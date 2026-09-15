@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   PageHeader,
   Section,
@@ -452,6 +453,26 @@ export default function BrandDocumentDeliverableStandards() {
                   requirement: "When the document will keep changing",
                   detail:
                     "A strategy that gets revised carries a version and date. A one-off proposal doesn't need one.",
+                },
+              ]}
+            />
+
+            <DefinitionTable
+              caption="Approved internal document types"
+              rows={[
+                {
+                  term: "Internal Service Brief",
+                  detail: (
+                    <>
+                      Web Wizards branded, internal only, normally one page.
+                      Operational rather than presentation-oriented. Use the
+                      approved template —{" "}
+                      <Link href="/templates-resources/internal-service-brief">
+                        Templates &amp; Resources
+                      </Link>{" "}
+                      holds the canonical version.
+                    </>
+                  ),
                 },
               ]}
             />

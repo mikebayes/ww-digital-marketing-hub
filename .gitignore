@@ -6,3 +6,6 @@ out
 *.tsbuildinfo
 next-env.d.ts
 .DS_Store
+
+# Copied from public/brand/derived by scripts/build-brief-pdf.mjs
+templates/internal-service-brief/lockup.svg

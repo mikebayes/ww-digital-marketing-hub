@@ -198,7 +198,7 @@ export const sections: HubSection[] = [
         title: "Internal Service Brief",
         summary:
           "The one-page brief Sales hands to Delivery, and the template behind it.",
-        status: "planned",
+        status: "published",
       },
       {
         slug: "kickoff-agenda",

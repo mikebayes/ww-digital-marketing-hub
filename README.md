@@ -66,6 +66,19 @@ viewBox. No path data is altered, re-traced or redrawn. Rebuild with:
 node scripts/build-lockups.mjs
 ```
 
+## Document templates
+
+`templates/` holds the print sources for downloadable documents; the rendered
+PDFs and previews go to `public/templates/`. The Internal Service Brief is an
+HTML source rendered to a one-page US Letter PDF through the locally installed
+Chrome, so AI can regenerate a client-specific brief by editing the same
+structure. The build fails rather than shipping a bad asset if Inter did not
+load or the content has outgrown one page.
+
+```bash
+node scripts/build-brief-pdf.mjs
+```
+
 ## Design system
 
 Colour and typography are taken from current Web Wizards work rather than

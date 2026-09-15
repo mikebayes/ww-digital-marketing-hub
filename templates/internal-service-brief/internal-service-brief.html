@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Internal Service Brief — Web Wizards</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /*
+       * Source for public/templates/internal-service-brief/…​.pdf
+       * Rebuild: node scripts/build-brief-pdf.mjs
+       *
+       * One page, US Letter. Values are the Hub's own tokens: charcoal #1C1F23,
+       * teal #3ABFAF, teal-ink #1F7D73 for small teal text, rule #E4E7EA.
+       */
+      @page {
+        size: letter;
+        margin: 0;
+      }
+
+      :root {
+        --ink: #0c0d0d;
+        --charcoal: #1c1f23;
+        --slate: #4a4f57;
+        --muted: #6e757d;
+        --rule: #e4e7ea;
+        --rule-strong: #c9cdd1;
+        --teal: #3abfaf;
+        --teal-ink: #1f7d73;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        width: 8.5in;
+        height: 11in;
+        padding: 0.5in 0.55in 0.4in;
+        font-family: Inter, "Helvetica Neue", Arial, sans-serif;
+        font-size: 8.9pt;
+        line-height: 1.44;
+        color: var(--slate);
+        -webkit-font-smoothing: antialiased;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .label {
+        font-size: 6.2pt;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      /* ---------- Masthead ---------- */
+      .masthead {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 24px;
+        padding-bottom: 9px;
+      }
+      .masthead img {
+        width: 168px;
+        height: auto;
+        display: block;
+      }
+      .doctype {
+        text-align: right;
+      }
+      .doctype .kind {
+        font-size: 13pt;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: var(--charcoal);
+        line-height: 1;
+      }
+      .doctype .confid {
+        margin-top: 3px;
+        font-size: 6.2pt;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--teal-ink);
+      }
+      .rule-teal {
+        height: 2px;
+        background: var(--charcoal);
+        position: relative;
+      }
+      .rule-teal::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 46px;
+        height: 2px;
+        background: var(--teal);
+      }
+
+      /* ---------- Meta strip ---------- */
+      .meta {
+        display: grid;
+        grid-template-columns: 1.3fr 1.7fr 1.15fr 1fr 0.72fr;
+        border-bottom: 1px solid var(--rule);
+        padding: 8px 0 9px;
+      }
+      .meta > div {
+        padding-right: 12px;
+      }
+      .meta > div + div {
+        border-left: 1px solid var(--rule);
+        padding-left: 12px;
+      }
+      .meta dt {
+        font-size: 6.1pt;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .meta dd.nowrap {
+        white-space: nowrap;
+      }
+      .meta dd {
+        margin: 3px 0 0;
+        font-size: 9pt;
+        font-weight: 600;
+        color: var(--charcoal);
+        line-height: 1.3;
+      }
+
+      /* ---------- Body grid ---------- */
+      .body {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 26px;
+        padding-top: 12px;
+      }
+      .col {
+        display: flex;
+        flex-direction: column;
+      }
+
+      section {
+        padding-top: 9px;
+        margin-top: 9px;
+        border-top: 1px solid var(--rule);
+      }
+      .col > section:first-child {
+        border-top: 0;
+        margin-top: 0;
+        padding-top: 0;
+      }
+      h2 {
+        margin: 0 0 6px;
+        font-size: 6.8pt;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--teal-ink);
+      }
+
+      p {
+        margin: 0 0 4px;
+      }
+      p:last-child {
+        margin-bottom: 0;
+      }
+
+      ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      li {
+        position: relative;
+        padding-left: 9px;
+        margin-bottom: 3px;
+      }
+      li:last-child {
+        margin-bottom: 0;
+      }
+      li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0.52em;
+        width: 4px;
+        height: 1px;
+        background: var(--rule-strong);
+      }
+
+      b,
+      strong {
+        color: var(--charcoal);
+        font-weight: 600;
+      }
+
+      /* Contact rows */
+      .contact {
+        display: grid;
+        grid-template-columns: 70px 1fr;
+        gap: 2px 8px;
+        margin-bottom: 4px;
+      }
+      .contact:last-child {
+        margin-bottom: 0;
+      }
+      .contact .k {
+        font-size: 6.1pt;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted);
+        padding-top: 1px;
+      }
+      .contact .v b {
+        display: inline;
+      }
+
+      /* ---------- Next steps ---------- */
+      .next {
+        margin-top: 12px;
+        border-top: 2px solid var(--charcoal);
+        padding-top: 9px;
+      }
+      .next h2 {
+        color: var(--teal-ink);
+      }
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 0;
+        margin-top: 5px;
+      }
+      .steps > div {
+        padding: 0 10px;
+        border-left: 1px solid var(--rule);
+      }
+      .steps > div:first-child {
+        padding-left: 0;
+        border-left: 0;
+      }
+      .steps > div:last-child {
+        padding-right: 0;
+      }
+      .steps .n {
+        font-size: 6.2pt;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        color: var(--teal-ink);
+        font-variant-numeric: tabular-nums;
+      }
+      .steps .t {
+        margin-top: 3px;
+        font-weight: 600;
+        color: var(--charcoal);
+        line-height: 1.3;
+      }
+      .steps .o {
+        margin-top: 2px;
+        font-size: 7.4pt;
+        color: var(--muted);
+      }
+
+      /* ---------- Footer ---------- */
+      footer {
+        margin-top: auto;
+        padding-top: 7px;
+        border-top: 1px solid var(--rule);
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 16px;
+        font-size: 6.2pt;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Masthead -->
+    <div class="masthead">
+      <img src="lockup.svg" alt="Web Wizards" />
+      <div class="doctype">
+        <div class="kind">Internal Service Brief</div>
+        <div class="confid">Internal use only · Not for client distribution</div>
+      </div>
+    </div>
+    <div class="rule-teal"></div>
+
+    <!-- Meta -->
+    <dl class="meta">
+      <div>
+        <dt>Client</dt>
+        <dd>Cedarline Outdoor Living</dd>
+      </div>
+      <div>
+        <dt>Service / Engagement</dt>
+        <dd>SEO &amp; Google Ads — 12-month retainer</dd>
+      </div>
+      <div>
+        <dt>Account Manager</dt>
+        <dd>Dana Whitfield</dd>
+      </div>
+      <div>
+        <dt>Salesperson</dt>
+        <dd>Marcus Reyes</dd>
+      </div>
+      <div>
+        <dt>Date</dt>
+        <dd class="nowrap">12 Sep 2026</dd>
+      </div>
+    </dl>
+
+    <!-- Body -->
+    <div class="body">
+      <div class="col">
+        <section>
+          <h2>Client &amp; Key Contacts</h2>
+          <div class="contact">
+            <span class="k">Company</span>
+            <span class="v"
+              ><b>Cedarline Outdoor Living</b> — Burlington, ON. Deck, pergola
+              and outdoor kitchen design and build.</span
+            >
+          </div>
+          <div class="contact">
+            <span class="k">Day&nbsp;to&nbsp;day</span>
+            <span class="v"
+              ><b>Priya Raman</b>, Marketing Coordinator. Our normal working
+              contact; approves content and ad copy.</span
+            >
+          </div>
+          <div class="contact">
+            <span class="k">Also&nbsp;know</span>
+            <span class="v">
+              <b>Glen Cedarholm</b>, Owner — final approver on budget and
+              anything brand-facing. Reads the monthly report.<br />
+              <b>Tom Vasquez</b>, Sales Manager — owns lead follow-up; lead
+              quality concerns will surface through him.
+            </span>
+          </div>
+          <div class="contact">
+            <span class="k">Services</span>
+            <span class="v">SEO (retained) · Google Ads (retained)</span>
+          </div>
+        </section>
+
+        <section>
+          <h2>What We Sold</h2>
+          <ul>
+            <li>Retained SEO and Google Ads management, 12-month term from 1 Oct 2026</li>
+            <li><b>$3,800/month</b> management fee</li>
+            <li>
+              Google Ads media budget <b>$6,000/month</b>, billed directly to the
+              client
+            </li>
+            <li>Quarterly strategy review included</li>
+            <li>No paid social, no website rebuild</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Why They Hired Us</h2>
+          <ul>
+            <li>
+              Organic traffic flat for two years while three competitors moved
+              above them for deck and pergola terms
+            </li>
+            <li>
+              Previous agency ran Ads with reporting they could not understand;
+              they cancelled in April
+            </li>
+            <li>
+              Booked out through summer, but wants the 2027 pipeline filled
+              earlier in the year
+            </li>
+          </ul>
+        </section>
+      </div>
+
+      <div class="col">
+        <section>
+          <h2>Goals &amp; Priorities</h2>
+          <ul>
+            <li>
+              More qualified quote requests in Jan–Apr, ahead of the spring build
+              season
+            </li>
+            <li>
+              First-page rankings for deck and pergola build terms across
+              Burlington, Oakville and Hamilton
+            </li>
+            <li>
+              Reporting they can actually read — Glen wants leads and cost per
+              lead, not impressions
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Important Scope Notes</h2>
+          <ul>
+            <li>
+              Media budget is separate and billed to the client. The management
+              fee does not include ad spend.
+            </li>
+            <li>
+              Client keeps social media in-house — do not propose or produce
+              social content.
+            </li>
+            <li>
+              Site is on Squarespace with no dev access. Structural SEO changes
+              go through Priya.
+            </li>
+            <li>
+              They expect campaigns live before <b>15 Oct</b> to catch
+              late-season search.
+            </li>
+            <li>
+              Photography is client-supplied. Strong existing library; they will
+              not fund new shoots.
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Client Context</h2>
+          <ul>
+            <li>
+              Last agency relationship ended badly — poor reporting, no direct
+              contact. Sensitive to slow replies and jargon.
+            </li>
+            <li>
+              Glen makes the final call but does not want weekly detail. Route
+              through Priya.
+            </li>
+            <li>
+              Tom is sceptical of paid search after the last agency. Expect early
+              scrutiny of lead quality.
+            </li>
+            <li>
+              The quarterly strategy review sold the deal. They expect a real
+              working session, not a report walkthrough.
+            </li>
+          </ul>
+        </section>
+      </div>
+    </div>
+
+    <!-- Next steps -->
+    <div class="next">
+      <h2>Immediate Next Steps</h2>
+      <div class="steps">
+        <div>
+          <div class="n">01</div>
+          <div class="t">Productive project &amp; task templates</div>
+          <div class="o">Dana · by 16 Sept</div>
+        </div>
+        <div>
+          <div class="n">02</div>
+          <div class="t">Request Ads, GA4, Search Console, Squarespace access</div>
+          <div class="o">Dana · by 16 Sept</div>
+        </div>
+        <div>
+          <div class="n">03</div>
+          <div class="t">Collect brand assets and photo library</div>
+          <div class="o">Dana · from Priya</div>
+        </div>
+        <div>
+          <div class="n">04</div>
+          <div class="t">Baseline keyword and competitor review</div>
+          <div class="o">SEO specialist · w/c 22 Sept</div>
+        </div>
+        <div>
+          <div class="n">05</div>
+          <div class="t">Kickoff call with Priya and Glen</div>
+          <div class="o">Dana · target w/c 29 Sept</div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <span>Web Wizards · Internal Service Brief</span>
+      <span>Prepared by Marcus Reyes · Reviewed 12 Sept 2026</span>
+      <span>Page 1 of 1</span>
+    </footer>
+  </body>
+</html>
