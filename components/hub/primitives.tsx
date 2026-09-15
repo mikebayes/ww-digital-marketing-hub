@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { getSection, getEntry } from "@/lib/navigation";
 
 /* -------------------------------------------------------------------------- */
 /* Labels and headers                                                          */
@@ -258,6 +259,111 @@ export function Callout({
   );
 }
 
+/**
+ * Two contrasting panels. Use the dark tone for the side that carries more
+ * weight — the owner, the default, the thing that wins when they conflict.
+ */
+export function SplitPanels({
+  panels,
+}: {
+  panels: {
+    label: string;
+    title: string;
+    description?: string;
+    items: string[];
+    tone: "dark" | "light";
+  }[];
+}) {
+  return (
+    <div className="grid gap-px border border-rule bg-rule @xl:grid-cols-2">
+      {panels.map((panel) => {
+        const dark = panel.tone === "dark";
+        return (
+          <div
+            key={panel.title}
+            className={`flex flex-col px-7 py-7 ${
+              dark ? "bg-charcoal" : "bg-surface"
+            }`}
+          >
+            <SectionLabel tone={dark ? "light" : "teal"}>
+              {panel.label}
+            </SectionLabel>
+            <h4
+              className={`mt-3 text-xl leading-snug font-semibold tracking-[-0.015em] ${
+                dark ? "text-white" : "text-charcoal"
+              }`}
+            >
+              {panel.title}
+            </h4>
+            {panel.description && (
+              <p
+                className={`mt-3 text-[0.9375rem] leading-relaxed ${
+                  dark ? "text-white/65" : "text-slate"
+                }`}
+              >
+                {panel.description}
+              </p>
+            )}
+            <ul
+              className={`mt-6 space-y-2 border-t pt-5 ${
+                dark ? "border-white/15" : "border-rule"
+              }`}
+            >
+              {panel.items.map((item) => (
+                <li
+                  key={item}
+                  className={`relative pl-5 text-[0.875rem] leading-snug ${
+                    dark ? "text-white/70" : "text-slate"
+                  }`}
+                >
+                  <span
+                    aria-hidden
+                    className={`absolute top-[0.6875em] left-0 h-px w-2.5 ${
+                      dark ? "bg-teal" : "bg-rule-strong"
+                    }`}
+                  />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/** A short list of conditions that must all be true. */
+export function Checklist({
+  caption,
+  items,
+}: {
+  caption?: string;
+  items: string[];
+}) {
+  return (
+    <div>
+      {caption && <SectionLabel className="mb-3">{caption}</SectionLabel>}
+      <ul className="border-t border-rule">
+        {items.map((item) => (
+          <li
+            key={item}
+            className="flex items-start gap-4 border-b border-rule py-3.5"
+          >
+            <span
+              aria-hidden
+              className="mt-[0.4375em] h-1.5 w-1.5 shrink-0 bg-teal"
+            />
+            <span className="text-[0.9375rem] leading-relaxed text-charcoal">
+              {item}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 /** Two-column Do / Avoid comparison. */
 export function DoAvoid({
   doItems,
@@ -393,6 +499,70 @@ export function DefinitionTable({
         ))}
       </dl>
     </div>
+  );
+}
+
+/**
+ * Links onward to related modules. Titles, summaries and status come from
+ * `lib/navigation.ts`, so a module that is later published stops advertising
+ * itself as unwritten without anyone editing the page that links to it.
+ */
+export function NextModules({
+  targets,
+}: {
+  /** `{ section }` links a whole section; `{ section, entry }` links a module. */
+  targets: { section: string; entry?: string }[];
+}) {
+  const rows = targets.flatMap((target) => {
+    const section = getSection(target.section);
+    if (!section) return [];
+
+    if (!target.entry) {
+      return [
+        {
+          href: `/${section.slug}`,
+          title: section.title,
+          summary: section.summary,
+          planned: false,
+        },
+      ];
+    }
+
+    const found = getEntry(target.section, target.entry);
+    if (!found) return [];
+    return [
+      {
+        href: `/${section.slug}/${found.entry.slug}`,
+        title: found.entry.title,
+        summary: found.entry.summary,
+        planned: found.entry.status === "planned",
+      },
+    ];
+  });
+
+  return (
+    <ul className="border-t border-rule">
+      {rows.map((row) => (
+        <li key={row.href} className="border-b border-rule">
+          <Link
+            href={row.href}
+            className="group grid gap-x-8 gap-y-1 py-4 @xl:grid-cols-[minmax(0,15rem)_minmax(0,1fr)]"
+          >
+            <span className="flex items-baseline gap-3">
+              <span className="text-[0.9375rem] font-semibold text-charcoal transition-colors group-hover:text-teal-ink">
+                {row.title}
+              </span>
+              {row.planned && (
+                <span className="label shrink-0 text-muted">Soon</span>
+              )}
+            </span>
+            <span className="text-[0.875rem] leading-relaxed text-slate">
+              {row.summary}
+            </span>
+          </Link>
+        </li>
+      ))}
+    </ul>
   );
 }
 

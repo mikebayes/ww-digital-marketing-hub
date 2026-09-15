@@ -68,15 +68,16 @@ export const sections: HubSection[] = [
     slug: "client-onboarding",
     title: "Client Onboarding",
     marker: "02",
-    summary: "From signed agreement to a client that is set up and running.",
+    summary: "From client approval to an account that is set up and running.",
     description:
       "The general onboarding path every new digital marketing client follows, regardless of which services they bought. Service-specific steps live under Service Onboarding.",
     entries: [
       {
         slug: "overview",
         title: "Overview",
-        summary: "The full onboarding sequence, owners and expected timing.",
-        status: "planned",
+        summary:
+          "Who owns onboarding, what happens in what order, and what has to be true before delivery starts.",
+        status: "published",
       },
       {
         slug: "internal-handoff",
@@ -103,7 +104,7 @@ export const sections: HubSection[] = [
         slug: "client-kickoff",
         title: "Client Kickoff",
         summary:
-          "Running the kickoff call, confirming scope and setting the first 90 days.",
+          "Running the kickoff, confirming goals and priorities, and agreeing the first 30 days.",
         status: "planned",
       },
     ],
