@@ -122,7 +122,7 @@ export default function InternalHandoff() {
 
             <Subsection title="What goes in it" eyebrow="02.1">
               <p>
-                Seven short sections. If any of them runs long, it probably
+                Six short sections. If any of them runs long, it probably
                 belongs somewhere else.
               </p>
             </Subsection>
@@ -140,11 +140,6 @@ export default function InternalHandoff() {
                     "Services purchased, fee or budget where useful, term or project basis, expected start.",
                 },
                 {
-                  term: "Why they hired us",
-                  detail:
-                    "The actual problem or opportunity behind the engagement. Two to four bullets.",
-                },
-                {
                   term: "Goals & priorities",
                   detail:
                     "What the client is trying to achieve, in plain language.",
@@ -155,9 +150,9 @@ export default function InternalHandoff() {
                     "Inclusions, exclusions, unusual requirements, timing commitments, assumptions.",
                 },
                 {
-                  term: "Client context",
+                  term: "Why they hired us / client context",
                   detail:
-                    "Prior agency or vendor experience, known frustrations, sensitivities, decision-making dynamics, internal constraints, and expectations created during the sale. Only what materially affects delivery — not personal commentary.",
+                    "The problem or opportunity behind the engagement, plus the context around it — prior agency or vendor experience, known frustrations, sensitivities, decision-making dynamics, internal constraints, and expectations created during the sale. Only what materially affects delivery — not personal commentary.",
                 },
                 {
                   term: "Immediate next steps",

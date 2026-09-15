@@ -155,7 +155,7 @@ export default function InternalServiceBriefTemplate() {
             intro={
               <p>
                 Header fields first — client, service or engagement, Account
-                Manager, salesperson, date — then the seven sections below.
+                Manager, salesperson, date — then the six sections below.
               </p>
             }
           >
@@ -172,11 +172,6 @@ export default function InternalServiceBriefTemplate() {
                     "Services purchased, recurring or project, fee and budget where useful, term, expected start. Do not reproduce the proposal scope.",
                 },
                 {
-                  term: "Why they hired us",
-                  detail:
-                    "The actual business reason behind the engagement. Two to four bullets.",
-                },
-                {
                   term: "Goals & priorities",
                   detail:
                     "What the client is trying to achieve, in their words where possible. Do not invent KPIs nobody agreed to.",
@@ -187,9 +182,9 @@ export default function InternalServiceBriefTemplate() {
                     "Only what Delivery could miss or misread — inclusions, exclusions, assumptions, unusual requirements, timing commitments, dependencies, media budget versus management fee, and anything the client is keeping in-house.",
                 },
                 {
-                  term: "Client context",
+                  term: "Why they hired us / client context",
                   detail:
-                    "Prior agency experience, known frustrations, sensitivities, decision-making dynamics, internal constraints, expectations set during the sale. Only what materially affects delivery — no gossip or personality profiling.",
+                    "The business problem or opportunity behind the engagement, and the context around it: prior agency experience, known frustrations, sensitivities, decision-making dynamics, internal constraints, expectations set during the sale. Only what materially affects delivery — no client history, no gossip, no personality profiling.",
                 },
                 {
                   term: "Immediate next steps",
