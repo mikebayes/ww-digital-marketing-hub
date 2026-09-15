@@ -4,7 +4,6 @@ import {
   Subsection,
   RuleBlock,
   Callout,
-  DoAvoid,
   ExamplePanel,
   DefinitionTable,
 } from "@/components/hub/primitives";
@@ -13,21 +12,16 @@ import {
   SwatchGrid,
   TypeSpecimen,
   OwnershipMatrix,
-  ApplicationSplit,
   DocumentAnatomy,
   CoBrandingExamples,
 } from "@/components/hub/brand";
 
 const toc: TocItem[] = [
-  { id: "purpose", marker: "01", title: "Purpose & Application" },
-  { id: "brand-direction", marker: "02", title: "Brand Direction" },
-  { id: "visual-system", marker: "03", title: "Core Visual System" },
-  { id: "applications", marker: "04", title: "Digital & Document Applications" },
-  { id: "ownership", marker: "05", title: "Branding & Ownership Rules" },
-  { id: "co-branding", marker: "06", title: "Co-Branding" },
-  { id: "document-standards", marker: "07", title: "Document Standards" },
-  { id: "design-principles", marker: "08", title: "Design Principles" },
-  { id: "examples", marker: "09", title: "Approved Direction" },
+  { id: "scope", marker: "01", title: "What This Standard Covers" },
+  { id: "visual-system", marker: "02", title: "Visual System" },
+  { id: "ownership", marker: "03", title: "Which Brand Should This Carry?" },
+  { id: "document-standards", marker: "04", title: "Document Standards" },
+  { id: "reference-work", marker: "05", title: "Current Visual Direction" },
 ];
 
 export default function BrandDocumentDeliverableStandards() {
@@ -35,7 +29,7 @@ export default function BrandDocumentDeliverableStandards() {
     <div className="px-6 pt-10 pb-4 md:px-12 lg:px-16 lg:pt-14">
       <PageHeader
         title="Brand, Document & Deliverable Standards"
-        lede="How Web Wizards work should look, whose brand it carries, and what a finished document needs. It applies to anything we produce — internal or client-facing."
+        lede="How Web Wizards work should look, whose brand it carries, and what a finished document needs."
         breadcrumb={[
           { label: "Hub", href: "/" },
           { label: "Standards", href: "/standards" },
@@ -49,121 +43,58 @@ export default function BrandDocumentDeliverableStandards() {
         ]}
       />
 
-      <div className="mt-12 grid gap-12 xl:grid-cols-[minmax(0,1fr)_var(--spacing-toc)] xl:gap-14">
+      <div className="mt-12 grid gap-12 min-[1400px]:grid-cols-[minmax(0,1fr)_var(--spacing-toc)] min-[1400px]:gap-14">
         <article className="@container min-w-0 space-y-12">
           {/* ---------------------------------------------------------------- */}
           <Section
-            id="purpose"
+            id="scope"
             marker="01"
-            title="Purpose & Application"
+            title="What This Standard Covers"
             intro={
               <>
                 <p>
-                  This standard exists so that Web Wizards work looks like Web
-                  Wizards work. Not because consistency is a virtue in itself,
-                  but because a client who receives a strategy, a report and a
-                  proposal over eighteen months should recognise all three as
-                  coming from the same team.
+                  This applies to anything Web Wizards produces that someone
+                  else reads — internal documentation and client-facing work
+                  alike. It is a working standard, not a brand bible. If a piece
+                  of work is better for breaking something here, break it and
+                  say so, so the standard can catch up.
                 </p>
                 <p>
-                  It is a set of decisions already made, so you do not have to
-                  make them again on every deliverable. It is not a rulebook to
-                  be enforced line by line. If a piece of work needs to break
-                  something here to be better, break it — then say so, so the
-                  standard can catch up.
+                  The Web Wizards website is the primary visual reference.
+                  Recent proposal work extends that identity into formal
+                  documents; see{" "}
+                  <a href="#reference-work">Current Visual Direction</a>.
                 </p>
               </>
             }
           >
             <DefinitionTable
-              caption="Scope"
               rows={[
                 {
                   term: "Applies to",
                   detail:
-                    "Internal documentation, operating procedures, client-facing strategies, audits, reports, proposals, presentations and any marketing material Web Wizards produces or produces on a client's behalf.",
+                    "Documentation, procedures, strategies, audits, reports, proposals, presentations, and marketing material we produce for clients.",
                 },
                 {
                   term: "Does not apply to",
                   detail:
-                    "Day-to-day email, Slack, meeting notes and working files. Use judgement; do not format a status update like a quarterly review.",
-                },
-                {
-                  term: "Who it is for",
-                  detail:
-                    "Everyone who produces work that leaves their own screen — strategists, specialists, account leads, designers and anyone writing a document a client will read.",
+                    "Email, Slack, meeting notes and working files. Don't format a status update like a quarterly review.",
                 },
                 {
                   term: "When in doubt",
                   detail:
-                    "Ask before the work is finished, not after. A five-minute question about whose brand a deliverable carries is cheaper than rebuilding it.",
+                    "Ask before the work is finished. A five-minute question about whose brand a deliverable carries is cheaper than rebuilding it.",
                 },
               ]}
             />
           </Section>
 
           {/* ---------------------------------------------------------------- */}
-          <Section
-            id="brand-direction"
-            marker="02"
-            title="Brand Direction"
-            intro={
-              <>
-                <p>
-                  The current Web Wizards identity is modern, technical,
-                  confident and understated. It reads as a team that knows what
-                  it is doing and does not need to shout about it.
-                </p>
-                <p>
-                  <strong>
-                    The Web Wizards website is the primary visual reference going
-                    forward.
-                  </strong>{" "}
-                  Where this document and the website disagree, the website is
-                  the direction and this document needs updating.
-                </p>
-                <p>
-                  Recent proposal and document work — the Goodies Bake Shop
-                  proposal and the SpeedPro Canada discovery deck — extends that
-                  language into formal business materials. Those pieces
-                  established the document side of the identity: the same
-                  palette and typography, applied with more editorial structure
-                  than a web page needs.
-                </p>
-              </>
-            }
-          >
-            <Callout label="On evolution">
+          <Section id="visual-system" marker="02" title="Visual System">
+            <Subsection title="Colour" eyebrow="02.1">
               <p>
-                The visual system will keep moving. That is fine. What matters
-                is that work produced <strong>today</strong> looks like it came
-                from the same organisation as the work produced last quarter.
-                Drift is acceptable; a different-looking deliverable every time
-                is not.
-              </p>
-            </Callout>
-          </Section>
-
-          {/* ---------------------------------------------------------------- */}
-          <Section
-            id="visual-system"
-            marker="03"
-            title="Core Visual System"
-            intro={
-              <p>
-                The values below are taken from current Web Wizards work — the
-                logo artwork and the recent proposal documents — rather than
-                invented. Treat them as the working system, not a ratified brand
-                specification. Where a formal brand guide exists or is created,
-                it supersedes this.
-              </p>
-            }
-          >
-            <Subsection title="Colour" eyebrow="03.1">
-              <p>
-                Near-black, white and teal carry almost everything. The neutrals
-                exist to create structure without adding colour. Nothing else
-                should appear without a reason you can explain.
+                Charcoal, white and teal carry almost everything. Anything
+                outside this list needs a reason you can explain.
               </p>
             </Subsection>
 
@@ -179,7 +110,7 @@ export default function BrandDocumentDeliverableStandards() {
                 {
                   name: "Teal",
                   hex: "#3ABFAF",
-                  role: "The brand accent. Taken from the logo mark. Markers, rules, fills, small highlights.",
+                  role: "The brand accent, taken from the logo. Markers, rules, fills, highlights.",
                   on: "light",
                 },
                 {
@@ -197,7 +128,7 @@ export default function BrandDocumentDeliverableStandards() {
                 {
                   name: "Ink",
                   hex: "#0C0D0D",
-                  role: "Deepest black. Full-bleed covers and section dividers where charcoal is not quite enough.",
+                  role: "Deepest black. Full-bleed covers and section dividers.",
                   on: "dark",
                 },
                 {
@@ -209,25 +140,25 @@ export default function BrandDocumentDeliverableStandards() {
                 {
                   name: "Secondary grey",
                   hex: "#6E757D",
-                  role: "Captions, labels and metadata. See the contrast note below.",
+                  role: "Captions, labels and metadata.",
                   on: "dark",
                 },
                 {
                   name: "Rule",
                   hex: "#E4E7EA",
-                  role: "Hairlines, borders and grid separators. The structural workhorse.",
+                  role: "Hairlines, borders and grid separators.",
                   on: "light",
                 },
                 {
                   name: "Neutral",
                   hex: "#F2F3F4",
-                  role: "Light panels and page furniture where white would flatten the layout.",
+                  role: "Light panels where white would flatten the layout.",
                   on: "light",
                 },
                 {
                   name: "Teal tint",
                   hex: "#EDF7F5",
-                  role: "Highlight fields and callouts. Use sparingly — it loses its effect when repeated.",
+                  role: "Highlight fields and callouts. Loses its effect when repeated.",
                   on: "light",
                 },
               ]}
@@ -235,41 +166,24 @@ export default function BrandDocumentDeliverableStandards() {
 
             <Callout label="Contrast — this one is a rule">
               <p>
-                <strong>The brand teal does not change.</strong> #3ABFAF is the
-                logo fill and stays exactly as it is for accents, rules,
-                markers, large graphical elements and any non-text detail. The
-                rule below is about which variant carries small text, not about
-                altering the brand colour.
+                <strong>The brand teal does not change.</strong> #3ABFAF stays
+                exactly as it is for accents, rules, markers and graphics. But
+                it only reaches 2:1 on white, so it cannot carry small text
+                there — use <strong>#1F7D73</strong> instead. On charcoal, brand
+                teal is fine for text as-is.
               </p>
               <p>
-                Teal at brand strength reaches roughly{" "}
-                <strong>2:1 against white</strong> — so it cannot carry small
-                text on a light background. Use <strong>#1F7D73</strong> there,
-                which clears 4.5:1. On charcoal, brand teal is fine for text
-                as-is.
-              </p>
-              <p>
-                The same logic applies to grey. The lighter secondary grey used
-                in recent work (#8A9097) sits at 3.2:1 on white — acceptable for
-                rules and large type, not for captions. Use{" "}
-                <strong>#6E757D</strong> for small secondary text.
+                Same logic for grey: use <strong>#6E757D</strong> for small
+                secondary text on white, not the lighter grey that appears in
+                recent work.
               </p>
             </Callout>
 
-            <Subsection title="Logo" eyebrow="03.2">
+            <Subsection title="Logo" eyebrow="02.2">
               <p>
-                The official logo library is the only source of Web Wizards
-                artwork. Never recreate the logo as text, trace it, redraw it or
-                rebuild it from a screenshot, and never distort its proportions.
-              </p>
-              <p>
-                The library provides horizontal, stacked and icon-only lockups
-                in light and dark versions, plus raster exports and a favicon
-                set. Each SVG separates the icon, wordmark and tagline into
-                their own groups, so a lockup can legitimately be used without
-                the tagline where the tagline would not be legible — as it is in
-                this Hub&rsquo;s own navigation. That is component selection, not
-                alteration.
+                The official library is the only source of Web Wizards artwork.
+                Never redraw it, trace it, set it as type or rebuild it from a
+                screenshot, and never stretch it.
               </p>
             </Subsection>
 
@@ -279,47 +193,37 @@ export default function BrandDocumentDeliverableStandards() {
                 {
                   term: "Dark surfaces",
                   detail:
-                    "Horizontal lockup with the white wordmark. This is the default for charcoal covers, section pages and dark UI.",
+                    "Horizontal lockup, white wordmark. The default for charcoal covers, section pages and dark UI.",
                 },
                 {
                   term: "Light surfaces",
                   detail:
-                    "Horizontal lockup with the near-black wordmark. The default for white document pages and light UI.",
+                    "Horizontal lockup, near-black wordmark. The default for white document pages and light UI.",
                 },
                 {
                   term: "Narrow or tall spaces",
                   detail:
-                    "Stacked lockup. Use where the horizontal version would have to be set so small that the wordmark stops being readable.",
+                    "Stacked lockup, where the horizontal version would have to be set too small to read.",
                 },
                 {
                   term: "Avatars and app icons",
                   detail:
-                    "Icon only. Never crop the horizontal lockup down to the icon — use the supplied icon file.",
+                    "Icon only. Use the supplied icon file rather than cropping the horizontal lockup.",
                 },
                 {
-                  term: "Tagline",
+                  term: "Small sizes",
                   detail:
-                    "Keep it where the lockup is reproduced at a size that renders it legibly. Drop it, using the supplied groups, where it would become an unreadable smudge.",
-                },
-                {
-                  term: "Minimum size",
-                  detail:
-                    "Below roughly 120px wide, switch to the icon rather than shrinking the full lockup further.",
+                    "Drop the tagline where it would be an unreadable smudge — the SVGs separate it into its own group for exactly this. Below roughly 120px wide, switch to the icon.",
                 },
               ]}
             />
 
-            <Subsection title="Typography" eyebrow="03.3">
+            <Subsection title="Typography" eyebrow="02.3">
               <p>
-                Two typefaces, both already in use across the website and the
-                recent proposal work. Do not add a third without a reason.
-              </p>
-              <p>
-                The weighting between them depends on the application. Digital
-                work is carried by strong sans-serif; the serif is an editorial
-                accent used where it earns its place. Formal documents can lean
-                on it harder — covers, section pages, pull quotes. Do not reach
-                for the serif simply because it exists.
+                Inter carries everything: headings, body, labels, tables.
+                Fraunces is an editorial accent — covers, section pages, pull
+                quotes — and documents can lean on it harder than screens do.
+                Don&rsquo;t add a third typeface.
               </p>
             </Subsection>
 
@@ -330,7 +234,7 @@ export default function BrandDocumentDeliverableStandards() {
                   role: "Primary",
                   sample: "Aa 0123",
                   notes:
-                    "Everything: headings, body, labels, tables, UI. Weights 400–700. Tighten letter-spacing on large headings; open it out to roughly 0.16em on small uppercase labels.",
+                    "Weights 400–700. Tighten letter-spacing on large headings; open it to roughly 0.16em on small uppercase labels.",
                 },
                 {
                   name: "Fraunces",
@@ -338,16 +242,15 @@ export default function BrandDocumentDeliverableStandards() {
                   sample: "Aa 0123",
                   display: true,
                   notes:
-                    "Editorial accent. Cover titles, large section numerals and pull quotes in formal documents. Used sparingly on screen — this Hub uses it only in this specimen. Never set body copy or anything below about 20px in it.",
+                    "Never for body copy or anything below about 20px.",
                 },
               ]}
             />
 
-            <Subsection title="Structure" eyebrow="03.4">
+            <Subsection title="Layout" eyebrow="02.4">
               <p>
-                The structural language matters more than the palette. Most of
-                what makes Web Wizards work recognisable is grid, whitespace and
-                hairlines — not colour.
+                What makes the work recognisable is grid, space and hairlines
+                rather than colour.
               </p>
             </Subsection>
 
@@ -355,120 +258,39 @@ export default function BrandDocumentDeliverableStandards() {
               items={[
                 {
                   title: "Build on a visible grid",
-                  body: "Columns should be obvious even without gridlines. Things line up; where they do not, it should read as deliberate.",
+                  body: "Columns should be obvious without gridlines. Things line up; where they don't, it should read as deliberate.",
                 },
                 {
-                  title: "Whitespace is structure, not leftover",
-                  body: "Space between blocks carries hierarchy. If a page feels tight, remove content before removing space.",
+                  title: "Protect whitespace",
+                  body: "If a page feels tight, cut content or add a page. Never shrink type or margins to make something fit.",
                 },
                 {
-                  title: "Thin rules over boxes",
-                  body: "A 1px rule separates as well as a border and adds far less weight. Use full boxes only when a block genuinely needs to be lifted off the page.",
+                  title: "Thin rules before boxes",
+                  body: "A 1px rule separates as well as a border and weighs far less. Use a full box only when a block genuinely needs lifting off the page.",
                 },
                 {
-                  title: "Small uppercase labels mark sections",
-                  body: "Roughly 11px, semibold, 0.16em tracking. They are the connective tissue of the system — section markers, panel headers, metadata keys.",
+                  title: "Teal is an accent, not a theme",
+                  body: "Markers, rules, small highlights. If a page reads as teal, there's too much of it.",
                 },
                 {
-                  title: "Numbering is quiet",
-                  body: "Sections are numbered 01, 02, 03. Numerals are a navigational aid, set in grey or teal at small size — or in Fraunces at large size on a cover or divider.",
-                },
-                {
-                  title: "Geometry is flat and simple",
-                  body: "Squares, rules, bars, split fields. No gradients except the faint radial glow used behind dark covers. No drop shadows in document work.",
-                },
-                {
-                  title: "Icons are minimal or absent",
-                  body: "Single-weight line icons only, and only where an icon does work a label cannot. Most pages need none.",
-                },
-                {
-                  title: "Imagery is controlled",
-                  body: "Real photography or texture, full-bleed or cropped to the grid, at a scale that lets it hold the page. No stock illustration, no clip art, no decorative abstract renders.",
+                  title: "Imagery and icons earn their place",
+                  body: "Real photography or texture, cropped to the grid. Single-weight line icons only, and only where a label won't do. No stock illustration and no generic AI imagery — abstract renders, glowing networks, stock futurism. If you can't say why an element is on the page, take it off.",
                 },
               ]}
             />
-          </Section>
-
-          {/* ---------------------------------------------------------------- */}
-          <Section
-            id="applications"
-            marker="04"
-            title="Digital & Document Applications"
-            intro={
-              <>
-                <p>
-                  Web Wizards has one identity with two applications. They share
-                  a palette and typeface pairing; they differ in composition,
-                  density and how much editorial character they carry.
-                </p>
-                <p>
-                  A website has to work at a glance and hold up under scrolling.
-                  A document has to survive being printed, skimmed in a meeting
-                  and forwarded to someone who was not in the room. Those are
-                  different jobs, and the treatment should reflect that.
-                </p>
-              </>
-            }
-          >
-            <ApplicationSplit
-              panels={[
-                {
-                  label: "Application A",
-                  title: "Digital experiences",
-                  description:
-                    "The website and anything built to be used on screen. Confident, structural, quick to scan.",
-                  tone: "dark",
-                  traits: [
-                    "Bold sans-serif typography carrying the hierarchy",
-                    "Strong, visible grid structure",
-                    "Dark backgrounds used as anchors and section breaks",
-                    "Photography or texture where it earns its place",
-                    "Teal restricted to accents, states and markers",
-                  ],
-                },
-                {
-                  label: "Application B",
-                  title: "Formal documents",
-                  description:
-                    "Proposals, strategies, audits and reports. Everything above, plus more editorial composition.",
-                  tone: "light",
-                  traits: [
-                    "Display typography on covers and section pages",
-                    "Dark covers and dividers against light content pages",
-                    "Information-dense body pages with clear hierarchy",
-                    "Abstract geometric devices — numerals, rules, split fields",
-                    "More considered composition; pages are designed, not filled",
-                  ],
-                },
-              ]}
-            />
-
-            <Callout label="The test">
-              <p>
-                Put a page from the website next to a page from the document. If
-                a client could not tell they came from the same company, one of
-                them is wrong.
-              </p>
-            </Callout>
           </Section>
 
           {/* ---------------------------------------------------------------- */}
           <Section
             id="ownership"
-            marker="05"
-            title="Branding & Ownership Rules"
+            marker="03"
+            title="Which Brand Should This Carry?"
             intro={
-              <>
-                <p>
-                  Most branding arguments are really ownership questions. Before
-                  designing anything, answer one: <strong>who is this for?</strong>
-                </p>
-                <p>
-                  Almost everything falls into one of three categories, and each
-                  has a default. Follow the default unless there is a specific
-                  reason not to.
-                </p>
-              </>
+              <p>
+                Answer one question first: <strong>who is this for?</strong>{" "}
+                Almost everything falls into one of three categories. Follow the
+                default unless there is a specific reason not to.
+              </p>
             }
           >
             <OwnershipMatrix
@@ -479,7 +301,7 @@ export default function BrandDocumentDeliverableStandards() {
                   branding: "Web Wizards brand",
                   weight: { ww: 100, client: 0 },
                   rationale:
-                    "This is our thinking, our method and our commercial position. It belongs to us and should look like it.",
+                    "Our thinking, our method, our commercial position. It belongs to us and should look like it.",
                   examples: [
                     "Internal standards and procedures",
                     "Methodologies and frameworks",
@@ -494,7 +316,7 @@ export default function BrandDocumentDeliverableStandards() {
                   branding: "Client-led, co-branded",
                   weight: { ww: 25, client: 75 },
                   rationale:
-                    "The material lives inside the client's business. It gets circulated internally, shown to their board and used to make decisions. It should feel like their document, prepared by us.",
+                    "This lives inside the client's business — circulated internally, shown to their board, used to make decisions. It should feel like their document, prepared by us.",
                   examples: [
                     "Strategies and roadmaps",
                     "Audits and research",
@@ -509,7 +331,7 @@ export default function BrandDocumentDeliverableStandards() {
                   branding: "Client brand only",
                   weight: { ww: 0, client: 100 },
                   rationale:
-                    "The audience is the client's customer, who has no relationship with us and no reason to care who made it. Our logo on this is noise at best.",
+                    "The audience is the client's customer, who has no relationship with us. Our logo here is noise.",
                   examples: [
                     "Brochures and collateral",
                     "Advertising creative",
@@ -521,73 +343,25 @@ export default function BrandDocumentDeliverableStandards() {
               ]}
             />
 
-            <DefinitionTable
-              caption="Applying the categories"
-              rows={[
-                {
-                  term: "Category B in practice",
-                  detail:
-                    "Use the client's logo, their name in the title, and their brand colours where they do not fight the content. Web Wizards appears as a restrained 'Prepared by Web Wizards' line on the cover and in the footer. Our mark should be present and small — findable, not competing.",
-                },
-                {
-                  term: "Category C in practice",
-                  detail:
-                    "No Web Wizards branding at all. Not in the artwork, not in the filename the client receives, not in the footer. Attribution belongs in the delivery email or the project record, not on the asset.",
-                },
-                {
-                  term: "Genuinely unclear cases",
-                  detail:
-                    "Ask who will look at it and where it will end up. A strategy the client presents internally is Category B. A one-pager we hand out at a conference is Category A. A case study featuring a client is Category A with their permission.",
-                },
-                {
-                  term: "Client brand guidelines",
-                  detail:
-                    "When a client has a brand guide and the work is Category B or C, their guide wins. Ask for it during onboarding rather than reverse-engineering it from their website.",
-                },
-              ]}
-            />
-          </Section>
-
-          {/* ---------------------------------------------------------------- */}
-          <Section
-            id="co-branding"
-            marker="06"
-            title="Co-Branding"
-            intro={
-              <>
-                <p>
-                  The objective of co-branding is not equal logo prominence. It
-                  is to make clear, at a glance, who a piece of work is for and
-                  who produced it.
-                </p>
-                <p>
-                  Two logos side by side at matching size says the two
-                  organisations are equal partners in the material. That is
-                  almost never what is true, and it reads as a joint venture
-                  rather than a service relationship.
-                </p>
-              </>
-            }
-          >
             <CoBrandingExamples
               examples={[
                 {
                   context: "Client-led deliverable",
                   verdict: "use",
                   lockup: "client-led",
-                  note: "Client logo at full size. Web Wizards as a small 'Prepared by' mark, typically bottom-left of the cover and in the footer.",
+                  note: "Client logo at full size. Web Wizards as a small 'Prepared by' mark on the cover and in the footer.",
                 },
                 {
                   context: "Web Wizards-owned material",
                   verdict: "use",
                   lockup: "ww-led",
-                  note: "Our mark alone, at whatever size the layout calls for. No client branding unless the client is the subject.",
+                  note: "Our mark alone. No client branding unless the client is the subject.",
                 },
                 {
                   context: "Matched-size lockup",
                   verdict: "avoid",
                   lockup: "equal",
-                  note: "Reads as a partnership or joint venture. Reserve for genuine co-authored work, which is rare.",
+                  note: "Reads as a joint venture rather than a service relationship. Rarely what's true.",
                 },
               ]}
             />
@@ -595,102 +369,98 @@ export default function BrandDocumentDeliverableStandards() {
             <RuleBlock
               items={[
                 {
-                  title: "One logo per surface, wherever possible",
-                  body: "A cover carries the client's mark. The footer carries ours. They do not need to appear together on the same line.",
+                  title: "Prominence follows the audience",
+                  body: "Whoever the material is for goes first. If the audience is the client's customer, we're not on it at all — not in the artwork, not in the footer, not in the filename. Attribution goes in the delivery email.",
                 },
                 {
-                  title: "Prominence follows audience",
-                  body: "The brand of whoever the material is for goes first. If the audience is the client's customer, we are not on it at all.",
+                  title: "Attribution is text, not a second logo",
+                  body: "'Prepared by Web Wizards' in a small label is more confident than a competing lockup.",
                 },
                 {
-                  title: "Attribution is text, not a badge",
-                  body: "'Prepared by Web Wizards' set in a small label is more confident than a second logo lockup, and it does not compete.",
+                  title: "Use client-supplied assets",
+                  body: "Never recreate a client's logo. If all they have is a low-resolution file, ask for a better one during onboarding.",
                 },
                 {
-                  title: "Never redraw a client's logo",
-                  body: "Use the files they supply. If they only have a low-resolution version, ask for a better one during onboarding rather than recreating it.",
+                  title: "Their brand guide wins",
+                  body: "On Category B and C work, the client's guidelines beat ours. Ask for them at onboarding rather than reverse-engineering from their website.",
                 },
                 {
-                  title: "Keep the page clean",
-                  body: "Two brands is the ceiling. Platform logos, certification badges and partner marks scattered across a cover undo the work everything else is doing.",
+                  title: "Two brands is the ceiling",
+                  body: "Platform logos, certification badges and partner marks scattered across a cover undo everything else.",
                 },
               ]}
             />
+
+            <Callout label="Unclear cases">
+              <p>
+                Ask who will look at it and where it ends up. A strategy the
+                client presents internally is B. A one-pager we hand out at a
+                conference is A. A case study featuring a client is A, with
+                their permission.
+              </p>
+            </Callout>
           </Section>
 
           {/* ---------------------------------------------------------------- */}
           <Section
             id="document-standards"
-            marker="07"
+            marker="04"
             title="Document Standards"
             intro={
-              <>
-                <p>
-                  A finished Web Wizards document should tell the reader what it
-                  is, who it is for and when it was written, without them having
-                  to ask. Everything below serves that.
-                </p>
-                <p>
-                  This is not document control. There is no approval matrix and
-                  no numbering scheme to maintain. It is the minimum a
-                  professional document needs.
-                </p>
-              </>
+              <p>
+                A finished document should say what it is, who it is for, when
+                it was written and who prepared it — without the reader having
+                to ask. That is the bar. This is not document control; there is
+                no approval matrix to maintain.
+              </p>
             }
           >
             <DocumentAnatomy
               parts={[
                 {
                   zone: "Cover",
-                  requirement: "Title, audience, purpose and date",
+                  requirement: "Title, audience and date",
                   detail:
-                    "What the document is, who it was prepared for, and when. A one-line description of its purpose where the title does not make it obvious.",
+                    "Plus a one-line purpose where the title doesn't make it obvious.",
                 },
                 {
                   zone: "Attribution",
                   requirement: "Prepared by, where appropriate",
                   detail:
-                    "Present on Category A and B material. Absent entirely on Category C. Set as a small label, not a logo lockup.",
-                },
-                {
-                  zone: "Contents",
-                  requirement: "For anything over about eight pages",
-                  detail:
-                    "Numbered sections matching the section markers used through the document. Short documents do not need one.",
+                    "On Category A and B material. Absent entirely on Category C.",
                 },
                 {
                   zone: "Hierarchy",
-                  requirement: "Consistent, and no deeper than three levels",
+                  requirement: "No deeper than three levels",
                   detail:
-                    "Section, subsection, and a heading within it. If you need a fourth level, the section probably needs splitting.",
+                    "If you need a fourth, the section probably needs splitting.",
                 },
                 {
                   zone: "Body",
                   requirement: "Readable density",
                   detail:
-                    "One idea per page where the format allows. A page that has to be shrunk to fit is a page that needs to be two pages.",
+                    "A page that has to be shrunk to fit is a page that needs to be two pages.",
                 },
                 {
                   zone: "Footer",
                   requirement: "Consistent on every page",
                   detail:
-                    "Document title, page number, and client name where relevant. Same treatment throughout — including section dividers.",
+                    "Document title, page number, client name where relevant — including section dividers.",
                 },
                 {
                   zone: "Version",
-                  requirement: "When it will change",
+                  requirement: "When the document will keep changing",
                   detail:
-                    "Living documents carry a version and date. A one-off proposal does not need one; a strategy that will be revised does.",
+                    "A strategy that gets revised carries a version and date. A one-off proposal doesn't need one.",
                 },
               ]}
             />
 
-            <Callout label="Naming" tone="charcoal">
+            <Callout label="File naming" tone="charcoal">
               <p>
                 File names travel further than covers do. Use{" "}
-                <strong>Client — Document Type — YYYY-MM</strong> for
-                client-facing work, and drop the client name for internal
-                material. Never send a file called{" "}
+                <strong>Client — Document Type — YYYY-MM</strong>, dropping the
+                client name for internal work. Never send{" "}
                 <strong>Proposal_v3_FINAL_2.pdf</strong>.
               </p>
             </Callout>
@@ -698,81 +468,27 @@ export default function BrandDocumentDeliverableStandards() {
 
           {/* ---------------------------------------------------------------- */}
           <Section
-            id="design-principles"
-            marker="08"
-            title="Design Principles"
+            id="reference-work"
+            marker="05"
+            title="Current Visual Direction"
             intro={
               <p>
-                When a specific rule above does not cover the situation, these
-                do.
+                Two recent pieces show where the identity currently sits. They
+                are reference points, not templates — take the principles, not
+                the layouts. Both files sit with the Digital Marketing lead.
               </p>
-            }
-          >
-            <DoAvoid
-              doItems={[
-                "Build a strong hierarchy — the reader should know what to look at first",
-                "Create whitespace and protect it",
-                "Keep layouts disciplined and aligned to the grid",
-                "Use teal selectively, as an accent rather than a theme",
-                "Prioritise readability over density",
-                "Apply client branding according to the ownership category",
-                "Give every visual element a job",
-                "Give each page or spread one clear focal point",
-                "Reuse a layout that already works",
-              ]}
-              avoidItems={[
-                "Introducing colours outside the system",
-                "Overcrowding a page to avoid adding another one",
-                "Icons used as decoration",
-                "Graphics that illustrate nothing",
-                "Generic AI-generated imagery — abstract renders, glowing networks, stock futurism",
-                "Mixing type styles within a document",
-                "Shrinking type or margins to make content fit",
-                "Equal-weight co-branding by default",
-                "Inventing a new visual style for each deliverable",
-              ]}
-            />
-
-            <Callout label="The shortest version">
-              <p>
-                If you cannot explain why an element is on the page, take it
-                off. Almost every problem with a deliverable is something that
-                should have been removed rather than something missing.
-              </p>
-            </Callout>
-          </Section>
-
-          {/* ---------------------------------------------------------------- */}
-          <Section
-            id="examples"
-            marker="09"
-            title="Approved Direction"
-            intro={
-              <>
-                <p>
-                  Two recent pieces define the current direction for formal
-                  materials. They are reference points, not templates — take the
-                  principles, not the layouts.
-                </p>
-                <p>
-                  Both files sit with the Digital Marketing lead. Ask before
-                  starting a significant document rather than working from
-                  memory.
-                </p>
-              </>
             }
           >
             <ExamplePanel
               label="Reference 01 · Document"
               title="Goodies Bake Shop — Digital Marketing Proposal"
               demonstrates={[
-                "The refined neutral ramp: charcoal, slate, grey, hairline rule",
-                "Inter and Fraunces working together — sans for substance, serif for character",
-                "Teal used as an accent across a full document without becoming a theme",
-                "Editorial composition: dark section pages against light, dense content pages",
+                "The neutral ramp: charcoal, slate, grey, hairline rule",
+                "Teal held to an accent across a full document",
+                "Dark section pages against light, dense content pages",
                 "Fine rules carrying structure instead of boxes and shadows",
               ]}
-              takeaway="This is the current benchmark for any formal Web Wizards document. When starting a proposal, strategy or audit, match this level of restraint and structure before adding anything of your own."
+              takeaway="The current benchmark for a formal Web Wizards document. Match this level of restraint before adding anything of your own."
             >
               <div className="flex flex-wrap">
                 {[
@@ -799,26 +515,16 @@ export default function BrandDocumentDeliverableStandards() {
               label="Reference 02 · Presentation"
               title="SpeedPro Canada — Digital Growth Discussion"
               demonstrates={[
-                "Overall finish and polish across a long, information-dense piece",
                 "Section labels and numbered markers used consistently as navigation",
                 "Structured information layouts — comparison tables, stat rows, staged diagrams",
                 "Client and Web Wizards branding coexisting without competing",
-                "Consistent spacing and border treatment holding a large document together",
               ]}
-              takeaway="Take the information design and the discipline of the labelling system. Do not take the presentation format — sequential slide-style panels belong in a pitch, not in a strategy, report or anything built to be referred back to."
+              takeaway="Take the information design and the labelling discipline. Don't take the format — sequential slide-style panels belong in a pitch, not in a strategy or report someone will refer back to."
             />
-
-            <Callout label="Adding to this list" tone="charcoal">
-              <p>
-                If you produce something that sets a new benchmark, say so. This
-                section should grow as the work does — but only with pieces
-                people can genuinely learn from, not everything that shipped.
-              </p>
-            </Callout>
           </Section>
         </article>
 
-        <aside className="hidden xl:block">
+        <aside className="hidden min-[1400px]:block">
           <OnThisPage items={toc} />
         </aside>
       </div>
