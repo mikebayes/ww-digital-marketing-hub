@@ -98,7 +98,7 @@ export const sections: HubSection[] = [
         title: "Access & Assets",
         summary:
           "Accounts, platform access, brand assets and credentials we need before kickoff.",
-        status: "planned",
+        status: "published",
       },
       {
         slug: "client-kickoff",
