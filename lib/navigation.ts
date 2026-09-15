@@ -84,7 +84,7 @@ export const sections: HubSection[] = [
         title: "Internal Handoff",
         summary:
           "What sales passes to delivery, in what format, and what delivery confirms before work starts.",
-        status: "planned",
+        status: "published",
       },
       {
         slug: "productive-setup",
@@ -194,9 +194,10 @@ export const sections: HubSection[] = [
       "Starting points rather than finished artefacts. Every template here should reflect the current Brand, Document & Deliverable Standards.",
     entries: [
       {
-        slug: "handoff-brief",
-        title: "Handoff Brief",
-        summary: "The sales-to-delivery brief template and how to fill it in.",
+        slug: "internal-service-brief",
+        title: "Internal Service Brief",
+        summary:
+          "The one-page brief Sales hands to Delivery, and the template behind it.",
         status: "planned",
       },
       {

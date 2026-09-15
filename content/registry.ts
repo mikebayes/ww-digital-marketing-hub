@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 import BrandDocumentDeliverableStandards from "./standards/brand-document-deliverable-standards";
 import ClientOnboardingOverview from "./client-onboarding/overview";
+import InternalHandoff from "./client-onboarding/internal-handoff";
 
 /**
  * Published Hub modules, keyed by `<section>/<entry>`.
@@ -12,4 +13,5 @@ export const modules: Record<string, ComponentType> = {
   "standards/brand-document-deliverable-standards":
     BrandDocumentDeliverableStandards,
   "client-onboarding/overview": ClientOnboardingOverview,
+  "client-onboarding/internal-handoff": InternalHandoff,
 };
