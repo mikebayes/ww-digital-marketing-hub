@@ -70,7 +70,7 @@ export const sections: HubSection[] = [
     marker: "02",
     summary: "From client approval to an account that is set up and running.",
     description:
-      "The general onboarding path every new digital marketing client follows, regardless of which services they bought. Service-specific steps live under Service Onboarding.",
+      "The general onboarding path a client follows when new work starts, whether they are new to Web Wizards or adding a service. Service-specific steps live under Service Onboarding.",
     entries: [
       {
         slug: "overview",
@@ -113,7 +113,8 @@ export const sections: HubSection[] = [
     slug: "service-onboarding",
     title: "Service Onboarding",
     marker: "03",
-    summary: "Service-specific setup once general onboarding is complete.",
+    summary:
+      "Service-specific setup that runs alongside the general onboarding process where appropriate.",
     description:
       "What each service needs before it can start delivering — audits, baselines, account structure and the first deliverable in each discipline.",
     entries: [

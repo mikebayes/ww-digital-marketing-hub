@@ -32,7 +32,7 @@ export default function ClientOnboardingOverview() {
         meta={[
           { label: "Owned by", value: "Account Manager" },
           { label: "Starts at", value: "Client authorization" },
-          { label: "Applies to", value: "All new clients" },
+          { label: "Applies to", value: "New clients & new services" },
           { label: "Version", value: "0.1 · Sept 2026" },
         ]}
       />
@@ -99,7 +99,7 @@ export default function ClientOnboardingOverview() {
               items={[
                 {
                   title: "Client approves work",
-                  body: "A signed proposal, written acceptance, or written confirmation between the client and the salesperson that work is going ahead. Any of those is enough to start — we do not wait on a countersigned contract if authorization is already clear.",
+                  body: "Onboarding can begin once authorization to proceed is clear — a signed proposal, written client acceptance, or written confirmation between the client and the salesperson that work is going ahead.",
                 },
                 {
                   title: "Internal handoff",
@@ -150,17 +150,17 @@ export default function ClientOnboardingOverview() {
                 {
                   term: "Internal handoff",
                   detail:
-                    "Salesperson, Account Manager, the assigned specialist, and the service lead where the service is technical enough to need them.",
+                    "Salesperson, Account Manager, assigned specialist, and service lead where relevant.",
                 },
                 {
                   term: "Client kickoff",
                   detail:
-                    "Account Manager, the assigned specialist, and the service lead where relevant. The salesperson attends only if there is a reason for them to stay involved.",
+                    "Account Manager, assigned specialist, and service lead where relevant. The salesperson attends only where there is a reason to remain involved.",
                 },
                 {
-                  term: "Who the specialist is",
+                  term: "Service assignment",
                   detail:
-                    "SEO and paid media usually pull in whoever is most tactical on that service. Social media and one-time projects go to the assigned specialist. The Account Manager stays the same either way.",
+                    "The assigned specialist depends on the service and account. SEO and paid media typically require more involvement from the service lead; social media and one-time projects are assigned based on the work required.",
                 },
               ]}
             />
