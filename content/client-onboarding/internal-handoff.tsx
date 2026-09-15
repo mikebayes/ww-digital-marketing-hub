@@ -62,12 +62,12 @@ export default function InternalHandoff() {
                 {
                   term: "Account Manager",
                   detail:
-                    "Owns the handoff. Makes sure the brief exists, is accurate and is attached to the project, and confirms the delivery team has what it needs before onboarding moves on.",
+                    "Owns the handoff. Makes sure the brief exists, has been reviewed and is attached to the project, and confirms the delivery team has what it needs before onboarding moves on.",
                 },
                 {
                   term: "Service specialist",
                   detail:
-                    "Reads the brief and asks questions. If something is unclear or missing, say so at the handoff — not three weeks into delivery.",
+                    "Reads the brief, asks questions, flags gaps and confirms understanding at the handoff conversation. If something is unclear or missing, say so then — not three weeks into delivery.",
                 },
               ]}
             />
@@ -81,13 +81,16 @@ export default function InternalHandoff() {
             intro={
               <>
                 <p>
-                  A one-page internal Web Wizards document. It is the handoff —
-                  the rest of this page is about producing it and confirming it
-                  landed.
+                  The Internal Service Brief is the salesperson&rsquo;s written
+                  handoff to Delivery. It is produced{" "}
+                  <strong>before the handoff conversation</strong>, from the
+                  approved proposal plus relevant sales context and
+                  correspondence.
                 </p>
                 <p>
-                  Do not write it from scratch. Most of what it needs is already
-                  in the approved proposal.
+                  One page. Do not write it from scratch — most of what it needs
+                  is already in the proposal. Delivery reads it, asks questions
+                  and flags gaps; Delivery does not co-author it.
                 </p>
               </>
             }
@@ -127,9 +130,9 @@ export default function InternalHandoff() {
             <DefinitionTable
               rows={[
                 {
-                  term: "Client",
+                  term: "Client & key contacts",
                   detail:
-                    "Company, primary contacts, Account Manager, assigned service or services.",
+                    "Company, Account Manager, and the assigned service or services. Name the primary working contact — who we deal with day to day — separately from other important stakeholders or influencers: executive sponsor, owner, final approver, marketing lead, anyone with real influence over the engagement.",
                 },
                 {
                   term: "What we sold",
@@ -154,7 +157,7 @@ export default function InternalHandoff() {
                 {
                   term: "Client context",
                   detail:
-                    "Only what affects delivery — key stakeholders, prior agency experience, sensitivities, decision-making style, commitments made during the sale.",
+                    "Prior agency or vendor experience, known frustrations, sensitivities, decision-making dynamics, internal constraints, and expectations created during the sale. Only what materially affects delivery — not personal commentary.",
                 },
                 {
                   term: "Immediate next steps",
@@ -181,10 +184,10 @@ export default function InternalHandoff() {
             title="The Handoff Conversation"
             intro={
               <p>
-                A short internal conversation normally follows the brief, with
-                the brief as the agenda. Around 15–20 minutes for a typical
-                account. Small or simple work may not need one at all if the
-                brief plus a direct follow-up covers it.
+                A short internal conversation normally follows once the brief is
+                written and reviewed, with the brief as the agenda. Around 15–20
+                minutes for a typical account. Small or simple work may not need
+                one at all if the brief plus a direct follow-up covers it.
               </p>
             }
           >
