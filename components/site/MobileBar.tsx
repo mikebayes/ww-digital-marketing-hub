@@ -34,12 +34,21 @@ export function MobileBar() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 flex items-center justify-between gap-4 bg-charcoal px-5 py-3.5 lg:hidden">
-        <Link href="/" className="flex items-center gap-3">
-          <Wordmark tone="light" height={20} />
-          <span className="h-4 w-px bg-white/20" aria-hidden />
-          <span className="text-xs leading-tight font-semibold tracking-tight text-white/80">
-            Playbook
+      <header className="sticky top-0 z-40 flex h-14 items-center justify-between gap-4 bg-charcoal px-5 lg:hidden">
+        {/*
+         * Below 480px the lockup stands alone — there is not room for the
+         * property name next to it and the Index button, and a truncated
+         * "Digital …" is worse than nothing. The drawer and every page header
+         * name the Hub anyway.
+         */}
+        <Link href="/" className="flex min-w-0 items-center gap-3">
+          <Wordmark tone="light" height={26} />
+          <span
+            className="hidden h-5 w-px shrink-0 bg-white/20 min-[480px]:block"
+            aria-hidden
+          />
+          <span className="hidden truncate text-[0.8125rem] leading-tight font-semibold tracking-[-0.01em] text-white/85 min-[480px]:block">
+            {site.name}
           </span>
         </Link>
 
@@ -47,7 +56,7 @@ export function MobileBar() {
           type="button"
           onClick={() => setOpen((value) => !value)}
           aria-expanded={open}
-          aria-controls="playbook-drawer"
+          aria-controls="hub-drawer"
           className="label flex items-center gap-2 border border-white/20 px-3 py-2 text-white/80 transition-colors hover:border-white/40 hover:text-white"
         >
           {open ? "Close" : "Index"}
@@ -61,11 +70,11 @@ export function MobileBar() {
 
       {open && (
         <div
-          id="playbook-drawer"
-          className="fixed inset-x-0 top-[57px] bottom-0 z-40 overflow-y-auto bg-charcoal lg:hidden"
+          id="hub-drawer"
+          className="fixed inset-x-0 top-14 bottom-0 z-40 overflow-y-auto overscroll-contain bg-charcoal lg:hidden"
         >
           <NavTree onNavigate={() => setOpen(false)} />
-          <div className="border-t border-white/10 px-6 py-5">
+          <div className="border-t border-white/[0.09] px-5 py-5">
             <p className="text-xs text-white/40">
               Version {site.version} · {site.updated}
             </p>

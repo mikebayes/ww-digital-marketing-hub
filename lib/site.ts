@@ -1,8 +1,8 @@
 export const site = {
-  name: "Digital Marketing Playbook",
+  name: "Digital Marketing Hub",
   owner: "Web Wizards",
   /**
-   * Playbook release, not a per-page version. Bump the minor when a module is
+   * Hub release, not a per-page version. Bump the minor when a module is
    * published or a standard changes materially.
    */
   version: "0.1",

@@ -4,6 +4,7 @@ import { SiteRail } from "@/components/site/SiteRail";
 import { MobileBar } from "@/components/site/MobileBar";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { site } from "@/lib/site";
+import { favicons, brandColors } from "@/lib/brand";
 import "./globals.css";
 
 const inter = Inter({
@@ -25,12 +26,20 @@ export const metadata: Metadata = {
     template: `%s · ${site.name}`,
   },
   description: site.description,
-  icons: { icon: "/ww-mark.svg" },
+  // Served from the official brand library rather than duplicated at the root.
+  icons: {
+    icon: [
+      { url: favicons.ico, sizes: "any" },
+      { url: favicons.png32, type: "image/png", sizes: "32x32" },
+      { url: favicons.png16, type: "image/png", sizes: "16x16" },
+    ],
+    apple: favicons.appleTouch,
+  },
   robots: { index: false, follow: false },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#1c1f23",
+  themeColor: brandColors.dark,
 };
 
 export default function RootLayout({

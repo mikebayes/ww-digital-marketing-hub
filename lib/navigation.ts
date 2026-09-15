@@ -1,5 +1,5 @@
 /**
- * Single source of truth for the playbook's information architecture.
+ * Single source of truth for the Hub's information architecture.
  *
  * Every navigation surface — sidebar, mobile drawer, breadcrumbs, section
  * indexes and the static routes themselves — reads from here.
@@ -11,7 +11,7 @@
 
 export type EntryStatus = "published" | "planned";
 
-export interface PlaybookEntry {
+export interface HubEntry {
   /** Path segment, unique within its section. */
   slug: string;
   title: string;
@@ -20,7 +20,7 @@ export interface PlaybookEntry {
   status: EntryStatus;
 }
 
-export interface PlaybookSection {
+export interface HubSection {
   /** Path segment at the root of the site. */
   slug: string;
   title: string;
@@ -29,10 +29,10 @@ export interface PlaybookSection {
   summary: string;
   /** Longer description shown on the section index page. */
   description: string;
-  entries: PlaybookEntry[];
+  entries: HubEntry[];
 }
 
-export const sections: PlaybookSection[] = [
+export const sections: HubSection[] = [
   {
     slug: "standards",
     title: "Standards",
@@ -221,18 +221,25 @@ export const sections: PlaybookSection[] = [
         summary: "Project templates, task libraries and Productive conventions.",
         status: "planned",
       },
+      {
+        slug: "brand-assets",
+        title: "Brand Assets",
+        summary:
+          "Approved Web Wizards logos and brand files, with guidance on which variant to use where.",
+        status: "planned",
+      },
     ],
   },
 ];
 
-export function getSection(slug: string): PlaybookSection | undefined {
+export function getSection(slug: string): HubSection | undefined {
   return sections.find((section) => section.slug === slug);
 }
 
 export function getEntry(
   sectionSlug: string,
   entrySlug: string,
-): { section: PlaybookSection; entry: PlaybookEntry } | undefined {
+): { section: HubSection; entry: HubEntry } | undefined {
   const section = getSection(sectionSlug);
   const entry = section?.entries.find((item) => item.slug === entrySlug);
   return section && entry ? { section, entry } : undefined;

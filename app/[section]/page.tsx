@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { sections, getSection } from "@/lib/navigation";
-import { PageHeader, SectionLabel } from "@/components/playbook/primitives";
+import { PageHeader, SectionLabel } from "@/components/hub/primitives";
 
 export const dynamicParams = false;
 
@@ -30,29 +30,13 @@ export default async function SectionPage({
   const section = getSection(slug);
   if (!section) notFound();
 
-  const publishedCount = section.entries.filter(
-    (entry) => entry.status === "published",
-  ).length;
-
   return (
     <div className="px-6 pt-10 pb-4 md:px-12 lg:px-16 lg:pt-14">
       <PageHeader
         marker={section.marker}
         title={section.title}
         lede={section.description}
-        breadcrumb={[
-          { label: "Playbook", href: "/" },
-          { label: section.title },
-        ]}
-        meta={[
-          { label: "Modules", value: String(section.entries.length) },
-          { label: "Published", value: String(publishedCount) },
-          {
-            label: "In progress",
-            value: String(section.entries.length - publishedCount),
-          },
-          { label: "Owner", value: "Digital Marketing" },
-        ]}
+        breadcrumb={[{ label: "Hub", href: "/" }, { label: section.title }]}
       />
 
       <div className="@container mt-12">
@@ -69,23 +53,26 @@ export default async function SectionPage({
                   href={href}
                   className="group flex flex-col gap-2 py-6 transition-colors hover:bg-teal-tint sm:flex-row sm:items-baseline sm:gap-8 sm:px-4 sm:-mx-4"
                 >
-                  <span className="label shrink-0 text-muted tabular-nums sm:w-12">
+                  <span
+                    className={`label shrink-0 tabular-nums sm:w-12 ${
+                      planned ? "text-muted" : "text-teal-ink"
+                    }`}
+                  >
                     {section.marker}.{index + 1}
                   </span>
 
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                      <h2
-                        className={`text-lg leading-snug font-semibold tracking-[-0.015em] ${
-                          planned ? "text-slate" : "text-charcoal"
-                        }`}
-                      >
+                      <h2 className="text-lg leading-snug font-semibold tracking-[-0.02em] text-charcoal">
                         {entry.title}
                       </h2>
+                      {/*
+                       * Only the planned state is labelled. Marking the live
+                       * module "Published" reads like a docs tool; the teal
+                       * marker already distinguishes it.
+                       */}
                       {planned && (
-                        <span className="label border border-rule-strong px-2 py-1 text-muted">
-                          Soon
-                        </span>
+                        <span className="label text-muted">Soon</span>
                       )}
                     </div>
                     <p className="mt-2 max-w-2xl text-[0.9375rem] leading-relaxed text-slate">

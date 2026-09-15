@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 /*
- * Web Wizards Digital Marketing Playbook — design tokens.
+ * Web Wizards Digital Marketing Hub — design tokens.
  *
  * Colour values are taken directly from current Web Wizards work: the teal is
  * the logo fill (#3ABFAF), and the charcoal/neutral ramp is lifted from the
  * Goodies Bake Shop proposal. Typography is the established Inter + Fraunces
  * pairing. Where this system departs from the proposal work it does so
- * deliberately: the playbook is built from rules and grids rather than cards
+ * deliberately: the Hub is built from rules and grids rather than cards
  * and shadows, so it reads as an operating tool rather than a sales document.
  */
 
@@ -48,7 +48,7 @@
     "Segoe UI", Roboto, Arial, sans-serif;
   --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
 
-  --spacing-rail: 16rem;
+  --spacing-rail: 17.5rem;
   --spacing-toc: 15rem;
 }
 
@@ -98,7 +98,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-@utility prose-playbook {
+@utility prose-hub {
   p {
     color: var(--color-slate);
     line-height: 1.7;

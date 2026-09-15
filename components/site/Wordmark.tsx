@@ -1,24 +1,30 @@
 import Image from "next/image";
+import { logos } from "@/lib/brand";
 
 /**
- * The Web Wizards horizontal lockup. Two static files rather than an inlined
- * SVG — the artwork is ~30KB of paths and does not belong in the JS bundle.
+ * The official Web Wizards lockup.
+ *
+ * Rendered from the approved SVG in `public/brand/` rather than inlined — the
+ * artwork is several thousand path commands and does not belong in the JS
+ * bundle. Proportions are locked to the source viewBox; only `height` varies.
  */
 export function Wordmark({
   tone = "dark",
   className = "",
-  height = 26,
+  height = 30,
 }: {
-  /** "dark" = charcoal wordmark for light surfaces. "light" = white wordmark. */
+  /** "dark" = near-black wordmark for light surfaces. "light" = white wordmark. */
   tone?: "dark" | "light";
   className?: string;
   height?: number;
 }) {
+  const logo = tone === "light" ? logos.lockupOnDark : logos.lockupOnLight;
+
   return (
     <Image
-      src={tone === "light" ? "/ww-logo-light.svg" : "/ww-logo.svg"}
+      src={logo.src}
       alt="Web Wizards"
-      width={Math.round((height * 1037) / 232)}
+      width={Math.round((height * logo.width) / logo.height)}
       height={height}
       className={className}
       priority

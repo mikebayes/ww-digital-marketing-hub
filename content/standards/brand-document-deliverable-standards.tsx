@@ -7,8 +7,8 @@ import {
   DoAvoid,
   ExamplePanel,
   DefinitionTable,
-} from "@/components/playbook/primitives";
-import { OnThisPage, type TocItem } from "@/components/playbook/OnThisPage";
+} from "@/components/hub/primitives";
+import { OnThisPage, type TocItem } from "@/components/hub/OnThisPage";
 import {
   SwatchGrid,
   TypeSpecimen,
@@ -16,7 +16,7 @@ import {
   ApplicationSplit,
   DocumentAnatomy,
   CoBrandingExamples,
-} from "@/components/playbook/brand";
+} from "@/components/hub/brand";
 
 const toc: TocItem[] = [
   { id: "purpose", marker: "01", title: "Purpose & Application" },
@@ -37,7 +37,7 @@ export default function BrandDocumentDeliverableStandards() {
         title="Brand, Document & Deliverable Standards"
         lede="How Web Wizards work should look, whose brand it carries, and what a finished document needs. It applies to anything we produce — internal or client-facing."
         breadcrumb={[
-          { label: "Playbook", href: "/" },
+          { label: "Hub", href: "/" },
           { label: "Standards", href: "/standards" },
           { label: "Brand, Document & Deliverable Standards" },
         ]}
@@ -235,24 +235,91 @@ export default function BrandDocumentDeliverableStandards() {
 
             <Callout label="Contrast — this one is a rule">
               <p>
-                Teal at brand strength reaches roughly{" "}
-                <strong>2:1 against white</strong>. It is a surface and marker
-                colour, not a text colour. For small teal text on a light
-                background use <strong>#1F7D73</strong>, which clears 4.5:1. On
-                charcoal, teal is fine as-is.
+                <strong>The brand teal does not change.</strong> #3ABFAF is the
+                logo fill and stays exactly as it is for accents, rules,
+                markers, large graphical elements and any non-text detail. The
+                rule below is about which variant carries small text, not about
+                altering the brand colour.
               </p>
               <p>
-                The same applies to grey. The lighter secondary grey used in
-                recent work (#8A9097) sits at 3.2:1 on white — acceptable for
+                Teal at brand strength reaches roughly{" "}
+                <strong>2:1 against white</strong> — so it cannot carry small
+                text on a light background. Use <strong>#1F7D73</strong> there,
+                which clears 4.5:1. On charcoal, brand teal is fine for text
+                as-is.
+              </p>
+              <p>
+                The same logic applies to grey. The lighter secondary grey used
+                in recent work (#8A9097) sits at 3.2:1 on white — acceptable for
                 rules and large type, not for captions. Use{" "}
                 <strong>#6E757D</strong> for small secondary text.
               </p>
             </Callout>
 
-            <Subsection title="Typography" eyebrow="03.2">
+            <Subsection title="Logo" eyebrow="03.2">
+              <p>
+                The official logo library is the only source of Web Wizards
+                artwork. Never recreate the logo as text, trace it, redraw it or
+                rebuild it from a screenshot, and never distort its proportions.
+              </p>
+              <p>
+                The library provides horizontal, stacked and icon-only lockups
+                in light and dark versions, plus raster exports and a favicon
+                set. Each SVG separates the icon, wordmark and tagline into
+                their own groups, so a lockup can legitimately be used without
+                the tagline where the tagline would not be legible — as it is in
+                this Hub&rsquo;s own navigation. That is component selection, not
+                alteration.
+              </p>
+            </Subsection>
+
+            <DefinitionTable
+              caption="Choosing a variant"
+              rows={[
+                {
+                  term: "Dark surfaces",
+                  detail:
+                    "Horizontal lockup with the white wordmark. This is the default for charcoal covers, section pages and dark UI.",
+                },
+                {
+                  term: "Light surfaces",
+                  detail:
+                    "Horizontal lockup with the near-black wordmark. The default for white document pages and light UI.",
+                },
+                {
+                  term: "Narrow or tall spaces",
+                  detail:
+                    "Stacked lockup. Use where the horizontal version would have to be set so small that the wordmark stops being readable.",
+                },
+                {
+                  term: "Avatars and app icons",
+                  detail:
+                    "Icon only. Never crop the horizontal lockup down to the icon — use the supplied icon file.",
+                },
+                {
+                  term: "Tagline",
+                  detail:
+                    "Keep it where the lockup is reproduced at a size that renders it legibly. Drop it, using the supplied groups, where it would become an unreadable smudge.",
+                },
+                {
+                  term: "Minimum size",
+                  detail:
+                    "Below roughly 120px wide, switch to the icon rather than shrinking the full lockup further.",
+                },
+              ]}
+            />
+
+            <Subsection title="Typography" eyebrow="03.3">
               <p>
                 Two typefaces, both already in use across the website and the
                 recent proposal work. Do not add a third without a reason.
+              </p>
+              <p>
+                The weighting between them depends on the application. Digital
+                work is carried by strong sans-serif; the serif is an editorial
+                accent used where it earns its place. Formal documents can lean
+                on it harder — covers, section pages, pull quotes. Do not reach
+                for the serif simply because it exists.
               </p>
             </Subsection>
 
@@ -271,12 +338,12 @@ export default function BrandDocumentDeliverableStandards() {
                   sample: "Aa 0123",
                   display: true,
                   notes:
-                    "Editorial accent only — cover titles, large section numerals, pull quotes. It gives documents their character. Never set body copy or anything below about 20px in it.",
+                    "Editorial accent. Cover titles, large section numerals and pull quotes in formal documents. Used sparingly on screen — this Hub uses it only in this specimen. Never set body copy or anything below about 20px in it.",
                 },
               ]}
             />
 
-            <Subsection title="Structure" eyebrow="03.3">
+            <Subsection title="Structure" eyebrow="03.4">
               <p>
                 The structural language matters more than the palette. Most of
                 what makes Web Wizards work recognisable is grid, whitespace and

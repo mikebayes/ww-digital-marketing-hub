@@ -62,7 +62,7 @@ export function Breadcrumb({
   );
 }
 
-/** The header block at the top of every playbook page. */
+/** The header block at the top of every Hub page. */
 export function PageHeader({
   marker,
   title,
@@ -81,20 +81,23 @@ export function PageHeader({
     <header className="border-b border-rule pb-10">
       {breadcrumb && <Breadcrumb items={breadcrumb} />}
 
-      <div className={breadcrumb ? "mt-8" : ""}>
+      <div className={breadcrumb ? "mt-9" : ""}>
         {marker && (
           <span
             aria-hidden
-            className="mb-5 block font-display text-5xl leading-none font-semibold text-rule-strong tabular-nums"
+            className="mb-6 flex items-center gap-3.5"
           >
-            {marker}
+            <span className="h-px w-8 bg-teal" />
+            <span className="label text-[0.75rem] tabular-nums text-teal-ink">
+              {marker}
+            </span>
           </span>
         )}
-        <h1 className="max-w-4xl text-3xl leading-[1.1] font-semibold tracking-[-0.02em] text-charcoal text-balance sm:text-4xl lg:text-[2.75rem]">
+        <h1 className="max-w-4xl text-[2rem] leading-[1.06] font-semibold tracking-[-0.03em] text-balance text-charcoal sm:text-[2.5rem] lg:text-[3.25rem]">
           {title}
         </h1>
         {lede && (
-          <div className="mt-5 max-w-2xl text-base leading-relaxed text-slate sm:text-lg">
+          <div className="mt-6 max-w-2xl text-base leading-relaxed text-slate sm:text-lg">
             {lede}
           </div>
         )}
@@ -135,20 +138,26 @@ export function Section({
   children?: ReactNode;
 }) {
   return (
-    <section id={id} className="border-t border-rule pt-10 first:border-t-0 first:pt-0">
-      <div className="flex flex-col gap-1.5 @sm:flex-row @sm:gap-6">
+    <section
+      id={id}
+      className="relative border-t-2 border-charcoal pt-9 first:border-t-2"
+    >
+      {/* Teal cap on the section rule — the transition marker used throughout. */}
+      <span aria-hidden className="absolute -top-0.5 left-0 h-0.5 w-10 bg-teal" />
+
+      <div className="flex flex-col gap-2 @sm:flex-row @sm:gap-6">
         <span
           aria-hidden
-          className="label shrink-0 pt-1.5 text-muted @sm:w-10"
+          className="label shrink-0 pt-1.5 tabular-nums text-teal-ink @sm:w-10"
         >
           {marker}
         </span>
         <div className="min-w-0 flex-1">
-          <h2 className="text-xl leading-tight font-semibold tracking-[-0.015em] text-charcoal sm:text-2xl">
+          <h2 className="text-xl leading-tight font-semibold tracking-[-0.025em] text-charcoal sm:text-[1.625rem]">
             {title}
           </h2>
           {intro && (
-            <div className="prose-playbook mt-4 text-[0.9375rem]">{intro}</div>
+            <div className="prose-hub mt-4 text-[0.9375rem]">{intro}</div>
           )}
           {children && <div className="mt-7 space-y-7">{children}</div>}
         </div>
@@ -173,7 +182,7 @@ export function Subsection({
       <h3 className="text-base font-semibold tracking-[-0.01em] text-charcoal">
         {title}
       </h3>
-      <div className="prose-playbook mt-3 text-[0.9375rem]">{children}</div>
+      <div className="prose-hub mt-3 text-[0.9375rem]">{children}</div>
     </div>
   );
 }
@@ -183,7 +192,7 @@ export function Subsection({
 /* -------------------------------------------------------------------------- */
 
 /**
- * A numbered rule or principle. The defining content unit of the playbook —
+ * A numbered rule or principle. The defining content unit of the Hub —
  * one statement, one explanation.
  */
 export function RuleBlock({
@@ -232,7 +241,7 @@ export function Callout({
     return (
       <aside className="bg-charcoal px-6 py-5">
         <SectionLabel tone="light">{label}</SectionLabel>
-        <div className="mt-2.5 max-w-2xl text-[0.9375rem] leading-relaxed text-white/75 [&_strong]:font-semibold [&_strong]:text-white">
+        <div className="mt-2.5 max-w-2xl text-[0.9375rem] leading-relaxed text-white/75 [&_p+p]:mt-3 [&_strong]:font-semibold [&_strong]:text-white">
           {children}
         </div>
       </aside>
@@ -242,7 +251,7 @@ export function Callout({
   return (
     <aside className="border-l-2 border-teal bg-teal-tint px-6 py-5">
       <SectionLabel>{label}</SectionLabel>
-      <div className="mt-2.5 max-w-2xl text-[0.9375rem] leading-relaxed text-slate [&_strong]:font-semibold [&_strong]:text-charcoal">
+      <div className="mt-2.5 max-w-2xl text-[0.9375rem] leading-relaxed text-slate [&_p+p]:mt-3 [&_strong]:font-semibold [&_strong]:text-charcoal">
         {children}
       </div>
     </aside>
@@ -387,51 +396,12 @@ export function DefinitionTable({
   );
 }
 
-/** Card used on the homepage and section indexes to route into the playbook. */
-export function RouteCard({
-  href,
-  marker,
-  title,
-  summary,
-  count,
-}: {
-  href: string;
-  marker?: string;
-  title: string;
-  summary: string;
-  count?: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className="group flex flex-col bg-surface px-6 py-6 transition-colors hover:bg-teal-tint"
-    >
-      <div className="flex items-baseline justify-between gap-4">
-        {marker && (
-          <span className="label text-teal-ink tabular-nums">{marker}</span>
-        )}
-        {count && <span className="label text-muted">{count}</span>}
-      </div>
-      <h3 className="mt-5 text-lg leading-snug font-semibold tracking-[-0.015em] text-charcoal">
-        {title}
-      </h3>
-      <p className="mt-2.5 flex-1 text-[0.875rem] leading-relaxed text-slate">
-        {summary}
-      </p>
-      <span
-        aria-hidden
-        className="mt-6 h-px w-8 bg-rule-strong transition-all duration-200 group-hover:w-14 group-hover:bg-teal"
-      />
-    </Link>
-  );
-}
-
 /** Marks a page or module that has not been written yet. */
 export function PlannedNotice({ children }: { children: ReactNode }) {
   return (
     <div className="border border-dashed border-rule-strong bg-surface px-6 py-7">
       <SectionLabel tone="muted">Not yet written</SectionLabel>
-      <div className="prose-playbook mt-3 text-[0.9375rem]">{children}</div>
+      <div className="prose-hub mt-3 text-[0.9375rem]">{children}</div>
     </div>
   );
 }

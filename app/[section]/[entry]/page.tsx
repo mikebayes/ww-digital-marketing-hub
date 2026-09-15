@@ -7,10 +7,10 @@ import {
   PageHeader,
   PlannedNotice,
   SectionLabel,
-} from "@/components/playbook/primitives";
+} from "@/components/hub/primitives";
 
 /**
- * Every playbook page below the section index resolves here.
+ * Every Hub page below the section index resolves here.
  *
  * Published modules are rendered from the registry in `content/registry.ts`;
  * everything else in the IA renders the placeholder below. Adding a module
@@ -61,7 +61,7 @@ export default async function EntryPage({
         title={entry.title}
         lede={entry.summary}
         breadcrumb={[
-          { label: "Playbook", href: "/" },
+          { label: "Hub", href: "/" },
           { label: section.title, href: `/${section.slug}` },
           { label: entry.title },
         ]}
@@ -70,7 +70,7 @@ export default async function EntryPage({
       <div className="@container mt-10 max-w-3xl space-y-8">
         <PlannedNotice>
           <p>
-            This module is part of the playbook structure but has not been
+            This module is part of the Hub structure but has not been
             written yet. It is listed here so the shape of the system is visible
             and so the same process does not get invented twice in different
             places.
