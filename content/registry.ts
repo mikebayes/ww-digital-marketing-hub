@@ -2,6 +2,7 @@ import type { ComponentType } from "react";
 import BrandDocumentDeliverableStandards from "./standards/brand-document-deliverable-standards";
 import ClientOnboardingOverview from "./client-onboarding/overview";
 import InternalHandoff from "./client-onboarding/internal-handoff";
+import ClientKickoff from "./client-onboarding/client-kickoff";
 import InternalServiceBriefTemplate from "./templates-resources/internal-service-brief";
 
 /**
@@ -15,5 +16,6 @@ export const modules: Record<string, ComponentType> = {
     BrandDocumentDeliverableStandards,
   "client-onboarding/overview": ClientOnboardingOverview,
   "client-onboarding/internal-handoff": InternalHandoff,
+  "client-onboarding/client-kickoff": ClientKickoff,
   "templates-resources/internal-service-brief": InternalServiceBriefTemplate,
 };

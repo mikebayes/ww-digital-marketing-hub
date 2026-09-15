@@ -105,7 +105,7 @@ export const sections: HubSection[] = [
         title: "Client Kickoff",
         summary:
           "Running the kickoff, confirming goals and priorities, and agreeing the first 30 days.",
-        status: "planned",
+        status: "published",
       },
     ],
   },
@@ -203,7 +203,8 @@ export const sections: HubSection[] = [
       {
         slug: "kickoff-agenda",
         title: "Kickoff Agenda",
-        summary: "A standard agenda and pre-read for the client kickoff call.",
+        summary:
+          "A short prompt list of what to confirm at kickoff — not a formal agenda or deck.",
         status: "planned",
       },
       {
