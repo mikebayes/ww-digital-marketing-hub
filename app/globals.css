@@ -1,0 +1,122 @@
+@import "tailwindcss";
+
+/*
+ * Web Wizards Digital Marketing Playbook — design tokens.
+ *
+ * Colour values are taken directly from current Web Wizards work: the teal is
+ * the logo fill (#3ABFAF), and the charcoal/neutral ramp is lifted from the
+ * Goodies Bake Shop proposal. Typography is the established Inter + Fraunces
+ * pairing. Where this system departs from the proposal work it does so
+ * deliberately: the playbook is built from rules and grids rather than cards
+ * and shadows, so it reads as an operating tool rather than a sales document.
+ */
+
+@theme {
+  /* Ink ramp */
+  --color-ink: #0c0d0d;
+  --color-charcoal: #1c1f23;
+  --color-slate: #4a4f57;
+  /*
+   * The secondary grey observed in recent work (#8A9097) only reaches 3.2:1 on
+   * white, so it is not used for text here. Secondary *text* is
+   * darkened to clear 4.5:1.
+   */
+  --color-muted: #6e757d;
+
+  /* Surfaces */
+  --color-paper: #fafbfb;
+  --color-neutral-tint: #f2f3f4;
+  --color-surface: #ffffff;
+
+  /* Rules and borders */
+  --color-rule: #e4e7ea;
+  --color-rule-strong: #c9cdd1;
+
+  /*
+   * Teal. #3ABFAF is the logo fill and the accent used throughout recent work.
+   * It is a surface and marker colour, not a text colour: it reaches only
+   * 2.0:1 on white. #2E9C90 (from the Goodies proposal) carries teal on dark
+   * backgrounds and at display sizes; #1F7D73 is the darkened variant used for
+   * small teal text on light, where it clears 4.5:1.
+   */
+  --color-teal: #3abfaf;
+  --color-teal-deep: #2e9c90;
+  --color-teal-ink: #1f7d73;
+  --color-teal-tint: #edf7f5;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, Arial, sans-serif;
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+
+  --spacing-rail: 16rem;
+  --spacing-toc: 15rem;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-charcoal);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv05" 1, "cv11" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: var(--color-teal);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-teal-ink);
+    outline-offset: 2px;
+  }
+
+  /* Offset anchor targets so sticky headers do not cover section headings. */
+  [id] {
+    scroll-margin-top: 6.5rem;
+  }
+}
+
+@utility label {
+  font-size: 0.6875rem;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+@utility prose-playbook {
+  p {
+    color: var(--color-slate);
+    line-height: 1.7;
+    max-width: 68ch;
+  }
+
+  p + p {
+    margin-top: 1rem;
+  }
+
+  strong {
+    color: var(--color-charcoal);
+    font-weight: 600;
+  }
+
+  a {
+    color: var(--color-teal-ink);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+}
