@@ -4,6 +4,11 @@ The internal operating hub for the Web Wizards Digital Marketing team. Internal
 use only; there is no authentication yet, so treat the deployed URL as
 unlisted rather than private.
 
+Every page carries a `noindex, nofollow` meta tag and every route returns an
+`X-Robots-Tag` header, so the Hub stays out of search results. `app/robots.ts`
+deliberately allows crawling — blocking it would stop crawlers reading those
+directives. None of that is access control: anyone with the URL can read it.
+
 ## Running it
 
 ```bash
