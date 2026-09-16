@@ -154,6 +154,16 @@ export default function SocialMediaOnboarding() {
               </p>
             </Callout>
 
+            <Callout label="Capture what we learn">
+              <p>
+                Anything established here that the next person would need to run
+                the account goes into the client&rsquo;s{" "}
+                <strong>Social Media Account Guide</strong> in Productive →
+                Docs. Do not leave account knowledge only in someone&rsquo;s
+                notes, inbox or memory.
+              </p>
+            </Callout>
+
             <DefinitionTable
               rows={[
                 {
@@ -395,8 +405,13 @@ export default function SocialMediaOnboarding() {
             }
           >
             <DefinitionTable
-              caption="The content plan onboarding produces"
+              caption="What onboarding produces"
               rows={[
+                {
+                  term: "Social Media Account Guide",
+                  detail:
+                    "The durable internal reference for how the account operates: channels, audiences, priorities, content sources, approval process, community-management rules, key constraints and links to working assets. Stored in Productive → Docs, and updated whenever material account details change.",
+                },
                 {
                   term: "Annual direction",
                   detail:
@@ -414,6 +429,21 @@ export default function SocialMediaOnboarding() {
                 },
               ]}
             />
+
+            <p className="text-[0.9375rem] leading-relaxed text-slate">
+              <strong className="font-semibold text-charcoal">
+                Account Guide
+              </strong>{" "}
+              = durable account knowledge.{" "}
+              <strong className="font-semibold text-charcoal">
+                Content roadmap and calendar
+              </strong>{" "}
+              = the changing delivery plan.{" "}
+              <strong className="font-semibold text-charcoal">
+                Productive tasks
+              </strong>{" "}
+              = work that needs to happen.
+            </p>
           </Section>
 
           {/* ---------------------------------------------------------------- */}
@@ -423,6 +453,7 @@ export default function SocialMediaOnboarding() {
                 "Service scope and channels are confirmed",
                 "Required platform access works",
                 "Brand guidance and assets are available",
+                "The Social Media Account Guide is complete and stored in Productive",
                 "Audiences and business priorities are understood",
                 "Content pillars are defined",
                 "Content sources are identified",
