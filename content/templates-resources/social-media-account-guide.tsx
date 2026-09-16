@@ -127,7 +127,7 @@ export default function SocialMediaAccountGuide() {
                 },
                 {
                   title: "Social Content Lead reviews and corrects",
-                  body: "They own what it says. A draft nobody has checked is not a reference.",
+                  body: "The Social Content Lead owns the final accuracy. The AI draft is only a starting point.",
                 },
                 {
                   title: "Store it in Productive → Docs",
@@ -152,7 +152,8 @@ export default function SocialMediaAccountGuide() {
               rows={[
                 {
                   term: "01 Platforms & cadence",
-                  detail: "Channels managed and how often each one posts.",
+                  detail:
+                    "Channels managed, how often each one posts, and whether there is a related paid social engagement — not included, a separate Paid Media engagement, or included and coordinated with them.",
                 },
                 {
                   term: "02 Audience & priorities",
@@ -184,9 +185,9 @@ export default function SocialMediaAccountGuide() {
                   detail: "Calendar, roadmap, reporting and asset library.",
                 },
                 {
-                  term: "08 Material account notes",
+                  term: "08 Material changes",
                   detail:
-                    "A short record of changes that altered how the account is run. Two or three lines, not a timeline.",
+                    "Durable changes to how the account is run — a new approver, a platform added or dropped, cadence materially changed, community management turned on or off, a new compliance restriction. Two or three lines. Not an activity log, meeting notes or monthly history.",
                 },
               ]}
             />
