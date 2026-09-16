@@ -422,3 +422,73 @@ export function LogoLibrary({ variants }: { variants: LogoVariant[] }) {
     </div>
   );
 }
+
+/* -------------------------------------------------------------------------- */
+/* Package comparison                                                          */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Client-facing package comparison. Attributes run down the side, packages
+ * across the top, so tiers can be read against each other.
+ *
+ * Wider than the content column by design — it scrolls horizontally inside its
+ * own container rather than forcing the page to, which is the one exception
+ * the Brand Standards allow.
+ */
+export function PackageTable({
+  columns,
+  rows,
+}: {
+  columns: { name: string; price: string }[];
+  rows: { label: string; values: string[] }[];
+}) {
+  return (
+    <div className="overflow-x-auto border border-rule bg-surface">
+      <table className="w-full min-w-[48rem] border-collapse text-left">
+        <thead>
+          <tr className="border-b border-rule-strong bg-neutral-tint">
+            <th scope="col" className="w-[13rem] px-5 py-4 align-bottom">
+              <span className="label text-muted">Package</span>
+            </th>
+            {columns.map((column) => (
+              <th
+                key={column.name}
+                scope="col"
+                className="border-l border-rule px-5 py-4 align-bottom"
+              >
+                <span className="block text-[0.9375rem] leading-tight font-semibold text-charcoal">
+                  {column.name}
+                </span>
+                <span className="mt-1.5 block text-[0.875rem] tabular-nums text-teal-ink">
+                  {column.price}
+                </span>
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.label} className="border-b border-rule last:border-b-0">
+              <th
+                scope="row"
+                className="px-5 py-3 text-[0.875rem] font-medium text-charcoal"
+              >
+                {row.label}
+              </th>
+              {row.values.map((value, index) => (
+                <td
+                  key={`${row.label}-${columns[index].name}`}
+                  className={`border-l border-rule px-5 py-3 text-[0.875rem] tabular-nums ${
+                    value === "No" ? "text-muted" : "text-slate"
+                  }`}
+                >
+                  {value}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}

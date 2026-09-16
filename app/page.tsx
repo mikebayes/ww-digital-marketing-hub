@@ -113,7 +113,7 @@ export default function HomePage() {
             Hub Sections
           </h2>
           <p className="text-[0.9375rem] text-slate">
-            Five areas, published as they are agreed.
+            Six areas, published as they are agreed.
           </p>
         </div>
 
@@ -147,17 +147,22 @@ export default function HomePage() {
 
                   <div className="md:pt-1.5">
                     <p className="label text-muted">
-                      {available.length > 0 ? "Available now" : "In progress"}
+                      {section.standalone || available.length > 0
+                        ? "Available now"
+                        : "In progress"}
                     </p>
                     <p className="mt-2 text-[0.875rem] leading-relaxed text-slate">
-                      {available.length > 0
-                        ? available.map((entry) => entry.title).join(", ")
-                        : `${section.entries
-                            .slice(0, 3)
-                            .map((entry) => entry.title)
-                            .join(", ")}${
-                            section.entries.length > 3 ? " and more" : ""
-                          }`}
+                      {/* A standalone section is the page, so it has no entries to list. */}
+                      {section.standalone
+                        ? "A single reference page."
+                        : available.length > 0
+                          ? available.map((entry) => entry.title).join(", ")
+                          : `${section.entries
+                              .slice(0, 3)
+                              .map((entry) => entry.title)
+                              .join(", ")}${
+                              section.entries.length > 3 ? " and more" : ""
+                            }`}
                     </p>
                   </div>
                 </Link>

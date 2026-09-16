@@ -53,7 +53,14 @@ export function NavTree({ onNavigate }: { onNavigate?: () => void }) {
             <Link
               href={sectionHref}
               onClick={onNavigate}
-              className="group flex items-baseline gap-3 px-5 pt-6 pb-3.5"
+              className={`group flex items-baseline gap-3 px-5 pt-6 ${
+                /*
+                 * A section with no entries has no list beneath it to carry
+                 * the closing space, so the heading absorbs it and the rail
+                 * keeps one rhythm.
+                 */
+                section.entries.length > 0 ? "pb-3.5" : "pb-8"
+              }`}
             >
               <span
                 aria-hidden
@@ -76,53 +83,55 @@ export function NavTree({ onNavigate }: { onNavigate?: () => void }) {
               </span>
             </Link>
 
-            <ul className="pb-5">
-              {section.entries.map((entry) => {
-                const href = `${sectionHref}/${entry.slug}`;
-                const active = pathname === href;
-                const planned = entry.status === "planned";
+            {section.entries.length > 0 && (
+              <ul className="pb-5">
+                {section.entries.map((entry) => {
+                  const href = `${sectionHref}/${entry.slug}`;
+                  const active = pathname === href;
+                  const planned = entry.status === "planned";
 
-                return (
-                  <li key={entry.slug}>
-                    <Link
-                      href={href}
-                      ref={active ? activeRef : undefined}
-                      onClick={onNavigate}
-                      aria-current={active ? "page" : undefined}
-                      className={`group relative flex py-[0.4375rem] pr-4 pl-5 transition-colors ${
-                        active ? "bg-white/[0.06]" : "hover:bg-white/[0.04]"
-                      }`}
-                    >
-                      {/* Active marker sits flush in the rail's left edge. */}
-                      <span
-                        aria-hidden
-                        className={`absolute inset-y-0 left-0 w-[3px] transition-colors ${
-                          active ? "bg-teal" : "bg-transparent"
+                  return (
+                    <li key={entry.slug}>
+                      <Link
+                        href={href}
+                        ref={active ? activeRef : undefined}
+                        onClick={onNavigate}
+                        aria-current={active ? "page" : undefined}
+                        className={`group relative flex py-[0.4375rem] pr-4 pl-5 transition-colors ${
+                          active ? "bg-white/[0.06]" : "hover:bg-white/[0.04]"
                         }`}
-                      />
-                      <span className="text-[0.8125rem] leading-[1.45]">
+                      >
+                        {/* Active marker sits flush in the rail's left edge. */}
                         <span
-                          className={`transition-colors ${
-                            active
-                              ? "font-medium text-white"
-                              : planned
-                                ? "text-white/55 group-hover:text-white/80"
-                                : "text-white/75 group-hover:text-white"
+                          aria-hidden
+                          className={`absolute inset-y-0 left-0 w-[3px] transition-colors ${
+                            active ? "bg-teal" : "bg-transparent"
                           }`}
-                        >
-                          {entry.title}
-                        </span>
-                        {planned && (
-                          <span className="label ml-2 align-[0.12em] text-[0.5625rem] whitespace-nowrap text-white/30">
-                            Soon
+                        />
+                        <span className="text-[0.8125rem] leading-[1.45]">
+                          <span
+                            className={`transition-colors ${
+                              active
+                                ? "font-medium text-white"
+                                : planned
+                                  ? "text-white/55 group-hover:text-white/80"
+                                  : "text-white/75 group-hover:text-white"
+                            }`}
+                          >
+                            {entry.title}
                           </span>
-                        )}
-                      </span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+                          {planned && (
+                            <span className="label ml-2 align-[0.12em] text-[0.5625rem] whitespace-nowrap text-white/30">
+                              Soon
+                            </span>
+                          )}
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </div>
         );
       })}

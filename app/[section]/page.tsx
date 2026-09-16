@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { sections, getSection } from "@/lib/navigation";
+import { sectionModules } from "@/content/registry";
 import { PageHeader, SectionLabel } from "@/components/hub/primitives";
 
 export const dynamicParams = false;
@@ -29,6 +30,10 @@ export default async function SectionPage({
   const { section: slug } = await params;
   const section = getSection(slug);
   if (!section) notFound();
+
+  // Standalone sections render their own page instead of an entry index.
+  const SectionPage = sectionModules[slug];
+  if (SectionPage) return <SectionPage />;
 
   return (
     <div className="px-6 pt-10 pb-4 md:px-12 lg:px-16 lg:pt-14">

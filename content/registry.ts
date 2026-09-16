@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import WhatWeSell from "./what-we-sell";
 import BrandDocumentDeliverableStandards from "./standards/brand-document-deliverable-standards";
 import ClientOnboardingOverview from "./client-onboarding/overview";
 import InternalHandoff from "./client-onboarding/internal-handoff";
@@ -26,4 +27,12 @@ export const modules: Record<string, ComponentType> = {
   "templates-resources/internal-service-brief": InternalServiceBriefTemplate,
   "templates-resources/client-onboarding-email": ClientOnboardingEmail,
   "templates-resources/social-media-account-guide": SocialMediaAccountGuide,
+};
+
+/**
+ * Sections that are a single page rather than an index of entries, keyed by
+ * section slug. Must match a section marked  in lib/navigation.ts.
+ */
+export const sectionModules: Record<string, ComponentType> = {
+  "what-we-sell": WhatWeSell,
 };

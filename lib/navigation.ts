@@ -29,14 +29,31 @@ export interface HubSection {
   summary: string;
   /** Longer description shown on the section index page. */
   description: string;
+  /**
+   * A section that is a single page rather than an index of entries. Its
+   * component is registered in content/registry.ts under sectionModules and
+   * rendered by app/[section]/page.tsx.
+   */
+  standalone?: boolean;
   entries: HubEntry[];
 }
 
 export const sections: HubSection[] = [
   {
+    slug: "what-we-sell",
+    title: "What We Sell",
+    marker: "01",
+    summary:
+      "The services, the usual shape of each, and what is not settled commercially yet.",
+    description:
+      "An internal commercial reference for the Digital Marketing team. The approved proposal always governs a specific client.",
+    standalone: true,
+    entries: [],
+  },
+  {
     slug: "standards",
     title: "Standards",
-    marker: "01",
+    marker: "02",
     summary: "How Web Wizards work looks, reads and holds together.",
     description:
       "Company-wide standards that apply to anything we produce — internal documentation, client deliverables and the way we communicate day to day.",
@@ -67,7 +84,7 @@ export const sections: HubSection[] = [
   {
     slug: "client-onboarding",
     title: "Client Onboarding",
-    marker: "02",
+    marker: "03",
     summary: "From client approval to an account that is set up and running.",
     description:
       "The general onboarding path a client follows when new work starts, whether they are new to Web Wizards or adding a service. Service-specific steps live under Service Onboarding.",
@@ -112,7 +129,7 @@ export const sections: HubSection[] = [
   {
     slug: "service-onboarding",
     title: "Service Onboarding",
-    marker: "03",
+    marker: "04",
     summary:
       "Service-specific setup that runs alongside the general onboarding process where appropriate.",
     description:
@@ -151,7 +168,7 @@ export const sections: HubSection[] = [
   {
     slug: "ongoing-delivery",
     title: "Ongoing Delivery",
-    marker: "04",
+    marker: "05",
     summary: "The standards that hold once a client is live.",
     description:
       "How retained work is run month to month — reporting, review cycles, scope management and the path for things that go wrong.",
@@ -188,7 +205,7 @@ export const sections: HubSection[] = [
   {
     slug: "templates-resources",
     title: "Templates & Resources",
-    marker: "05",
+    marker: "06",
     summary: "The working files behind the standards.",
     description:
       "Starting points rather than finished artefacts. Every template here should reflect the current Brand, Document & Deliverable Standards.",
