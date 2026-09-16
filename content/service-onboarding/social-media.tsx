@@ -16,10 +16,11 @@ const toc: TocItem[] = [
   { id: "account", marker: "03", title: "Understand the Account" },
   { id: "access", marker: "04", title: "Access & Assets" },
   { id: "content-model", marker: "05", title: "The Content Model" },
-  { id: "approval", marker: "06", title: "Approval & Community" },
-  { id: "launch", marker: "07", title: "Prepare to Launch" },
-  { id: "done", marker: "08", title: "Complete When" },
-  { id: "next", marker: "09", title: "Then What?" },
+  { id: "horizon", marker: "06", title: "Content Planning Horizon" },
+  { id: "approval", marker: "07", title: "Approval & Community" },
+  { id: "launch", marker: "08", title: "Prepare to Launch" },
+  { id: "done", marker: "09", title: "Complete When" },
+  { id: "next", marker: "10", title: "Then What?" },
 ];
 
 export default function SocialMediaOnboarding() {
@@ -280,8 +281,52 @@ export default function SocialMediaOnboarding() {
 
           {/* ---------------------------------------------------------------- */}
           <Section
-            id="approval"
+            id="horizon"
             marker="06"
+            title="Content Planning Horizon"
+            intro={
+              <p>
+                <strong>
+                  The further out the plan goes, the higher-level it should be.
+                </strong>{" "}
+                The calendar exists to help the team plan ahead, not to force
+                decisions before they need to be made.
+              </p>
+            }
+          >
+            <RuleBlock
+              items={[
+                {
+                  title: "Annual — direction only",
+                  body: "Major campaigns, promotions, seasonal moments, events, known product or service priorities, and broad content themes. This is not a commitment to individual posts months out: no copy, no post ideas, no fixed dates, no creative that far ahead.",
+                },
+                {
+                  title: "Quarterly — bring it into focus",
+                  body: "Current priorities, campaigns, themes, important dates and a rough topic mix. Sharper than the annual view, but still not every individual post.",
+                },
+                {
+                  title: "Current month — plan the execution",
+                  body: "Channel, intended publish timing, the post concept, creative requirements, and approval status where it applies. This is the only horizon where specific content gets planned.",
+                },
+              ]}
+            />
+
+            <Callout label="Roadmap template still to be developed">
+              <p>
+                The team should develop a simple reusable format for the annual
+                and quarterly roadmap. Once the structure is working well it can
+                become a standard template that AI helps populate quickly from
+                the proposal, the Internal Service Brief, client priorities and
+                known campaign dates. The goal is consistency and speed, not
+                another heavy planning document.
+              </p>
+            </Callout>
+          </Section>
+
+          {/* ---------------------------------------------------------------- */}
+          <Section
+            id="approval"
+            marker="07"
             title="Approval & Community"
             intro={
               <p>
@@ -339,7 +384,7 @@ export default function SocialMediaOnboarding() {
           {/* ---------------------------------------------------------------- */}
           <Section
             id="launch"
-            marker="07"
+            marker="08"
             title="Prepare to Launch"
             intro={
               <p>
@@ -350,20 +395,40 @@ export default function SocialMediaOnboarding() {
               </p>
             }
           >
+            <DefinitionTable
+              caption="The content plan onboarding produces"
+              rows={[
+                {
+                  term: "Annual direction",
+                  detail:
+                    "High level — campaigns, promotions, seasonal moments and broad themes.",
+                },
+                {
+                  term: "Near-term view",
+                  detail:
+                    "The current quarter in focus: priorities, campaigns, themes and key dates.",
+                },
+                {
+                  term: "First content cycle",
+                  detail:
+                    "The first detailed calendar or batch, ready for approval or production.",
+                },
+              ]}
+            />
+
             <Callout label="Not a strategy document">
               <p>
-                There is no mandatory Social Media Launch Strategy PDF. What
-                onboarding produces is the operating setup itself — channels,
-                cadence, pillars, sources, responsibilities, approval workflow,
-                community rules — plus the first content calendar or batch for
-                the client. If a larger client needs a formal strategy document
-                later, write one then.
+                There is no mandatory Social Media Launch Strategy PDF. The
+                content plan above, plus the operating setup — channels, cadence,
+                pillars, sources, responsibilities, approval workflow, community
+                rules — is the useful output. If a larger client needs a formal
+                strategy document later, write one then.
               </p>
             </Callout>
           </Section>
 
           {/* ---------------------------------------------------------------- */}
-          <Section id="done" marker="08" title="Complete When">
+          <Section id="done" marker="09" title="Complete When">
             <Checklist
               items={[
                 "Service scope and channels are confirmed",
@@ -376,13 +441,15 @@ export default function SocialMediaOnboarding() {
                 "Approval process is confirmed",
                 "Community-management responsibility is clear",
                 "Baseline metrics are captured",
-                "The first content cycle is planned or in production",
+                "High-level annual direction is captured",
+                "Near-term content priorities are planned",
+                "The first detailed content cycle is ready for approval or production",
               ]}
             />
           </Section>
 
           {/* ---------------------------------------------------------------- */}
-          <Section id="next" marker="09" title="Then What?">
+          <Section id="next" marker="10" title="Then What?">
             <NextModules
               targets={[
                 { section: "service-onboarding", entry: "paid-media" },
