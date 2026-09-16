@@ -249,8 +249,13 @@ export function Callout({
 }) {
   if (tone === "band") {
     return (
-      <aside className="border border-rule bg-surface">
-        <p className="label border-b border-rule bg-neutral-tint px-6 py-3 text-charcoal">
+      /*
+       * 8px radius — enough to soften the box without breaking the square,
+       * ruled system the rest of the page is built on. overflow-hidden clips
+       * the header fill to the top corners.
+       */
+      <aside className="overflow-hidden rounded-lg border border-rule-strong bg-surface">
+        <p className="label border-b border-rule-strong bg-rule px-6 py-3 text-charcoal">
           {label}
         </p>
         <div className="max-w-2xl px-6 py-5 text-[0.9375rem] leading-relaxed text-slate [&_a]:text-teal-ink [&_a]:underline [&_a]:underline-offset-2 [&_p+p]:mt-3 [&_strong]:font-semibold [&_strong]:text-charcoal">
