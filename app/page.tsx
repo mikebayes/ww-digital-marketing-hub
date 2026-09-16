@@ -2,6 +2,7 @@ import Link from "next/link";
 import { sections } from "@/lib/navigation";
 import { site } from "@/lib/site";
 import { SectionLabel } from "@/components/hub/primitives";
+import { RingMotif } from "@/components/site/RingMotif";
 
 export default function HomePage() {
   const published = sections.flatMap((section) =>
@@ -21,10 +22,14 @@ export default function HomePage() {
        * content below.
        */}
       <section className="relative overflow-hidden bg-charcoal px-6 pt-16 pb-14 md:px-12 lg:px-16 lg:pt-24 lg:pb-20">
-        <span
-          aria-hidden
-          className="absolute top-0 left-6 h-16 w-px bg-white/10 md:left-12 lg:left-16"
-        />
+        {/*
+         * Flush to the corner, so the rings crop against both edges the way
+         * they do on a proposal cover. Each size is set by how much room the
+         * copy actually leaves in that corner: the paragraph is the limit
+         * through the middle widths, and below 640px the version row runs
+         * close enough to the edge that there is no room worth having.
+         */}
+        <RingMotif className="pointer-events-none absolute right-0 bottom-0 hidden h-36 w-36 sm:block lg:h-40 lg:w-40 xl:h-80 xl:w-80" />
 
         <div className="relative max-w-4xl">
           <SectionLabel tone="light">Web Wizards · Internal</SectionLabel>
