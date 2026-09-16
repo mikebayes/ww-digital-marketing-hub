@@ -400,20 +400,29 @@ export function LogoLibrary({ variants }: { variants: LogoVariant[] }) {
             <p className="mt-1.5 flex-1 text-[0.875rem] leading-relaxed text-slate">
               {variant.note}
             </p>
-            <p className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
+            {/*
+             * Format is named, not sized. The pixel dimensions are still in
+             * the filename for anyone who needs them, but they are noise in
+             * the UI — most people want the logo, not a resolution decision.
+             */}
+            <p className="label mt-4 flex flex-wrap items-center gap-x-2 gap-y-2 text-muted">
+              <span>Download:</span>
               <a
                 href={`${LOGO_DIR}/svg/${variant.file}.svg`}
                 download
-                className="label text-teal-ink underline underline-offset-2"
+                aria-label={`Download ${variant.name} as SVG`}
+                className="text-teal-ink underline underline-offset-2"
               >
                 SVG
               </a>
+              <span aria-hidden>|</span>
               <a
                 href={`${LOGO_DIR}/png/${variant.file}-${variant.png}.png`}
                 download
-                className="label text-teal-ink underline underline-offset-2"
+                aria-label={`Download ${variant.name} as PNG`}
+                className="text-teal-ink underline underline-offset-2"
               >
-                PNG {variant.png}
+                PNG
               </a>
             </p>
           </div>
