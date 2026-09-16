@@ -154,16 +154,6 @@ export default function SocialMediaOnboarding() {
               </p>
             </Callout>
 
-            <Callout label="Capture what we learn">
-              <p>
-                Anything established here that the next person would need to run
-                the account goes into the client&rsquo;s{" "}
-                <strong>Social Media Account Guide</strong> in Productive →
-                Docs. Do not leave account knowledge only in someone&rsquo;s
-                notes, inbox or memory.
-              </p>
-            </Callout>
-
             <DefinitionTable
               rows={[
                 {
@@ -202,6 +192,16 @@ export default function SocialMediaOnboarding() {
                 },
               ]}
             />
+
+            <Callout label="Capture what we learn">
+              <p>
+                Anything established here that the next person would need to run
+                the account goes into the client&rsquo;s{" "}
+                <strong>Social Media Account Guide</strong> in Productive →
+                Docs. Do not leave account knowledge only in someone&rsquo;s
+                notes, inbox or memory.
+              </p>
+            </Callout>
           </Section>
 
           {/* ---------------------------------------------------------------- */}
