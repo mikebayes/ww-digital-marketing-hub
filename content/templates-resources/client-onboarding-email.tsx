@@ -60,6 +60,13 @@ export default function ClientOnboardingEmail() {
                 not identical wording — do not force formal language where it
                 does not fit.
               </p>
+              <p>
+                How much context to give depends on the relationship. A
+                long-standing client may need very little. A new client needs to
+                know straight away who you are and which engagement you are
+                writing about, because this may be the first thing they have had
+                from us since the proposal.
+              </p>
             </Callout>
           </Section>
 
@@ -78,8 +85,9 @@ export default function ClientOnboardingEmail() {
             <DefinitionTable
               rows={[
                 {
-                  term: "Acknowledgement",
-                  detail: "A line confirming the work is going ahead.",
+                  term: "Opening context",
+                  detail:
+                    "What the engagement is, that it is with Web Wizards, and why you are writing. Never assume the client already knows what the email refers to.",
                 },
                 {
                   term: "Main contact",
@@ -129,62 +137,70 @@ export default function ClientOnboardingEmail() {
               </p>
             }
           >
-            <Callout label="Existing client — familiar relationship">
+            <Callout label="Existing client, familiar relationship">
+              <p>Hi Priya,</p>
               <p>
-                Hi Priya — everything&rsquo;s approved, so we&rsquo;re underway.
+                I&rsquo;m following up on the social media work we talked about
+                last month. It&rsquo;s all approved, so we&rsquo;re getting
+                started this week.
               </p>
               <p>
-                Same as always, I&rsquo;m your first call if anything comes up. What
-                I need from you this week is access to the Instagram account and
+                Same as always, I&rsquo;m your first call if anything comes up.
+                What I need from you is access to the Instagram account and
                 whatever&rsquo;s left of the brand photo library. The access
                 request is already on its way.
               </p>
               <p>
-                While that comes across, Jordan&rsquo;s pulling a baseline on the
-                current channels so we&rsquo;re not asking you things we can work
-                out ourselves.
+                While that comes across, Jordan is pulling a baseline on the
+                current channels so we&rsquo;re not asking you things we can
+                work out ourselves.
               </p>
               <p>I&rsquo;ll come back next week with the first content plan.</p>
               <p>Dana</p>
             </Callout>
 
-            <Callout label="New client — standard">
+            <Callout label="New client, standard engagement">
+              <p>Hi Glen,</p>
               <p>
-                Hi Glen — thanks for getting everything signed off. We&rsquo;re
-                ready to start.
+                I&rsquo;m following up on the SEO and Google Ads work you
+                recently signed up for with Web Wizards. I&rsquo;m Dana
+                Whitfield, your Account Manager, and I&rsquo;ll be your main
+                point of contact from here. You&rsquo;ll also hear from Jordan
+                Ellis, who leads the SEO work day to day.
               </p>
               <p>
-                I&rsquo;m Dana Whitfield, your Account Manager, and your main
-                contact from here. You&rsquo;ll also hear from Jordan Ellis, who&rsquo;s
-                leading the SEO work day to day.
+                To get started we need three things from you this week: access
+                to Google Analytics, Search Console and the Ads account, your
+                logo files and brand guidelines if you have them, and
+                confirmation of who signs off on content.
               </p>
               <p>
-                To get moving we need three things from you this week: access to
-                Google Analytics, Search Console and the Ads account; your logo
-                files and brand guidelines if you have them; and confirmation of
-                who signs off on content.
-              </p>
-              <p>
-                While we wait on those, we&rsquo;ll be reviewing your site,
-                rankings and competitors, so we arrive at the kickoff with a
+                While we wait on those, we&rsquo;ll be reviewing your site, your
+                rankings and your competitors, so we come to the kickoff with a
                 point of view rather than a list of questions.
               </p>
               <p>
-                I&rsquo;ll send over a few times for a 30-minute kickoff call next
-                week.
+                I&rsquo;ll send over a few times for a 30-minute kickoff call
+                next week.
               </p>
               <p>Dana</p>
             </Callout>
 
-            <Callout label="Simple engagement — no kickoff call">
-              <p>Hi Tom — all approved, and we start this week.</p>
+            <Callout label="Simple engagement, no kickoff call">
+              <p>Hi Tom,</p>
               <p>
-                I&rsquo;m your contact for this one. The only thing I need right
-                now is access to the website CMS; the request has gone through.
+                I&rsquo;m following up on the website SEO work you recently
+                approved with Web Wizards. I&rsquo;m Dana Whitfield and
+                I&rsquo;ll be your contact for this one.
               </p>
               <p>
-                For a project this size I don&rsquo;t think we need a call, but if
-                you&rsquo;d rather talk it through, say so and I&rsquo;ll set one up.
+                The only thing I need right now is access to the website CMS.
+                The request has already gone through.
+              </p>
+              <p>
+                For a project this size I don&rsquo;t think we need a call, but
+                if you&rsquo;d rather talk it through, just say and I&rsquo;ll
+                set one up.
               </p>
               <p>You&rsquo;ll hear from me once the first draft is ready.</p>
               <p>Dana</p>
