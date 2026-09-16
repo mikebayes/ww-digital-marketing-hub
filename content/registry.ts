@@ -4,6 +4,7 @@ import ClientOnboardingOverview from "./client-onboarding/overview";
 import InternalHandoff from "./client-onboarding/internal-handoff";
 import ClientKickoff from "./client-onboarding/client-kickoff";
 import AccessAndAssets from "./client-onboarding/access-assets";
+import SocialMediaOnboarding from "./service-onboarding/social-media";
 import InternalServiceBriefTemplate from "./templates-resources/internal-service-brief";
 
 /**
@@ -19,5 +20,6 @@ export const modules: Record<string, ComponentType> = {
   "client-onboarding/internal-handoff": InternalHandoff,
   "client-onboarding/access-assets": AccessAndAssets,
   "client-onboarding/client-kickoff": ClientKickoff,
+  "service-onboarding/social-media": SocialMediaOnboarding,
   "templates-resources/internal-service-brief": InternalServiceBriefTemplate,
 };

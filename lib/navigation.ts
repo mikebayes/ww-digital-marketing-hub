@@ -137,7 +137,7 @@ export const sections: HubSection[] = [
         title: "Social Media",
         summary:
           "Channel setup, content pillars, approval flow and publishing cadence.",
-        status: "planned",
+        status: "published",
       },
       {
         slug: "one-time-projects",
