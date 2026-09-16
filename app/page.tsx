@@ -54,13 +54,17 @@ export default function HomePage() {
 
       {/* Start here — the live module leads, roadmap context stays quiet. */}
       {primary && (
-        <section className="border-b border-rule px-6 py-14 md:px-12 lg:px-16">
+        <section className="border-b border-rule px-6 py-12 md:px-12 lg:px-16">
           <SectionLabel tone="muted">Start here</SectionLabel>
 
-          <div className="mt-6 grid gap-x-14 gap-y-10 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
+          <div className="mt-6 grid gap-x-8 gap-y-10 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
+            {/*
+             * A column, so the read cue can sit on the bottom rule rather than
+             * floating halfway up a stretched grid cell.
+             */}
             <Link
               href={`/${primary.section.slug}/${primary.entry.slug}`}
-              className="group block border-t-2 border-charcoal pt-7 transition-colors hover:border-teal"
+              className="group flex flex-col border-t-2 border-charcoal pt-7 transition-colors hover:border-teal"
             >
               <span className="label text-teal-ink">
                 {primary.section.title}
@@ -71,7 +75,7 @@ export default function HomePage() {
               <p className="mt-4 max-w-xl text-[1.0625rem] leading-relaxed text-slate">
                 {primary.entry.summary}
               </p>
-              <span className="mt-7 inline-flex items-center gap-3">
+              <span className="mt-7 inline-flex items-center gap-3 self-start lg:mt-auto lg:pt-10">
                 <span className="label text-charcoal">Read the standard</span>
                 <span
                   aria-hidden
@@ -80,9 +84,12 @@ export default function HomePage() {
               </span>
             </Link>
 
-            <div className="border-t border-rule pt-7">
+            {/* Rules on two sides, so the column reads as a column. */}
+            <div className="border-t border-rule pt-7 lg:border-l lg:pl-8">
               <span className="label text-muted">Coming next</span>
-              <ul className="mt-5 space-y-4">
+
+              {/* The links group tightly; the notes about them sit below a rule. */}
+              <ul className="mt-5 space-y-2.5">
                 {rest.map(({ section, entry }) => (
                   <li key={entry.slug}>
                     <Link
@@ -93,26 +100,28 @@ export default function HomePage() {
                     </Link>
                   </li>
                 ))}
-                <li className="text-[0.9375rem] leading-relaxed text-slate">
+              </ul>
+
+              <div className="mt-6 space-y-2 border-t border-rule pt-5">
+                <p className="text-[0.875rem] leading-relaxed text-slate">
                   <span className="font-medium text-charcoal">
                     Client Onboarding
                   </span>{" "}
-                  — internal handoff, Productive setup and the access checklist
-                  are the next modules to be written.
-                </li>
-                <li className="text-[0.9375rem] leading-relaxed text-slate">
+                  — Productive Setup is the remaining module.
+                </p>
+                <p className="text-[0.875rem] leading-relaxed text-slate">
                   Anything marked{" "}
                   <span className="label text-muted">Soon</span> has been scoped
                   but not yet written.
-                </li>
-              </ul>
+                </p>
+              </div>
             </div>
           </div>
         </section>
       )}
 
       {/* Hub sections */}
-      <section className="px-6 py-14 md:px-12 lg:px-16">
+      <section className="px-6 py-12 md:px-12 lg:px-16">
         <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2">
           <h2 className="text-2xl leading-tight font-semibold tracking-[-0.025em] text-charcoal">
             Hub Sections
@@ -122,21 +131,27 @@ export default function HomePage() {
           </p>
         </div>
 
-        <ol className="mt-9 border-t border-rule">
+        <ol className="mt-7 border-t border-rule">
           {sections.map((section) => {
             const available = section.entries.filter(
               (entry) => entry.status === "published",
             );
+            const live = section.standalone || available.length > 0;
 
             return (
               <li key={section.slug} className="border-b border-rule">
+                {/*
+                 * Baseline alignment rather than hand-tuned padding, so the
+                 * marker, the title and the status all sit on one line across
+                 * every row regardless of their type sizes.
+                 */}
                 <Link
                   href={`/${section.slug}`}
-                  className="group grid gap-x-10 gap-y-3 py-8 md:grid-cols-[3.5rem_minmax(0,1fr)_minmax(0,17rem)]"
+                  className="group grid gap-x-10 gap-y-3 py-6 md:grid-cols-[3.5rem_minmax(0,1fr)_minmax(0,17rem)] md:items-baseline"
                 >
                   <span
                     aria-hidden
-                    className="label pt-2 tabular-nums text-muted transition-colors group-hover:text-teal-ink"
+                    className="label tabular-nums text-muted transition-colors group-hover:text-teal-ink"
                   >
                     {section.marker}
                   </span>
@@ -150,11 +165,16 @@ export default function HomePage() {
                     </p>
                   </div>
 
-                  <div className="md:pt-1.5">
-                    <p className="label text-muted">
-                      {section.standalone || available.length > 0
-                        ? "Available now"
-                        : "In progress"}
+                  <div>
+                    {/*
+                     * Weight carries the status, not a badge and not teal —
+                     * five teal labels down one edge would be more accent than
+                     * the page can hold.
+                     */}
+                    <p
+                      className={`label ${live ? "text-charcoal" : "text-muted"}`}
+                    >
+                      {live ? "Available now" : "In progress"}
                     </p>
                     <p className="mt-2 text-[0.875rem] leading-relaxed text-slate">
                       {/* A standalone section is the page, so it has no entries to list. */}
