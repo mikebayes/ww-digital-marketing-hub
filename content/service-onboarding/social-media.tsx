@@ -415,16 +415,6 @@ export default function SocialMediaOnboarding() {
                 },
               ]}
             />
-
-            <Callout label="Not a strategy document">
-              <p>
-                There is no mandatory Social Media Launch Strategy PDF. The
-                content plan above, plus the operating setup — channels, cadence,
-                pillars, sources, responsibilities, approval workflow, community
-                rules — is the useful output. If a larger client needs a formal
-                strategy document later, write one then.
-              </p>
-            </Callout>
           </Section>
 
           {/* ---------------------------------------------------------------- */}
