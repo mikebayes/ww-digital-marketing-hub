@@ -169,10 +169,30 @@ export const sections: HubSection[] = [
     slug: "ongoing-delivery",
     title: "Ongoing Delivery",
     marker: "05",
-    summary: "The standards that hold once a client is live.",
+    summary: "How a service is actually run once it is live.",
     description:
-      "How retained work is run month to month — reporting, review cycles, scope management and the path for things that go wrong.",
+      "Client Onboarding gets the account ready and Service Onboarding gets the service ready. This is how the work runs after that — a page per service, over the shared standards that apply to all of them.",
     entries: [
+      {
+        slug: "social-media",
+        title: "Social Media",
+        summary:
+          "The monthly, quarterly and annual rhythm of a live organic social account.",
+        status: "published",
+      },
+      {
+        slug: "seo",
+        title: "SEO",
+        summary: "How a live SEO engagement is run month to month.",
+        status: "planned",
+      },
+      {
+        slug: "paid-media",
+        title: "Paid Media",
+        summary:
+          "How live campaigns are managed, optimised and reviewed month to month.",
+        status: "planned",
+      },
       {
         slug: "reporting",
         title: "Reporting",
