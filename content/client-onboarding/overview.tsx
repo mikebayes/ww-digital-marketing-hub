@@ -184,7 +184,7 @@ export default function ClientOnboardingOverview() {
               ]}
             />
 
-            <Callout label="This is a standard, not paperwork" tone="charcoal">
+            <Callout label="This is a standard, not paperwork">
               <p>
                 A small SEO client may not need a kickoff call. A simple
                 one-time project may skip steps that add nothing. Use judgement

@@ -155,7 +155,7 @@ export default function ClientKickoff() {
               ]}
             />
 
-            <Callout label="Keep it lightweight" tone="charcoal">
+            <Callout label="Keep it lightweight">
               <p>
                 <strong>
                   The kickoff is not a presentation. It is a confirmation

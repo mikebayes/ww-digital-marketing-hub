@@ -229,57 +229,30 @@ export function RuleBlock({
 }
 
 /**
- * Short aside.
+ * Short aside — one pattern across the Hub.
  *
- * - `band` — outlined box with a tinted header band. Draws attention through
- *   structure rather than colour, so several can sit on one page without the
- *   page turning into stripes. Currently used by Service Onboarding → Social
- *   Media; the intention is for this to become the single Hub-wide pattern.
- * - `teal` / `charcoal` — the original treatments, still used by the earlier
- *   modules. Left untouched so migrating a page is a deliberate act.
+ * An outlined box with a tinted header band: it draws attention through
+ * structure rather than colour, so several can sit on one page without the
+ * page turning into stripes. The 8px radius softens the box just enough
+ * without breaking the square, ruled system everything else is built on;
+ * `overflow-hidden` clips the header fill to the top corners.
+ *
+ * There is deliberately no tone prop. Emphasis comes from what the callout
+ * says and where it sits, not from a louder box.
  */
 export function Callout({
   label,
-  tone = "teal",
   children,
 }: {
   label: string;
-  tone?: "teal" | "charcoal" | "band";
   children: ReactNode;
 }) {
-  if (tone === "band") {
-    return (
-      /*
-       * 8px radius — enough to soften the box without breaking the square,
-       * ruled system the rest of the page is built on. overflow-hidden clips
-       * the header fill to the top corners.
-       */
-      <aside className="overflow-hidden rounded-lg border border-rule-strong bg-surface">
-        <p className="label border-b border-rule-strong bg-rule px-6 py-3 text-charcoal">
-          {label}
-        </p>
-        <div className="max-w-2xl px-6 py-5 text-[0.9375rem] leading-relaxed text-slate [&_a]:text-teal-ink [&_a]:underline [&_a]:underline-offset-2 [&_p+p]:mt-3 [&_strong]:font-semibold [&_strong]:text-charcoal">
-          {children}
-        </div>
-      </aside>
-    );
-  }
-
-  if (tone === "charcoal") {
-    return (
-      <aside className="bg-charcoal px-6 py-5">
-        <SectionLabel tone="light">{label}</SectionLabel>
-        <div className="mt-2.5 max-w-2xl text-[0.9375rem] leading-relaxed text-white/75 [&_p+p]:mt-3 [&_strong]:font-semibold [&_strong]:text-white">
-          {children}
-        </div>
-      </aside>
-    );
-  }
-
   return (
-    <aside className="border-l-2 border-teal bg-teal-tint px-6 py-5">
-      <SectionLabel>{label}</SectionLabel>
-      <div className="mt-2.5 max-w-2xl text-[0.9375rem] leading-relaxed text-slate [&_p+p]:mt-3 [&_strong]:font-semibold [&_strong]:text-charcoal">
+    <aside className="overflow-hidden rounded-lg border border-rule-strong bg-surface">
+      <p className="label border-b border-rule-strong bg-rule px-6 py-3 text-charcoal">
+        {label}
+      </p>
+      <div className="max-w-2xl px-6 py-5 text-[0.9375rem] leading-relaxed text-slate [&_a]:text-teal-ink [&_a]:underline [&_a]:underline-offset-2 [&_p+p]:mt-3 [&_strong]:font-semibold [&_strong]:text-charcoal">
         {children}
       </div>
     </aside>

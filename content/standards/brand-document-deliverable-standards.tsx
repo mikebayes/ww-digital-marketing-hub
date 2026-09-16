@@ -477,7 +477,7 @@ export default function BrandDocumentDeliverableStandards() {
               ]}
             />
 
-            <Callout label="File naming" tone="charcoal">
+            <Callout label="File naming">
               <p>
                 File names travel further than covers do. Use{" "}
                 <strong>Client — Document Type — YYYY-MM</strong>, dropping the

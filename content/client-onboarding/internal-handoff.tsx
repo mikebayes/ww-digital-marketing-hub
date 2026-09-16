@@ -229,7 +229,7 @@ export default function InternalHandoff() {
               ]}
             />
 
-            <Callout label="Keep it lightweight" tone="charcoal">
+            <Callout label="Keep it lightweight">
               <p>
                 <strong>The handoff should take minutes, not hours.</strong> Its
                 only job is to move the context Delivery cannot get from the

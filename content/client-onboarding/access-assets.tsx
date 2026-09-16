@@ -158,7 +158,7 @@ export default function AccessAndAssets() {
               ]}
             />
 
-            <Callout label="Not everything, and not forever" tone="charcoal">
+            <Callout label="Not everything, and not forever">
               <p>
                 Work can start before every possible asset arrives — just not
                 before the ones it actually needs. Missing items are fine while

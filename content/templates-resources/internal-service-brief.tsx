@@ -194,7 +194,7 @@ export default function InternalServiceBriefTemplate() {
               ]}
             />
 
-            <Callout label="Leave it out" tone="charcoal">
+            <Callout label="Leave it out">
               <p>
                 No full proposal, no service descriptions, no client history, no
                 discovery notes, and nothing already visible in Productive —
