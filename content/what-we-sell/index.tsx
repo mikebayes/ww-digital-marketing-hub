@@ -88,7 +88,7 @@ export default function WhatWeSell() {
         <article className="@container min-w-0 space-y-12">
           {/* ---------------------------------------------------------------- */}
           <Section id="how-we-sell" marker="01" title="How We Sell">
-            <Callout label="The proposal wins, every time">
+            <Callout label="Proposal Is the Source of Truth">
               <p>
                 <strong>
                   The approved proposal is always the source of truth for a
@@ -150,7 +150,7 @@ export default function WhatWeSell() {
 
             <PackageTable columns={SEO_PACKAGES} rows={SEO_ROWS} />
 
-            <Callout label="Two things to read carefully">
+            <Callout label="Notes on these packages">
               <p>
                 <strong>Analytics and GSC setup is a &ldquo;No&rdquo; on every
                 tier</strong> in the current package definition. Where a client
@@ -212,7 +212,7 @@ export default function WhatWeSell() {
             />
 
             <DefinitionTable
-              caption="Engagement shapes"
+              caption="Engagement types"
               rows={[
                 {
                   term: "Ongoing monthly management",
@@ -276,7 +276,7 @@ export default function WhatWeSell() {
               ]}
             />
 
-            <Callout label="Paid social is not this">
+            <Callout label="Paid social sits under Paid Media">
               <p>
                 Paid social advertising belongs under{" "}
                 <a href="#paid-media">Paid Media</a>, even when it runs on the
@@ -322,7 +322,7 @@ export default function WhatWeSell() {
               </p>
             }
           >
-            <Callout label="The line that matters">
+            <Callout label="Keeping the scope defined">
               <p>
                 <strong>
                   One-time work should have a defined outcome. It should not

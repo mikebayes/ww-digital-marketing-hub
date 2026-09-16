@@ -453,10 +453,23 @@ export function PackageTable({
 }) {
   return (
     <div className="overflow-x-auto border border-rule bg-surface">
-      <table className="w-full min-w-[48rem] border-collapse text-left">
+      <table className="w-full min-w-[56rem] table-fixed border-collapse text-left">
+        {/*
+         * Fixed layout, so the columns are set by the table rather than by
+         * whichever package happens to have the longest name. The attribute
+         * column takes a fixed share and the packages divide what is left
+         * evenly, which keeps every tier the same width and lets long
+         * attribute labels wrap without dragging a column wider.
+         */}
+        <colgroup>
+          <col className="w-[18%]" />
+          {columns.map((column) => (
+            <col key={column.name} />
+          ))}
+        </colgroup>
         <thead>
           <tr className="border-b border-rule-strong bg-neutral-tint">
-            <th scope="col" className="w-[13rem] px-5 py-4 align-bottom">
+            <th scope="col" className="px-5 py-4 align-bottom">
               <span className="label text-muted">Package</span>
             </th>
             {columns.map((column) => (
