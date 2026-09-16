@@ -228,16 +228,38 @@ export function RuleBlock({
   );
 }
 
-/** Short aside. Teal for guidance, charcoal for something that must not be missed. */
+/**
+ * Short aside.
+ *
+ * - `band` — outlined box with a tinted header band. Draws attention through
+ *   structure rather than colour, so several can sit on one page without the
+ *   page turning into stripes. Currently used by Service Onboarding → Social
+ *   Media; the intention is for this to become the single Hub-wide pattern.
+ * - `teal` / `charcoal` — the original treatments, still used by the earlier
+ *   modules. Left untouched so migrating a page is a deliberate act.
+ */
 export function Callout({
   label,
   tone = "teal",
   children,
 }: {
   label: string;
-  tone?: "teal" | "charcoal";
+  tone?: "teal" | "charcoal" | "band";
   children: ReactNode;
 }) {
+  if (tone === "band") {
+    return (
+      <aside className="border border-rule bg-surface">
+        <p className="label border-b border-rule bg-neutral-tint px-6 py-3 text-charcoal">
+          {label}
+        </p>
+        <div className="max-w-2xl px-6 py-5 text-[0.9375rem] leading-relaxed text-slate [&_a]:text-teal-ink [&_a]:underline [&_a]:underline-offset-2 [&_p+p]:mt-3 [&_strong]:font-semibold [&_strong]:text-charcoal">
+          {children}
+        </div>
+      </aside>
+    );
+  }
+
   if (tone === "charcoal") {
     return (
       <aside className="bg-charcoal px-6 py-5">

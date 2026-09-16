@@ -121,7 +121,7 @@ export default function SocialMediaOnboarding() {
               ]}
             />
 
-            <Callout label="Paid social is not onboarded here">
+            <Callout label="Paid social is not onboarded here" tone="band">
               <p>
                 Paid social runs through{" "}
                 <Link href="/service-onboarding/paid-media">Paid Media</Link>,
@@ -144,7 +144,7 @@ export default function SocialMediaOnboarding() {
               </p>
             }
           >
-            <Callout label="Do not ask twice">
+            <Callout label="Do not ask twice" tone="band">
               <p>
                 Read the Internal Service Brief, the proposal, existing brand
                 guidance, their current channels and whatever was collected
@@ -311,7 +311,7 @@ export default function SocialMediaOnboarding() {
               ]}
             />
 
-            <Callout label="Roadmap template still to be developed">
+            <Callout label="Roadmap template still to be developed" tone="band">
               <p>
                 The team should develop a simple reusable format for the annual
                 and quarterly roadmap. Once the structure is working well it can
@@ -369,7 +369,7 @@ export default function SocialMediaOnboarding() {
 
             <Callout
               label="Social workflow tooling is worth reviewing"
-              tone="charcoal"
+              tone="band"
             >
               <p>
                 Calendars, approvals, scheduling and publishing are all manual
