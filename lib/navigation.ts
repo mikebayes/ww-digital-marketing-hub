@@ -208,6 +208,13 @@ export const sections: HubSection[] = [
         status: "published",
       },
       {
+        slug: "social-media-account-guide",
+        title: "Social Media Account Guide",
+        summary:
+          "The living reference for how a social account is run, so anyone can pick it up.",
+        status: "published",
+      },
+      {
         slug: "kickoff-agenda",
         title: "Kickoff Agenda",
         summary:

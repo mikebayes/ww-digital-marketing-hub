@@ -69,14 +69,14 @@ node scripts/build-lockups.mjs
 ## Document templates
 
 `templates/` holds the print sources for downloadable documents; the rendered
-PDFs and previews go to `public/templates/`. The Internal Service Brief is an
-HTML source rendered to a one-page US Letter PDF through the locally installed
-Chrome, so AI can regenerate a client-specific brief by editing the same
-structure. The build fails rather than shipping a bad asset if Inter did not
-load or the content has outgrown one page.
+PDFs and previews go to `public/templates/`. Each is an HTML source rendered to
+a one-page US Letter PDF through the locally installed Chrome, so AI can
+regenerate a client-specific version by editing the same structure. The build
+fails rather than shipping a bad asset if Inter did not load or the content has
+outgrown one page. Add a document by appending to DOCS in the script.
 
 ```bash
-node scripts/build-brief-pdf.mjs
+node scripts/build-pdfs.mjs
 ```
 
 ## Design system

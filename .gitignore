@@ -9,3 +9,5 @@ next-env.d.ts
 
 # Copied from public/brand/derived by scripts/build-brief-pdf.mjs
 templates/internal-service-brief/lockup.svg
+
+templates/social-media-account-guide/lockup.svg
