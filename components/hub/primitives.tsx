@@ -63,6 +63,17 @@ export function Breadcrumb({
   );
 }
 
+/**
+ * Column spans for the last meta cell, written out because Tailwind only sees
+ * class names it can read in the source.
+ */
+const META_SPAN: Record<number, string> = { 2: "col-span-2" };
+const META_SPAN_SM: Record<number, string> = {
+  2: "sm:col-span-2",
+  3: "sm:col-span-3",
+  4: "sm:col-span-4",
+};
+
 /** The header block at the top of every Hub page. */
 export function PageHeader({
   marker,
@@ -106,14 +117,33 @@ export function PageHeader({
 
       {meta && meta.length > 0 && (
         <dl className="mt-9 grid grid-cols-2 gap-px border border-rule bg-rule sm:grid-cols-4">
-          {meta.map((item) => (
-            <div key={item.label} className="bg-surface px-4 py-3.5">
-              <dt className="label text-muted">{item.label}</dt>
-              <dd className="mt-1.5 text-[0.8125rem] leading-snug font-medium text-charcoal">
-                {item.value}
-              </dd>
-            </div>
-          ))}
+          {meta.map((item, index) => {
+            /*
+             * The grid's own background is the rule colour, so a final row
+             * with cells left over reads as a grey void rather than as
+             * spacing. The last item stretches to close it. A count that
+             * divides evenly — which is every page so far — spans nothing.
+             */
+            const last = index === meta.length - 1;
+            const fill = (cols: number) => {
+              const remainder = meta.length % cols;
+              return last && remainder !== 0 ? cols - remainder + 1 : 0;
+            };
+
+            return (
+              <div
+                key={item.label}
+                className={`bg-surface px-4 py-3.5 ${
+                  META_SPAN[fill(2)] ?? ""
+                } ${META_SPAN_SM[fill(4)] ?? ""}`}
+              >
+                <dt className="label text-muted">{item.label}</dt>
+                <dd className="mt-1.5 text-[0.8125rem] leading-snug font-medium text-charcoal">
+                  {item.value}
+                </dd>
+              </div>
+            );
+          })}
         </dl>
       )}
     </header>

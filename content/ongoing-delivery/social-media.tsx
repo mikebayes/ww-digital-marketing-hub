@@ -38,6 +38,10 @@ export default function SocialMediaOngoingDelivery() {
         meta={[
           { label: "Owned by", value: "Account Manager" },
           { label: "Delivery owner", value: "Social Content Lead" },
+          {
+            label: "Expert oversight",
+            value: "Digital Marketing Manager / Service Lead",
+          },
           { label: "Timing", value: "After onboarding" },
           { label: "Version", value: "0.1 · Sept 2026" },
         ]}
@@ -306,8 +310,8 @@ export default function SocialMediaOngoingDelivery() {
             <Checklist
               items={[
                 "Prepare Monthly Content Calendar",
-                "Prepare Monthly Social Report",
-                "Quarterly Content Planning",
+                "Prepare Social Media Report, on the cadence the engagement sets",
+                "Quarterly Content & Account Review, covering next-quarter priorities, account performance, expert review and any material adjustments",
                 "Annual Content Roadmap Refresh",
                 "Client Review where applicable",
               ]}
