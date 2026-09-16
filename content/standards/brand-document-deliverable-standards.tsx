@@ -7,6 +7,7 @@ import {
   Callout,
   ExamplePanel,
   DefinitionTable,
+  SectionLabel,
 } from "@/components/hub/primitives";
 import { OnThisPage, type TocItem } from "@/components/hub/OnThisPage";
 import {
@@ -15,6 +16,7 @@ import {
   OwnershipMatrix,
   DocumentAnatomy,
   CoBrandingExamples,
+  LogoLibrary,
 } from "@/components/hub/brand";
 
 const toc: TocItem[] = [
@@ -218,6 +220,90 @@ export default function BrandDocumentDeliverableStandards() {
                 },
               ]}
             />
+
+            <SectionLabel tone="muted">Logo library</SectionLabel>
+
+            <LogoLibrary
+              variants={[
+                {
+                  file: "webwizards-light-bg",
+                  name: "Horizontal — light surface",
+                  note: "Transparent background, near-black wordmark. The default for white and light surfaces.",
+                  surface: "light",
+                  png: "1024w",
+                },
+                {
+                  file: "webwizards-dark-bg",
+                  name: "Horizontal — dark surface",
+                  note: "Transparent background, white wordmark. The default for charcoal and other dark surfaces.",
+                  surface: "charcoal",
+                  png: "1024w",
+                },
+                {
+                  file: "webwizards-horizontal-light",
+                  name: "Horizontal — white block",
+                  note: "White background baked in. For places transparency does not survive, such as Office documents and email.",
+                  surface: "neutral",
+                  png: "1024w",
+                },
+                {
+                  file: "webwizards-horizontal-dark",
+                  name: "Horizontal — charcoal block",
+                  note: "Charcoal background baked in. Same use as above where the surrounding surface is dark.",
+                  surface: "neutral",
+                  png: "1024w",
+                },
+                {
+                  file: "webwizards-stacked-light",
+                  name: "Stacked — white block",
+                  note: "Icon above the wordmark, for narrow or tall spaces. White background baked in.",
+                  surface: "neutral",
+                  png: "1024w",
+                },
+                {
+                  file: "webwizards-stacked-dark",
+                  name: "Stacked — charcoal block",
+                  note: "The same stacked lockup on charcoal.",
+                  surface: "neutral",
+                  png: "1024w",
+                },
+                {
+                  file: "webwizards-icon",
+                  name: "Icon only",
+                  note: "Transparent background. Avatars, app icons, and anywhere the full lockup would be under about 120px wide.",
+                  surface: "neutral",
+                  png: "512px",
+                },
+                {
+                  file: "webwizards-icon-dark",
+                  name: "Icon — charcoal block",
+                  note: "The icon on a charcoal square, for profile images and social avatars.",
+                  surface: "neutral",
+                  png: "512px",
+                },
+              ]}
+            />
+
+            <div className="flex flex-col gap-4 border border-rule bg-surface px-6 py-5 @xl:flex-row @xl:items-center @xl:justify-between">
+              <div>
+                <p className="text-[0.9375rem] font-semibold text-charcoal">
+                  The full logo package
+                </p>
+                <p className="mt-1 max-w-xl text-[0.875rem] leading-relaxed text-slate">
+                  Every variant above in SVG, PNG at all exported sizes, and the
+                  favicon set. Take this if you are handing assets to someone
+                  outside the team.
+                </p>
+              </div>
+              <a
+                href="/brand/logos/Web Wizards Logo Files.zip"
+                download
+                className="label inline-flex shrink-0 items-center gap-3 self-start bg-charcoal px-5 py-3.5 text-white transition-colors hover:bg-teal-ink @xl:self-auto"
+              >
+                Download all
+                <span aria-hidden className="h-px w-6 bg-teal" />
+              </a>
+            </div>
 
             <Subsection title="Typography" eyebrow="02.3">
               <p>

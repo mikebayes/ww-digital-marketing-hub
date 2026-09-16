@@ -345,3 +345,80 @@ export function CoBrandingExamples({
     </div>
   );
 }
+
+/* -------------------------------------------------------------------------- */
+/* Logo library                                                                */
+/* -------------------------------------------------------------------------- */
+
+const LOGO_DIR = "/brand/logos";
+
+export interface LogoVariant {
+  /** Shared basename across svg/ and png/, e.g. "webwizards-dark-bg". */
+  file: string;
+  name: string;
+  note: string;
+  /** Preview backdrop. Files with a baked-in background sit on neutral so the
+   *  block itself is visible; transparent files sit on the surface they are for. */
+  surface: "light" | "charcoal" | "neutral";
+  /** Size suffix on the matching PNG — lockups use widths, icons use px. */
+  png: string;
+}
+
+/**
+ * The approved logo files, previewed from the real SVGs in
+ * public/brand/logos/svg/ and downloadable directly. No artwork is recreated
+ * here: every preview is the shipped file rendered at size.
+ */
+export function LogoLibrary({ variants }: { variants: LogoVariant[] }) {
+  const surfaces = {
+    light: "bg-surface",
+    charcoal: "bg-charcoal",
+    neutral: "bg-neutral-tint",
+  } as const;
+
+  return (
+    <div className="grid gap-px border border-rule bg-rule @xl:grid-cols-2">
+      {variants.map((variant) => (
+        <div key={variant.file} className="flex flex-col bg-surface">
+          <div
+            className={`flex h-[120px] items-center justify-center border-b border-rule px-6 ${
+              surfaces[variant.surface]
+            }`}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`${LOGO_DIR}/svg/${variant.file}.svg`}
+              alt={variant.name}
+              className="max-h-full max-w-full object-contain"
+            />
+          </div>
+
+          <div className="flex flex-1 flex-col px-6 py-5">
+            <p className="text-[0.9375rem] font-semibold text-charcoal">
+              {variant.name}
+            </p>
+            <p className="mt-1.5 flex-1 text-[0.875rem] leading-relaxed text-slate">
+              {variant.note}
+            </p>
+            <p className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
+              <a
+                href={`${LOGO_DIR}/svg/${variant.file}.svg`}
+                download
+                className="label text-teal-ink underline underline-offset-2"
+              >
+                SVG
+              </a>
+              <a
+                href={`${LOGO_DIR}/png/${variant.file}-${variant.png}.png`}
+                download
+                className="label text-teal-ink underline underline-offset-2"
+              >
+                PNG {variant.png}
+              </a>
+            </p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
