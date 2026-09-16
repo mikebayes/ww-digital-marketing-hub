@@ -201,6 +201,13 @@ export const sections: HubSection[] = [
         status: "published",
       },
       {
+        slug: "client-onboarding-email",
+        title: "Client Onboarding Email",
+        summary:
+          "The first client-facing email after approval — what it has to cover, and three examples to adapt.",
+        status: "published",
+      },
+      {
         slug: "kickoff-agenda",
         title: "Kickoff Agenda",
         summary:

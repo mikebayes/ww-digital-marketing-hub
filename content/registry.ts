@@ -6,6 +6,7 @@ import ClientKickoff from "./client-onboarding/client-kickoff";
 import AccessAndAssets from "./client-onboarding/access-assets";
 import SocialMediaOnboarding from "./service-onboarding/social-media";
 import InternalServiceBriefTemplate from "./templates-resources/internal-service-brief";
+import ClientOnboardingEmail from "./templates-resources/client-onboarding-email";
 
 /**
  * Published Hub modules, keyed by `<section>/<entry>`.
@@ -22,4 +23,5 @@ export const modules: Record<string, ComponentType> = {
   "client-onboarding/client-kickoff": ClientKickoff,
   "service-onboarding/social-media": SocialMediaOnboarding,
   "templates-resources/internal-service-brief": InternalServiceBriefTemplate,
+  "templates-resources/client-onboarding-email": ClientOnboardingEmail,
 };
