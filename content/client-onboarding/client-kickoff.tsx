@@ -2,19 +2,22 @@ import Link from "next/link";
 import {
   PageHeader,
   Section,
+  Subsection,
   RuleBlock,
   Callout,
   Checklist,
+  DefinitionTable,
   NextModules,
 } from "@/components/hub/primitives";
 import { OnThisPage, type TocItem } from "@/components/hub/OnThisPage";
 
 const toc: TocItem[] = [
   { id: "before", marker: "01", title: "Before the Kickoff" },
-  { id: "confirm", marker: "02", title: "How to Run the Kickoff" },
-  { id: "after", marker: "03", title: "After the Kickoff" },
-  { id: "done", marker: "04", title: "Kickoff Is Complete When" },
-  { id: "next", marker: "05", title: "Then What?" },
+  { id: "attend", marker: "02", title: "Who Should Attend" },
+  { id: "confirm", marker: "03", title: "How to Run the Kickoff" },
+  { id: "after", marker: "04", title: "After the Kickoff" },
+  { id: "done", marker: "05", title: "Kickoff Is Complete When" },
+  { id: "next", marker: "06", title: "Then What?" },
 ];
 
 export default function ClientKickoff() {
@@ -71,23 +74,72 @@ export default function ClientKickoff() {
 
           {/* ---------------------------------------------------------------- */}
           <Section
-            id="confirm"
+            id="attend"
             marker="02"
+            title="Who Should Attend"
+            intro={
+              <p>
+                The ideal shape of the meeting, not an attendance rule. Scale it
+                to the engagement.
+              </p>
+            }
+          >
+            <Subsection title="Web Wizards" eyebrow="02.1">
+              <DefinitionTable
+                rows={[
+                  {
+                    term: "Account Manager",
+                    detail:
+                      "Leads the meeting and owns the client relationship.",
+                  },
+                  {
+                    term: "Assigned specialist",
+                    detail:
+                      "Attends because they will be doing the work, and should hear the client's priorities, concerns and expectations directly.",
+                  },
+                  {
+                    term: "Digital Marketing Manager or service lead",
+                    detail:
+                      "Ideally attends, particularly for a new client, a larger account, or where strategic or technical decisions may come up. Not mandatory for every small or straightforward engagement.",
+                  },
+                  {
+                    term: "Salesperson",
+                    detail:
+                      "Joins only where there is a specific reason: relationship continuity, unusual commitments, or unresolved scope questions.",
+                  },
+                ]}
+              />
+            </Subsection>
+
+            <Subsection title="Client" eyebrow="02.2">
+              <DefinitionTable
+                rows={[
+                  {
+                    term: "Primary working contact",
+                    detail: "Should attend.",
+                  },
+                  {
+                    term: "Key stakeholder or approver",
+                    detail:
+                      "Include where their involvement will materially help confirm priorities, approvals or decisions. Do not require every senior stakeholder on every kickoff.",
+                  },
+                ]}
+              />
+            </Subsection>
+          </Section>
+
+          {/* ---------------------------------------------------------------- */}
+          <Section
+            id="confirm"
+            marker="03"
             title="How to Run the Kickoff"
             intro={
-              <>
-                <p>
-                  The kickoff should feel like a normal client conversation, not
-                  a presentation. Use these prompts to make sure the important
-                  things get covered, in whatever order the conversation takes
-                  them.
-                </p>
-                <p>
-                  The Account Manager leads. The assigned specialist attends,
-                  plus the service lead where relevant. The salesperson joins
-                  only if there is a specific reason.
-                </p>
-              </>
+              <p>
+                The kickoff should feel like a normal client conversation, not a
+                presentation. Use these prompts to make sure the important
+                things get covered, in whatever order the conversation takes
+                them.
+              </p>
             }
           >
             <RuleBlock
@@ -132,7 +184,7 @@ export default function ClientKickoff() {
           {/* ---------------------------------------------------------------- */}
           <Section
             id="after"
-            marker="03"
+            marker="04"
             title="After the Kickoff"
             intro={
               <p>
@@ -152,7 +204,7 @@ export default function ClientKickoff() {
           </Section>
 
           {/* ---------------------------------------------------------------- */}
-          <Section id="done" marker="04" title="Kickoff Is Complete When">
+          <Section id="done" marker="05" title="Kickoff Is Complete When">
             <Checklist
               items={[
                 "Goals and priorities are confirmed",
@@ -178,7 +230,7 @@ export default function ClientKickoff() {
           </Section>
 
           {/* ---------------------------------------------------------------- */}
-          <Section id="next" marker="05" title="Then What?">
+          <Section id="next" marker="06" title="Then What?">
             <NextModules
               targets={[
                 { section: "client-onboarding", entry: "access-assets" },
