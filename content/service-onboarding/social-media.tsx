@@ -15,12 +15,17 @@ const toc: TocItem[] = [
   { id: "service", marker: "02", title: "Confirm the Service" },
   { id: "account", marker: "03", title: "Understand the Account" },
   { id: "access", marker: "04", title: "Access & Assets" },
-  { id: "content-model", marker: "05", title: "The Content Model" },
-  { id: "horizon", marker: "06", title: "Content Planning Horizon" },
-  { id: "approval", marker: "07", title: "Approval & Community" },
-  { id: "launch", marker: "08", title: "Prepare to Launch" },
-  { id: "done", marker: "09", title: "Complete When" },
-  { id: "next", marker: "10", title: "Then What?" },
+  {
+    id: "productive-template",
+    marker: "05",
+    title: "Productive Project Template",
+  },
+  { id: "content-model", marker: "06", title: "The Content Model" },
+  { id: "horizon", marker: "07", title: "Content Planning Horizon" },
+  { id: "approval", marker: "08", title: "Approval & Community" },
+  { id: "launch", marker: "09", title: "Prepare to Launch" },
+  { id: "done", marker: "10", title: "Complete When" },
+  { id: "next", marker: "11", title: "Then What?" },
 ];
 
 export default function SocialMediaOnboarding() {
@@ -247,8 +252,29 @@ export default function SocialMediaOnboarding() {
 
           {/* ---------------------------------------------------------------- */}
           <Section
-            id="content-model"
+            id="productive-template"
             marker="05"
+            title="Productive Project Template"
+            intro={
+              <p>
+                The Social Media project template will define the standard
+                onboarding and recurring delivery tasks for this service,
+                including role placeholders and recurring task cadence.
+              </p>
+            }
+          >
+            <Callout label="To be finalized with the Social Media team">
+              <p>
+                The final template structure, task ownership, recurrence and
+                setup process will be documented here once agreed.
+              </p>
+            </Callout>
+          </Section>
+
+          {/* ---------------------------------------------------------------- */}
+          <Section
+            id="content-model"
+            marker="06"
             title="The Content Model"
             intro={
               <p>
@@ -292,7 +318,7 @@ export default function SocialMediaOnboarding() {
           {/* ---------------------------------------------------------------- */}
           <Section
             id="horizon"
-            marker="06"
+            marker="07"
             title="Content Planning Horizon"
             intro={
               <p>
@@ -336,7 +362,7 @@ export default function SocialMediaOnboarding() {
           {/* ---------------------------------------------------------------- */}
           <Section
             id="approval"
-            marker="07"
+            marker="08"
             title="Approval & Community"
             intro={
               <p>
@@ -393,7 +419,7 @@ export default function SocialMediaOnboarding() {
           {/* ---------------------------------------------------------------- */}
           <Section
             id="launch"
-            marker="08"
+            marker="09"
             title="Prepare to Launch"
             intro={
               <p>
@@ -447,7 +473,7 @@ export default function SocialMediaOnboarding() {
           </Section>
 
           {/* ---------------------------------------------------------------- */}
-          <Section id="done" marker="09" title="Complete When">
+          <Section id="done" marker="10" title="Complete When">
             <Checklist
               items={[
                 "Service scope and channels are confirmed",
@@ -469,7 +495,7 @@ export default function SocialMediaOnboarding() {
           </Section>
 
           {/* ---------------------------------------------------------------- */}
-          <Section id="next" marker="10" title="Then What?">
+          <Section id="next" marker="11" title="Then What?">
             <NextModules
               targets={[
                 { section: "service-onboarding", entry: "paid-media" },
