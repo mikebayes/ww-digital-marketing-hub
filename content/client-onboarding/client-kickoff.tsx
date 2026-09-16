@@ -11,7 +11,7 @@ import { OnThisPage, type TocItem } from "@/components/hub/OnThisPage";
 
 const toc: TocItem[] = [
   { id: "before", marker: "01", title: "Before the Kickoff" },
-  { id: "confirm", marker: "02", title: "What to Confirm" },
+  { id: "confirm", marker: "02", title: "How to Run the Kickoff" },
   { id: "after", marker: "03", title: "After the Kickoff" },
   { id: "done", marker: "04", title: "Kickoff Is Complete When" },
   { id: "next", marker: "05", title: "Then What?" },
@@ -73,13 +73,21 @@ export default function ClientKickoff() {
           <Section
             id="confirm"
             marker="02"
-            title="What to Confirm"
+            title="How to Run the Kickoff"
             intro={
-              <p>
-                The Account Manager leads. The assigned specialist attends, plus
-                the service lead where relevant. The salesperson joins only if
-                there is a specific reason.
-              </p>
+              <>
+                <p>
+                  The kickoff should feel like a normal client conversation, not
+                  a presentation. Use these prompts to make sure the important
+                  things get covered, in whatever order the conversation takes
+                  them.
+                </p>
+                <p>
+                  The Account Manager leads. The assigned specialist attends,
+                  plus the service lead where relevant. The salesperson joins
+                  only if there is a specific reason.
+                </p>
+              </>
             }
           >
             <RuleBlock
@@ -101,11 +109,11 @@ export default function ClientKickoff() {
                   body: "Preferred channel, what a normal response time looks like, and any recurring meeting actually worth holding.",
                 },
                 {
-                  title: "Access and assets",
+                  title: "Access and blockers",
                   body: (
                     <>
-                      What is still missing, and who is chasing it. Detail lives
-                      in{" "}
+                      Anything still missing that could hold up delivery, and
+                      who is chasing it. Detail lives in{" "}
                       <Link href="/client-onboarding/access-assets">
                         Access &amp; Assets
                       </Link>
@@ -114,8 +122,8 @@ export default function ClientKickoff() {
                   ),
                 },
                 {
-                  title: "The first 30 days",
-                  body: "First priorities, first actions, the first thing the client will see, and any deadline or dependency in the way. A short list, not a plan document.",
+                  title: "Immediate next steps",
+                  body: "What we do next, what the client owes us, who owns each open item, and the first thing they will see. A short list, not a plan document.",
                 },
               ]}
             />
@@ -161,9 +169,10 @@ export default function ClientKickoff() {
                   The kickoff is not a presentation. It is a confirmation
                   conversation.
                 </strong>{" "}
-                No deck, no agenda document, no ceremony. If a call would add
-                nothing for a particular client, confirm the same things another
-                way — but confirm them.
+                No deck, no agenda document, no ceremony. The prompts above are
+                there so nothing important is missed, not to be read out in
+                order. If a call would add nothing for a particular client,
+                confirm the same things another way — but confirm them.
               </p>
             </Callout>
           </Section>

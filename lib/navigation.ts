@@ -232,13 +232,6 @@ export const sections: HubSection[] = [
         status: "published",
       },
       {
-        slug: "kickoff-agenda",
-        title: "Kickoff Agenda",
-        summary:
-          "A short prompt list of what to confirm at kickoff — not a formal agenda or deck.",
-        status: "planned",
-      },
-      {
         slug: "strategy-templates",
         title: "Strategy Templates",
         summary: "Strategy and roadmap document shells by service.",
