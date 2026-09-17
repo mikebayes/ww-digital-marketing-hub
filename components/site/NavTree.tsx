@@ -38,8 +38,42 @@ export function NavTree({ onNavigate }: { onNavigate?: () => void }) {
     el.scrollIntoView({ block: "nearest" });
   }, [pathname]);
 
+  const onIntakes = pathname === "/intakes" || pathname.startsWith("/intakes/");
+
   return (
     <nav aria-label="Hub" className="pb-8">
+      {/*
+       * Intakes sits above the numbered index and outside it. The sections
+       * below are documentation — standards and procedures, numbered as one
+       * body of reading. This is a tool that holds live client data, and
+       * giving it section 07 would have said it was another chapter.
+       */}
+      <div className="border-b border-white/[0.09]">
+        <Link
+          href="/intakes"
+          onClick={onNavigate}
+          aria-current={onIntakes ? "page" : undefined}
+          className={`group relative flex items-baseline gap-3 px-5 pt-6 pb-6 transition-colors ${
+            onIntakes ? "bg-white/[0.06]" : "hover:bg-white/[0.04]"
+          }`}
+        >
+          <span
+            aria-hidden
+            className={`absolute inset-y-0 left-0 w-[3px] transition-colors ${
+              onIntakes ? "bg-teal" : "bg-transparent"
+            }`}
+          />
+          <span
+            className={`text-[0.9375rem] leading-tight font-semibold tracking-[-0.01em] transition-colors ${
+              onIntakes ? "text-white" : "text-white/85 group-hover:text-white"
+            }`}
+          >
+            Intakes
+          </span>
+          <span className="label ml-auto text-white/30">Tool</span>
+        </Link>
+      </div>
+
       {sections.map((section) => {
         const sectionHref = `/${section.slug}`;
         const sectionActive = pathname === sectionHref;

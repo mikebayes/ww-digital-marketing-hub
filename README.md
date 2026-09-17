@@ -114,3 +114,124 @@ content column narrows considerably once the in-page index appears.
 The standard itself, at
 `/standards/brand-document-deliverable-standards`, is the reference for
 anything produced with these components.
+
+---
+
+## Client Intakes
+
+The first operational module in the Hub. Everything above this section is static
+documentation; this part holds real client information, and is the reason the
+Hub now has a database and a sign-in.
+
+### How it fits together
+
+```
+/intakes                    list
+/intakes/new                pick client, services, Account Manager
+/intakes/[id]               internal record, answers, lifecycle actions
+/intakes/[id]/edit          prepare the questionnaire
+/intakes/[id]/preview       the client's page, read-only
+/intake/[token]             the client's page, live
+```
+
+`/intake/[token]` is the only route a client ever sees. It renders outside the
+`app/(hub)` route group, so the internal rail, module index and footer do not
+exist on it — they are not hidden, they are not rendered.
+
+### Questions
+
+Question wording lives in `question_definitions`, per service. Creating an
+intake **copies** the relevant definitions into `intake_questions`, so editing
+the master library later cannot change what a client was asked last quarter.
+The Common set is always included.
+
+Two columns drive the client experience:
+
+- `client_visible` — false makes a question internal preparation. This is how
+  proposal summaries, handoff context and observations are stored without a
+  second table.
+- `client_step` / `client_step_order` — the step the client sees the question
+  under. Steps come from the data, so Common and Social Media questions merge
+  into one "Audience & Content Direction" step, and adding SEO later is a seed
+  data change rather than a form change.
+
+`required_mode` of `required_by_completion` means Web Wizards must resolve the
+answer before finishing. It never blocks the client from submitting; it shows up
+on the intake page under **Still Outstanding** as the kickoff list.
+
+### Supabase setup
+
+One Supabase project serves the whole Hub.
+
+1. Create a project at [supabase.com](https://supabase.com).
+2. In the SQL editor, run `supabase/migrations/0001_intakes.sql`.
+3. In the SQL editor, run `supabase/seed.sql`. It is safe to re-run — every
+   insert is `ON CONFLICT DO NOTHING`, so edits to the question library survive.
+4. **Authentication → Providers → Email**: enable email, and turn *off*
+   "Confirm email" if you want magic links to work for users you invite
+   directly. Magic link is the only sign-in method used.
+5. **Authentication → URL Configuration**: add your deployed origin and
+   `http://localhost:3000` to the redirect allow list, both with `/auth/callback`.
+6. **Authentication → Users**: invite the Web Wizards people who need access.
+   There is no sign-up route — being in this list *is* the permission model.
+7. Copy `.env.example` to `.env.local` and fill in the three values from
+   **Project settings → API**. Set the same three in Vercel.
+
+### Environment variables
+
+| Variable | Secret | Used by |
+| --- | --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | no | everything |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | no | staff sign-in and internal queries |
+| `SUPABASE_SERVICE_ROLE_KEY` | **yes** | the public questionnaire only |
+
+The service role key bypasses Row Level Security. It is read by
+`lib/supabase/admin.ts`, which is marked `server-only` — importing it from a
+client component is a build error.
+
+### Security model
+
+Two access paths exist, and only two.
+
+**Staff** sign in with a magic link. `proxy.ts` gates `/intakes` on a valid
+session and fails closed: an unconfigured deployment redirects to `/login`
+rather than assuming nobody is signed in. Internal queries run as the
+`authenticated` role under the RLS policies in the migration, so a policy
+mistake breaks an internal screen rather than silently reading past the rules.
+
+**Clients** hold a token. It is 32 bytes of CSPRNG output, base64url encoded,
+generated in `lib/intake/token.ts` — sized as a credential, not as an id. The
+public route never talks to PostgREST from the browser; it is server-rendered
+through `lib/intake/public-queries.ts`, and anonymous callers have no RLS policy
+on any table, so a leaked anon key reads nothing.
+
+Internal content is kept in by four independent things:
+
+1. RLS grants `anon` nothing.
+2. The public query names its columns, and `internal_notes` and `final_answer`
+   are not among them.
+3. The query filters on `included` and `client_visible`.
+4. `lib/intake/public.ts` rebuilds each question field by field into a separate
+   `PublicQuestion` type, so an internal field added later cannot reach a client
+   by being forgotten about.
+
+Writes from the client are restricted server-side to the questions that intake
+actually exposed as editable; anything else in the payload is discarded.
+
+A bad token, an unsent intake and a nonexistent intake all return the same 404.
+
+**The questionnaire never asks for credentials.** The intro says so, and any
+step whose title mentions access repeats it.
+
+### Tests
+
+```bash
+npm test
+```
+
+Node's built-in runner over the pure logic — the public projection, answer
+normalisation, token generation and the lifecycle. No test framework, no
+transpile step; Node runs the TypeScript directly.
+
+The database layer is not covered by automated tests. It needs a live Supabase
+project, which is worth adding when there is one to point at.
