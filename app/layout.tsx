@@ -1,8 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Fraunces } from "next/font/google";
-import { SiteRail } from "@/components/site/SiteRail";
-import { MobileBar } from "@/components/site/MobileBar";
-import { SiteFooter } from "@/components/site/SiteFooter";
 import { site } from "@/lib/site";
 import { favicons, brandColors } from "@/lib/brand";
 import "./globals.css";
@@ -42,6 +39,15 @@ export const viewport: Viewport = {
   themeColor: brandColors.dark,
 };
 
+/**
+ * Document shell only.
+ *
+ * The internal rail, mobile bar and footer used to live here, which meant every
+ * route in the application got them. The client questionnaire must not, so the
+ * chrome moved down into app/(hub)/layout.tsx and this layout was left with the
+ * things that genuinely are global: fonts, tokens and metadata. Route groups do
+ * not appear in URLs, so nothing the Hub serves changed address.
+ */
 export default function RootLayout({
   children,
 }: {
@@ -49,27 +55,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
-      <body>
-        <a
-          href="#content"
-          className="label sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:bg-charcoal focus:px-4 focus:py-3 focus:text-white"
-        >
-          Skip to content
-        </a>
-
-        <SiteRail />
-        <MobileBar />
-
-        <div className="lg:pl-rail">
-          {/* Capped so the measure does not run away on ultrawide displays. */}
-          <div className="mx-auto max-w-[110rem]">
-            <main id="content" className="min-h-[70vh]">
-              {children}
-            </main>
-            <SiteFooter />
-          </div>
-        </div>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

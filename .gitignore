@@ -11,3 +11,7 @@ next-env.d.ts
 templates/internal-service-brief/lockup.svg
 
 templates/social-media-account-guide/lockup.svg
+
+# Local environment
+.env
+.env.local
