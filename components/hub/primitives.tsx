@@ -278,7 +278,14 @@ export function Callout({
   children: ReactNode;
 }) {
   return (
-    <aside className="overflow-hidden rounded-lg border border-rule-strong bg-surface">
+    /*
+     * [&_p]:max-w-none because a Callout placed inside a Subsection sits in a
+     * prose-hub container, which caps paragraphs at 68ch. That cap reached the
+     * label band and left it stopping short of the callout's own border. The
+     * measure is set by the body wrapper below instead, so it holds wherever
+     * the callout is placed.
+     */
+    <aside className="overflow-hidden rounded-lg border border-rule-strong bg-surface [&_p]:max-w-none">
       <p className="label border-b border-rule-strong bg-rule px-6 py-3 text-charcoal">
         {label}
       </p>
