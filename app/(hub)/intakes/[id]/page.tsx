@@ -15,7 +15,7 @@ import {
 } from "@/components/intake/ui";
 import { getIntake, getIntakeQuestions } from "@/lib/intake/queries";
 import { availableActions, effectiveAnswer, outstandingQuestions, STATUS_LABELS } from "@/lib/intake/status";
-import { clientIntakeUrl } from "@/lib/intake/token";
+import { clientIntakeUrl, resolveOrigin } from "@/lib/intake/token";
 import type { IntakeQuestion } from "@/lib/intake/types";
 import { saveFinalAnswersAction, setStatusAction } from "../actions";
 
@@ -45,10 +45,13 @@ export default async function IntakePage({
 
   const questions = await getIntakeQuestions(id);
   const requestHeaders = await headers();
-  const origin =
-    requestHeaders.get("origin") ??
-    `https://${requestHeaders.get("host") ?? "localhost:3000"}`;
-  const clientUrl = clientIntakeUrl(origin, intake.public_token);
+  const clientUrl = clientIntakeUrl(
+    resolveOrigin(
+      requestHeaders.get("host"),
+      requestHeaders.get("x-forwarded-proto"),
+    ),
+    intake.public_token,
+  );
 
   const actions = availableActions(intake.status);
   const outstanding = outstandingQuestions(questions);

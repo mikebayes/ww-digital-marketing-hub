@@ -21,6 +21,15 @@ export async function sendMagicLink(formData: FormData) {
     await supabase.auth.signInWithOtp({
       email,
       options: {
+        /*
+         * Sign in existing users only. Without this a magic link creates an
+         * account for whatever address was typed, which would make the login
+         * form a public sign-up for anyone who found the URL.
+         *
+         * Being in the project's user list is the permission model, so the
+         * only way in is an invite from the Supabase dashboard.
+         */
+        shouldCreateUser: false,
         emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
       },
     });

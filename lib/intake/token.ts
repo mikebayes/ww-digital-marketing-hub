@@ -27,3 +27,22 @@ export function isPlausibleToken(token: string): boolean {
 export function clientIntakeUrl(origin: string, token: string): string {
   return `${origin.replace(/\/+$/, "")}/intake/${token}`;
 }
+
+/**
+ * Work out the origin to build a client link from.
+ *
+ * A plain navigation sends no Origin header, so the scheme has to be derived.
+ * Assuming https produced an https://localhost link in development, which is
+ * not openable — the Account Manager copies a dead URL and only finds out when
+ * the client says so.
+ */
+export function resolveOrigin(
+  host: string | null,
+  forwardedProto: string | null,
+): string {
+  const resolvedHost = host || "localhost:3000";
+  const local = /^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/.test(resolvedHost);
+  // A proxy that terminates TLS knows better than we do; Vercel sets this.
+  const scheme = forwardedProto?.split(",")[0].trim() || (local ? "http" : "https");
+  return `${scheme}://${resolvedHost}`;
+}

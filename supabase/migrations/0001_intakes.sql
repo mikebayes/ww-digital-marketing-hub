@@ -265,3 +265,31 @@ create policy "staff read intake_services" on intake_services
 
 create policy "staff read intake_questions" on intake_questions
   for all to authenticated using (true) with check (true);
+
+-- ---------------------------------------------------------------------------
+-- Grants
+-- ---------------------------------------------------------------------------
+--
+-- RLS decides which rows a role may touch; it does not grant the privilege to
+-- touch the table at all. Supabase's default privileges cover REFERENCES,
+-- TRIGGER and TRUNCATE but not DML, so without this block every role — staff
+-- included — gets "permission denied for table" and the internal screens do
+-- not work.
+--
+-- anon is revoked explicitly rather than merely left ungranted. It arrives
+-- holding TRUNCATE by default, which RLS does not restrain, and the public
+-- questionnaire never reaches Postgres as anon anyway.
+
+grant usage on schema public to anon, authenticated, service_role;
+
+revoke all on all tables in schema public from anon;
+
+grant select, insert, update, delete on
+  clients, services, question_definitions,
+  intakes, intake_services, intake_questions
+  to authenticated;
+
+grant select, insert, update, delete on
+  clients, services, question_definitions,
+  intakes, intake_services, intake_questions
+  to service_role;

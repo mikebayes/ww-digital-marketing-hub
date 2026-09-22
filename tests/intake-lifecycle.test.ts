@@ -13,6 +13,7 @@ import {
   clientIntakeUrl,
   generatePublicToken,
   isPlausibleToken,
+  resolveOrigin,
 } from "../lib/intake/token.ts";
 import type { IntakeQuestion, IntakeStatus } from "../lib/intake/types.ts";
 
@@ -168,5 +169,37 @@ describe("what we still owe", () => {
       }),
     ]);
     assert.equal(outstanding.length, 2);
+  });
+});
+
+describe("client link origin", () => {
+  test("uses http for localhost, where there is no TLS to assume", () => {
+    assert.equal(resolveOrigin("localhost:3000", null), "http://localhost:3000");
+    assert.equal(resolveOrigin("127.0.0.1:3000", null), "http://127.0.0.1:3000");
+  });
+
+  test("uses https for a real host", () => {
+    assert.equal(
+      resolveOrigin("ww-digital-marketing-hub.vercel.app", null),
+      "https://ww-digital-marketing-hub.vercel.app",
+    );
+  });
+
+  test("trusts the proxy's scheme when it sets one", () => {
+    assert.equal(
+      resolveOrigin("ww-digital-marketing-hub.vercel.app", "https"),
+      "https://ww-digital-marketing-hub.vercel.app",
+    );
+    // Some proxies send a comma-separated chain; the first hop is ours.
+    assert.equal(resolveOrigin("example.com", "https, http"), "https://example.com");
+  });
+
+  test("falls back rather than producing a schemeless url", () => {
+    assert.equal(resolveOrigin(null, null), "http://localhost:3000");
+  });
+
+  test("builds a link that is actually openable in development", () => {
+    const url = clientIntakeUrl(resolveOrigin("localhost:3000", null), "abc123");
+    assert.equal(url, "http://localhost:3000/intake/abc123");
   });
 });
