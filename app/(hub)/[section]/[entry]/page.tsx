@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { sections, getEntry } from "@/lib/navigation";
+import { notFound, redirect } from "next/navigation";
+import { sections, getEntry, entryHref } from "@/lib/navigation";
 import { modules } from "@/content/registry";
 import {
   PageHeader,
@@ -49,6 +49,14 @@ export default async function EntryPage({
   if (!found) notFound();
 
   const { section, entry } = found;
+
+  /*
+   * A group heading has no page of its own. Redirecting rather than 404ing
+   * keeps links made before the split working — including any already sent to
+   * a client or pasted into Productive.
+   */
+  if (entry.children?.length) redirect(entryHref(sectionSlug, entry));
+
   const Module = modules[`${sectionSlug}/${entrySlug}`];
 
   if (Module) return <Module />;
@@ -94,7 +102,7 @@ export default async function EntryPage({
               {siblings.map((sibling) => (
                 <li key={sibling.slug} className="border-b border-rule">
                   <Link
-                    href={`/${section.slug}/${sibling.slug}`}
+                    href={entryHref(section.slug, sibling)}
                     className="group flex items-baseline justify-between gap-4 py-3.5"
                   >
                     <span className="text-[0.9375rem] font-medium text-charcoal transition-colors group-hover:text-teal-ink">

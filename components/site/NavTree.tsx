@@ -124,6 +124,59 @@ export function NavTree({ onNavigate }: { onNavigate?: () => void }) {
                   const active = pathname === href;
                   const planned = entry.status === "planned";
 
+                  /*
+                   * An entry with children is a heading, not a destination.
+                   * Rendering it as a link would give the rail a row that only
+                   * bounces you somewhere else, and would make the parent and
+                   * its first child both look active at once.
+                   */
+                  if (entry.children?.length) {
+                    return (
+                      <li key={entry.slug}>
+                        <p className="px-5 pt-3 pb-1 text-[0.8125rem] leading-[1.45] font-medium text-white/50">
+                          {entry.title}
+                        </p>
+                        <ul>
+                          {entry.children.map((child) => {
+                            const childHref = `${href}/${child.slug}`;
+                            const childActive = pathname === childHref;
+                            return (
+                              <li key={child.slug}>
+                                <Link
+                                  href={childHref}
+                                  ref={childActive ? activeRef : undefined}
+                                  onClick={onNavigate}
+                                  aria-current={childActive ? "page" : undefined}
+                                  className={`group relative flex py-[0.4375rem] pr-4 pl-9 transition-colors ${
+                                    childActive
+                                      ? "bg-white/[0.06]"
+                                      : "hover:bg-white/[0.04]"
+                                  }`}
+                                >
+                                  <span
+                                    aria-hidden
+                                    className={`absolute inset-y-0 left-0 w-[3px] transition-colors ${
+                                      childActive ? "bg-teal" : "bg-transparent"
+                                    }`}
+                                  />
+                                  <span
+                                    className={`text-[0.8125rem] leading-[1.45] transition-colors ${
+                                      childActive
+                                        ? "font-medium text-white"
+                                        : "text-white/70 group-hover:text-white"
+                                    }`}
+                                  >
+                                    {child.title}
+                                  </span>
+                                </Link>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </li>
+                    );
+                  }
+
                   return (
                     <li key={entry.slug}>
                       <Link

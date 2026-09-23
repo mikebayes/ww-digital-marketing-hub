@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { sections, getSection } from "@/lib/navigation";
+import { sections, getSection, entryHref } from "@/lib/navigation";
 import { sectionModules } from "@/content/registry";
 import { PageHeader, SectionLabel } from "@/components/hub/primitives";
 
@@ -49,7 +49,7 @@ export default async function SectionPage({
 
         <ol className="mt-5 border-t border-rule">
           {section.entries.map((entry, index) => {
-            const href = `/${section.slug}/${entry.slug}`;
+            const href = entryHref(section.slug, entry);
             const planned = entry.status === "planned";
 
             return (

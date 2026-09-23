@@ -18,6 +18,13 @@ export interface HubEntry {
   /** Short line used in section indexes and nav tooltips. */
   summary: string;
   status: EntryStatus;
+  /**
+   * Sub-pages beneath this entry. An entry with children is a group heading
+   * rather than a page: the rail stops linking it, and its own URL redirects
+   * to the first child so links made before the split still land somewhere
+   * sensible.
+   */
+  children?: HubEntry[];
 }
 
 export interface HubSection {
@@ -153,8 +160,24 @@ export const sections: HubSection[] = [
         slug: "social-media",
         title: "Social Media",
         summary:
-          "Channel setup, content pillars, approval flow and publishing cadence.",
+          "How an organic social account is run, and how to onboard a new one.",
         status: "published",
+        children: [
+          {
+            slug: "service-standards",
+            title: "Service Standards",
+            summary:
+              "How Web Wizards approaches and runs an organic social account.",
+            status: "published",
+          },
+          {
+            slug: "setup-launch",
+            title: "Setup & Launch",
+            summary:
+              "The onboarding process, from approved engagement to the first content calendar.",
+            status: "published",
+          },
+        ],
       },
       {
         slug: "one-time-projects",
@@ -291,4 +314,27 @@ export function getEntry(
   const section = getSection(sectionSlug);
   const entry = section?.entries.find((item) => item.slug === entrySlug);
   return section && entry ? { section, entry } : undefined;
+}
+
+/** Resolve a child page beneath an entry. */
+export function getChild(
+  sectionSlug: string,
+  entrySlug: string,
+  childSlug: string,
+): { section: HubSection; entry: HubEntry; child: HubEntry } | undefined {
+  const found = getEntry(sectionSlug, entrySlug);
+  const child = found?.entry.children?.find((item) => item.slug === childSlug);
+  return found && child ? { ...found, child } : undefined;
+}
+
+/**
+ * The URL an entry should actually link to.
+ *
+ * An entry with children is a heading, not a page, so every navigation surface
+ * links past it to the first child rather than to a URL that only redirects.
+ */
+export function entryHref(sectionSlug: string, entry: HubEntry): string {
+  const base = `/${sectionSlug}/${entry.slug}`;
+  const first = entry.children?.[0];
+  return first ? `${base}/${first.slug}` : base;
 }

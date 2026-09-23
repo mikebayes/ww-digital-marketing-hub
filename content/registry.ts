@@ -5,7 +5,8 @@ import ClientOnboardingOverview from "./client-onboarding/overview";
 import InternalHandoff from "./client-onboarding/internal-handoff";
 import ClientKickoff from "./client-onboarding/client-kickoff";
 import AccessAndAssets from "./client-onboarding/access-assets";
-import SocialMediaOnboarding from "./service-onboarding/social-media";
+import SocialMediaServiceStandards from "./service-onboarding/social-media/service-standards";
+import SocialMediaSetupLaunch from "./service-onboarding/social-media/setup-launch";
 import SocialMediaOngoingDelivery from "./ongoing-delivery/social-media";
 import InternalServiceBriefTemplate from "./templates-resources/internal-service-brief";
 import ClientOnboardingEmail from "./templates-resources/client-onboarding-email";
@@ -24,7 +25,8 @@ export const modules: Record<string, ComponentType> = {
   "client-onboarding/internal-handoff": InternalHandoff,
   "client-onboarding/access-assets": AccessAndAssets,
   "client-onboarding/client-kickoff": ClientKickoff,
-  "service-onboarding/social-media": SocialMediaOnboarding,
+  "service-onboarding/social-media/service-standards": SocialMediaServiceStandards,
+  "service-onboarding/social-media/setup-launch": SocialMediaSetupLaunch,
   "ongoing-delivery/social-media": SocialMediaOngoingDelivery,
   "templates-resources/internal-service-brief": InternalServiceBriefTemplate,
   "templates-resources/client-onboarding-email": ClientOnboardingEmail,

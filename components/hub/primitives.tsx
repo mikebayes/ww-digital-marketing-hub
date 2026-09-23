@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { getSection, getEntry } from "@/lib/navigation";
+import { getSection, getEntry, entryHref } from "@/lib/navigation";
 
 /* -------------------------------------------------------------------------- */
 /* Labels and headers                                                          */
@@ -569,7 +569,9 @@ export function NextModules({
     if (!found) return [];
     return [
       {
-        href: `/${section.slug}/${found.entry.slug}`,
+        // Resolves past a group heading to its first child, so a target that
+        // names an entry never hands the reader a redirect.
+        href: entryHref(section.slug, found.entry),
         title: found.entry.title,
         summary: found.entry.summary,
         planned: found.entry.status === "planned",
