@@ -1,47 +1,47 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
-import { authLandingTarget } from "@/lib/intake/token";
+import {
+  isAllowedEmail,
+  isPublicPath,
+  oauthLandingTarget,
+} from "@/lib/auth/access";
 
 /**
- * Session refresh and the gate on internal client data.
+ * The gate on the whole application.
  *
- * Only /intakes is gated. The documentation pages that make up the rest of the
- * Hub hold no client information and stayed readable to anyone with the URL
- * before this feature existed; gating them now would be a change to the Hub
- * rather than an addition to it. Extending the gate is the PROTECTED list
- * below and nothing else.
+ * The Hub used to be readable by anyone with the URL, and only /intakes was
+ * protected. It now holds client intake data alongside the standards, and the
+ * decision is that all of it is internal, so this denies by default: every
+ * request is authenticated unless lib/auth/access.ts exempts it.
  *
- * The client questionnaire at /intake/<token> is deliberately not gated. Its
- * token is its credential.
- */
-const PROTECTED = ["/intakes"];
-
-function isProtected(pathname: string): boolean {
-  return PROTECTED.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
-  );
-}
-
-/*
- * See authLandingTarget in lib/intake/token.ts for why this exists.
+ * The client questionnaire at /intake/<token> is the one substantive
+ * exemption. Its token is its credential, and it is served to people who do
+ * not have Microsoft accounts with us.
  */
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const landing = authLandingTarget(pathname, request.nextUrl.searchParams);
+  /*
+   * Checked before anything else: a sign-in returning to the root carries the
+   * credential that would let the rest of this function pass. See
+   * oauthLandingTarget.
+   */
+  const landing = oauthLandingTarget(pathname, request.nextUrl.searchParams);
   if (landing) return NextResponse.redirect(new URL(landing, request.url));
 
-  if (!isProtected(pathname)) return NextResponse.next();
+  if (isPublicPath(pathname)) return NextResponse.next();
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   /*
-   * Fail closed. An unconfigured deployment cannot verify anyone, so it must
-   * not serve client data on the assumption that nobody is logged in either.
+   * Fail closed. A deployment that cannot verify anyone must not serve
+   * internal material on the assumption that nobody is signed in either.
    */
   if (!url || !anonKey) {
-    return NextResponse.redirect(new URL("/login?error=unconfigured", request.url));
+    return NextResponse.redirect(
+      new URL("/login?error=unconfigured", request.url),
+    );
   }
 
   let response = NextResponse.next({ request });
@@ -71,8 +71,17 @@ export async function proxy(request: NextRequest) {
 
   if (!user) {
     const login = new URL("/login", request.url);
-    login.searchParams.set("next", pathname);
+    login.searchParams.set("next", pathname + request.nextUrl.search);
     return NextResponse.redirect(login);
+  }
+
+  /*
+   * A session for someone outside Web Wizards should not exist — the callback
+   * signs those out before a cookie is ever set. Checked again anyway, because
+   * a gate that only works when the door upstream held is not a gate.
+   */
+  if (!isAllowedEmail(user.email)) {
+    return NextResponse.redirect(new URL("/login?error=denied", request.url));
   }
 
   return response;
@@ -81,10 +90,10 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Everything except Next internals and static files. The handler itself
-     * decides what is protected; this only keeps the middleware off asset
-     * requests.
+     * Everything except Next internals and static files. The handler decides
+     * what is public; this only keeps the middleware off asset requests, which
+     * would otherwise pay for a Supabase round trip each.
      */
-    "/((?!_next/static|_next/image|favicon.ico|brand/|templates/|.*\\.(?:png|jpg|jpeg|gif|svg|ico|webp|pdf|zip|txt|xml)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico).*)",
   ],
 };

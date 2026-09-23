@@ -1,45 +1,62 @@
 "use server";
 
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { safeNext } from "@/lib/auth/access";
+import { NEXT_COOKIE } from "@/lib/auth/cookies";
 
 /**
- * Send a magic link.
+ * Start Microsoft sign-in.
  *
- * Always redirects to the same "check your email" state, whether or not the
- * address belongs to anyone. Telling a stranger which addresses exist is a
- * small leak, but it is free to avoid.
+ * Supabase owns the OAuth exchange; this only asks it for the authorize URL
+ * and sends the browser there. There is no second authentication system here
+ * and there should not be one.
  */
-export async function sendMagicLink(formData: FormData) {
-  const email = String(formData.get("email") ?? "").trim();
-  const next = String(formData.get("next") ?? "/intakes");
+export async function signInWithMicrosoft(formData: FormData) {
+  const next = safeNext(String(formData.get("next") ?? ""));
+  const requestHeaders = await headers();
+  const host = requestHeaders.get("host") ?? "localhost:3000";
+  const proto =
+    requestHeaders.get("x-forwarded-proto")?.split(",")[0].trim() ??
+    (host.startsWith("localhost") || host.startsWith("127.0.0.1")
+      ? "http"
+      : "https");
+  const origin = `${proto}://${host}`;
 
-  if (email) {
-    const origin = (await headers()).get("origin") ?? "";
-    const supabase = await createClient();
-    await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        /*
-         * Sign in existing users only. Without this a magic link creates an
-         * account for whatever address was typed, which would make the login
-         * form a public sign-up for anyone who found the URL.
-         *
-         * Being in the project's user list is the permission model, so the
-         * only way in is an invite from the Supabase dashboard.
-         */
-        shouldCreateUser: false,
-        emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
-      },
-    });
-  }
+  /*
+   * Where to return to is remembered in a cookie rather than carried on the
+   * OAuth redirect. Supabase validates redirect_to against its own allow list
+   * and silently falls back to the project Site URL when a URL is not on it,
+   * which would take the query string with it. A cookie survives that.
+   */
+  const cookieStore = await cookies();
+  cookieStore.set(NEXT_COOKIE, next, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: proto === "https",
+    path: "/",
+    maxAge: 600,
+  });
 
-  redirect(`/login?sent=1&next=${encodeURIComponent(next)}`);
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "azure",
+    options: {
+      // Entra needs email explicitly; without it the identity can arrive with
+      // no address and the domain check below has nothing to test.
+      scopes: "email",
+      redirectTo: `${origin}/auth/callback`,
+    },
+  });
+
+  if (error || !data?.url) redirect("/login?error=provider");
+
+  redirect(data.url);
 }
 
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  redirect("/login");
+  redirect("/login?signedout=1");
 }

@@ -167,14 +167,23 @@ One Supabase project serves the whole Hub.
 2. In the SQL editor, run `supabase/migrations/0001_intakes.sql`.
 3. In the SQL editor, run `supabase/seed.sql`. It is safe to re-run — every
    insert is `ON CONFLICT DO NOTHING`, so edits to the question library survive.
-4. **Authentication → Providers → Email**: enable email, and turn *off*
-   "Confirm email" if you want magic links to work for users you invite
-   directly. Magic link is the only sign-in method used.
+4. **Authentication → Providers → Azure**: enable it, and set the Application
+   (client) ID, the client secret and the Azure Tenant URL for the Web Wizards
+   Microsoft Entra tenant. Turn **Allow users without an email** off — the
+   application checks the email domain, so an identity without one cannot be
+   admitted. Microsoft is the only staff sign-in method.
 5. **Authentication → URL Configuration**: add your deployed origin and
    `http://localhost:3000` to the redirect allow list, both with `/auth/callback`.
-6. **Authentication → Users**: invite the Web Wizards people who need access.
-   There is no sign-up route — being in this list *is* the permission model.
-7. Copy `.env.example` to `.env.local` and fill in the three values from
+   Until this is done Supabase substitutes the Site URL and the sign-in comes
+   back to `/`; `oauthLandingTarget` in `lib/auth/access.ts` catches that so
+   sign-in still works, but the list is the real fix.
+6. **Authentication → Providers → Email**: turn it off. Nothing uses it, and
+   leaving it on keeps a second way into an internal application.
+7. **Authentication → Sign-ups**: staff accounts are created by their first
+   Microsoft sign-in, so sign-ups must be allowed. With the email provider off
+   and the Azure provider tenant-restricted, the only identity that can create
+   an account is one that already belongs to Web Wizards.
+8. Copy `.env.example` to `.env.local` and fill in the three values from
    **Project settings → API**. Set the same three in Vercel.
 
 ### Environment variables
@@ -182,7 +191,7 @@ One Supabase project serves the whole Hub.
 | Variable | Secret | Used by |
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | no | everything |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | no | staff sign-in and internal queries |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | no | Microsoft sign-in and internal queries |
 | `SUPABASE_SERVICE_ROLE_KEY` | **yes** | the public questionnaire only |
 
 The service role key bypasses Row Level Security. It is read by
@@ -193,11 +202,19 @@ client component is a build error.
 
 Two access paths exist, and only two.
 
-**Staff** sign in with a magic link. `proxy.ts` gates `/intakes` on a valid
-session and fails closed: an unconfigured deployment redirects to `/login`
-rather than assuming nobody is signed in. Internal queries run as the
-`authenticated` role under the RLS policies in the migration, so a policy
-mistake breaks an internal screen rather than silently reading past the rules.
+**Staff** sign in with Microsoft against the Web Wizards Entra tenant.
+`proxy.ts` gates the entire application and denies by default: a request is
+authenticated unless `lib/auth/access.ts` exempts it, so a route added later is
+protected because nobody remembered to protect it rather than exposed because
+nobody remembered to list it. It also fails closed — an unconfigured deployment
+redirects to `/login` rather than assuming nobody is signed in.
+
+Authenticating is not the same as being staff, so the email domain is checked
+in application code as well: the callback signs out an identity that does not
+carry a `@webwizards.ca` address before a session cookie is kept, and the proxy
+checks again on every request. Internal queries run as the `authenticated` role
+under the RLS policies in the migration, so a policy mistake breaks an internal
+screen rather than silently reading past the rules.
 
 **Clients** hold a token. It is 32 bytes of CSPRNG output, base64url encoded,
 generated in `lib/intake/token.ts` — sized as a credential, not as an id. The

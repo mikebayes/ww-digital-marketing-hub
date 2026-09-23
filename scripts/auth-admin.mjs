@@ -1,11 +1,12 @@
 /**
- * Supabase Auth admin helpers, used to provision staff accounts and to drive
- * end-to-end tests without a mailbox.
+ * Supabase Auth admin helpers.
+ *
+ * Staff sign in with Microsoft, so there are no accounts to provision here.
+ * What is left is read-only: check the provider configuration, and see who has
+ * actually signed in.
  *
  *   node scripts/auth-admin.mjs settings
- *   node scripts/auth-admin.mjs create <email>
  *   node scripts/auth-admin.mjs list
- *   node scripts/auth-admin.mjs magiclink <email>
  *
  * Reads the secret key from .env.local and never prints it.
  */
@@ -37,24 +38,10 @@ if (cmd === "settings") {
   console.log(JSON.stringify({ email: s.external?.email, disable_signup: s.disable_signup, mailer_autoconfirm: s.mailer_autoconfirm }, null, 2));
 }
 
-if (cmd === "create") {
-  const r = await api("/auth/v1/admin/users", {
-    method: "POST",
-    body: JSON.stringify({ email: arg, email_confirm: true }),
-  });
-  console.log(r.status, JSON.stringify(r.body?.id ? { id: r.body.id, email: r.body.email, confirmed: !!r.body.email_confirmed_at } : r.body));
-}
 
 if (cmd === "list") {
   const r = await api("/auth/v1/admin/users");
   console.log(JSON.stringify((r.body.users ?? []).map(u => ({ email: u.email, confirmed: !!u.email_confirmed_at })), null, 2));
 }
 
-if (cmd === "magiclink") {
-  const r = await api("/auth/v1/admin/generate_link", {
-    method: "POST",
-    body: JSON.stringify({ type: "magiclink", email: arg, options: { redirect_to: "http://localhost:3000/auth/callback?next=/intakes" } }),
-  });
-  if (r.status !== 200) { console.log("FAILED", r.status, JSON.stringify(r.body)); process.exit(1); }
-  console.log(r.body.action_link ?? r.body.properties?.action_link ?? JSON.stringify(r.body));
-}
+
