@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { authLandingTarget } from "@/lib/intake/token";
 
 /**
  * Session refresh and the gate on internal client data.
@@ -21,8 +22,14 @@ function isProtected(pathname: string): boolean {
   );
 }
 
+/*
+ * See authLandingTarget in lib/intake/token.ts for why this exists.
+ */
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  const landing = authLandingTarget(pathname, request.nextUrl.searchParams);
+  if (landing) return NextResponse.redirect(new URL(landing, request.url));
 
   if (!isProtected(pathname)) return NextResponse.next();
 

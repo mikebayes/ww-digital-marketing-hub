@@ -46,3 +46,29 @@ export function resolveOrigin(
   const scheme = forwardedProto?.split(",")[0].trim() || (local ? "http" : "https");
   return `${scheme}://${resolvedHost}`;
 }
+
+/**
+ * Where a magic link that landed on the wrong page should be sent.
+ *
+ * Supabase only redirects to URLs on its own allow list and falls back to the
+ * project's Site URL otherwise, so a link clicked from an email can arrive at
+ * the Hub's root carrying the credential instead of at /auth/callback. This
+ * decides whether that has happened and where the credential should go.
+ *
+ * Returns null for an ordinary request, so a normal visit to the homepage is
+ * never touched.
+ */
+export function authLandingTarget(
+  pathname: string,
+  params: URLSearchParams,
+): string | null {
+  if (pathname !== "/") return null;
+
+  const hasCredential =
+    params.has("code") || (params.has("token_hash") && params.has("type"));
+  if (!hasCredential) return null;
+
+  const forwarded = new URLSearchParams(params);
+  if (!forwarded.has("next")) forwarded.set("next", "/intakes");
+  return `/auth/callback?${forwarded.toString()}`;
+}

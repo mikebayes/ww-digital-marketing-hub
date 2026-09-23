@@ -14,6 +14,7 @@ import {
   generatePublicToken,
   isPlausibleToken,
   resolveOrigin,
+  authLandingTarget,
 } from "../lib/intake/token.ts";
 import type { IntakeQuestion, IntakeStatus } from "../lib/intake/types.ts";
 
@@ -201,5 +202,44 @@ describe("client link origin", () => {
   test("builds a link that is actually openable in development", () => {
     const url = clientIntakeUrl(resolveOrigin("localhost:3000", null), "abc123");
     assert.equal(url, "http://localhost:3000/intake/abc123");
+  });
+});
+
+describe("magic links that land on the wrong page", () => {
+  const q = (s: string) => new URLSearchParams(s);
+
+  test("an ordinary homepage visit is never touched", () => {
+    assert.equal(authLandingTarget("/", q("")), null);
+    assert.equal(authLandingTarget("/", q("utm_source=email")), null);
+  });
+
+  test("other paths are never touched, even carrying a code", () => {
+    assert.equal(authLandingTarget("/what-we-sell", q("code=abc")), null);
+    assert.equal(authLandingTarget("/auth/callback", q("code=abc")), null);
+  });
+
+  test("a PKCE code at the root is forwarded to the callback", () => {
+    const target = authLandingTarget("/", q("code=abc123"));
+    assert.ok(target?.startsWith("/auth/callback?"));
+    const params = new URLSearchParams(target!.split("?")[1]);
+    assert.equal(params.get("code"), "abc123");
+    assert.equal(params.get("next"), "/intakes");
+  });
+
+  test("a token_hash link is forwarded too", () => {
+    const target = authLandingTarget("/", q("token_hash=deadbeef&type=magiclink"));
+    const params = new URLSearchParams(target!.split("?")[1]);
+    assert.equal(params.get("token_hash"), "deadbeef");
+    assert.equal(params.get("type"), "magiclink");
+  });
+
+  test("a token_hash without its type is not a credential", () => {
+    assert.equal(authLandingTarget("/", q("token_hash=deadbeef")), null);
+  });
+
+  test("an explicit next is preserved rather than overwritten", () => {
+    const target = authLandingTarget("/", q("code=abc&next=%2Fintakes%2Fnew"));
+    const params = new URLSearchParams(target!.split("?")[1]);
+    assert.equal(params.get("next"), "/intakes/new");
   });
 });
