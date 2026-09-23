@@ -109,7 +109,7 @@ export default function SocialMediaSetupLaunch() {
         ]}
       />
 
-      <div className="mt-12 grid gap-12 min-[1400px]:grid-cols-[minmax(0,1fr)_var(--spacing-toc)] min-[1400px]:gap-14">
+      <div className="doc-layout">
         <article className="@container min-w-0 space-y-12">
           <p className="max-w-2xl text-[1.0625rem] leading-relaxed text-slate">
             This page is the process. How we think about running a social

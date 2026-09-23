@@ -50,6 +50,18 @@
 
   --spacing-rail: 17.5rem;
   --spacing-toc: 15rem;
+
+  /*
+   * Gutter between a long-form article and its in-page index.
+   *
+   * Proportional rather than fixed, because the article column is the one that
+   * absorbs a wider viewport: with a fixed gutter the measure kept growing
+   * while the gap to the index stayed put, so section rules ran on toward the
+   * index and bordered blocks filled with slack. Clamped at both ends so the
+   * gap cannot collapse on a small laptop or open into a canyon on a large
+   * display.
+   */
+  --spacing-doc-gutter: clamp(5rem, 10vw, 13rem);
 }
 
 @layer base {
@@ -118,5 +130,23 @@
     color: var(--color-teal-ink);
     text-decoration: underline;
     text-underline-offset: 2px;
+  }
+}
+
+/*
+ * The long-form documentation layout: an article beside a sticky in-page
+ * index, stacking below 1400px where the index is hidden.
+ *
+ * Defined here rather than repeated across a dozen content pages, so the
+ * measure and the gutter stay one decision instead of twelve.
+ */
+@utility doc-layout {
+  margin-top: 3rem;
+  display: grid;
+  gap: 3rem;
+
+  @media (width >= 1400px) {
+    grid-template-columns: minmax(0, 1fr) var(--spacing-toc);
+    column-gap: var(--spacing-doc-gutter);
   }
 }
