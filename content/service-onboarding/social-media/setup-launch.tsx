@@ -14,10 +14,10 @@ import { OnThisPage, type TocItem } from "@/components/hub/OnThisPage";
 
 const toc: TocItem[] = [
   { id: "glance", marker: "01", title: "At a Glance" },
-  { id: "productive", marker: "02", title: "Set Up the Project" },
-  { id: "budget", marker: "03", title: "Add the Budget" },
-  { id: "tasks", marker: "04", title: "Task Dates & Recurrence" },
-  { id: "handoff", marker: "05", title: "Internal Handoff" },
+  { id: "handoff", marker: "02", title: "Internal Handoff" },
+  { id: "productive", marker: "03", title: "Set Up the Project" },
+  { id: "budget", marker: "04", title: "Add the Budget" },
+  { id: "tasks", marker: "05", title: "Task Dates & Recurrence" },
   { id: "intake", marker: "06", title: "Onboarding Email & Intake" },
   { id: "kickoff", marker: "07", title: "Client Kickoff" },
   { id: "access", marker: "08", title: "Access & Assets" },
@@ -132,27 +132,63 @@ export default function SocialMediaSetupLaunch() {
           >
             <AtAGlance />
 
-            <Callout label="Productive setup runs alongside">
+            <Callout label="Productive setup happens after the internal handoff">
               <p>
-                Setting the client up in Productive is not on this list because
-                it is not a client-facing step. Do it as soon as the handoff is
-                done, so the project and budget exist before the first invoice
-                is due. Sections <strong>02</strong> to <strong>04</strong>{" "}
-                cover it.
+                Once the internal handoff is complete, create the live
+                Productive project, configure the budget, and set the task dates
+                and recurrence — sections <strong>03</strong> to{" "}
+                <strong>05</strong>. That is internal setup rather than one of
+                the eleven steps above, and it should be done before client
+                onboarding gets underway.
               </p>
             </Callout>
           </Section>
 
           {/* ---------------------------------------------------------------- */}
           <Section
-            id="productive"
+            id="handoff"
             marker="02"
+            title="Complete the Internal Handoff"
+            intro={
+              <p>
+                Social starts from the proposal and the{" "}
+                <Link href="/templates-resources/internal-service-brief">
+                  Internal Service Brief
+                </Link>
+                , not from a conversation with the client. The{" "}
+                <Link href="/client-onboarding/internal-handoff">
+                  Internal Handoff
+                </Link>{" "}
+                standard covers how the meeting runs.
+              </p>
+            }
+          >
+            <Checklist
+              caption="Delivery should leave the handoff knowing"
+              items={[
+                "What was sold",
+                "Which channels are included",
+                "Posting cadence",
+                "The client's goals",
+                "Who is responsible for content",
+                "The reporting commitment",
+                "Whether community management is in scope",
+                "Whether Paid Media is also included",
+                "Any unusual commitments or client context",
+              ]}
+            />
+          </Section>
+
+          {/* ---------------------------------------------------------------- */}
+          <Section
+            id="productive"
+            marker="03"
             title="Set Up the Project in Productive"
             intro={
               <p>
-                Do this once the internal handoff is complete. The template
-                carries the standard task structure, so almost nothing has to be
-                built by hand.
+                With the handoff done, set the live project up before client
+                onboarding gets underway. The template carries the standard task
+                structure, so almost nothing has to be built by hand.
               </p>
             }
           >
@@ -240,7 +276,7 @@ export default function SocialMediaSetupLaunch() {
                 <p>
                   The template deliberately carries no due dates, because client
                   start dates vary. You set them after the project exists —
-                  section <strong>04</strong>.
+                  section <strong>05</strong>.
                 </p>
               </Callout>
             </Subsection>
@@ -266,7 +302,7 @@ export default function SocialMediaSetupLaunch() {
           {/* ---------------------------------------------------------------- */}
           <Section
             id="budget"
-            marker="03"
+            marker="04"
             title="Add and Configure the Budget"
             intro={
               <p>
@@ -390,7 +426,7 @@ export default function SocialMediaSetupLaunch() {
           {/* ---------------------------------------------------------------- */}
           <Section
             id="tasks"
-            marker="04"
+            marker="05"
             title="Set Task Dates and Recurrence"
             intro={
               <p>
@@ -435,41 +471,6 @@ export default function SocialMediaSetupLaunch() {
                 otherwise.
               </p>
             </Callout>
-          </Section>
-
-          {/* ---------------------------------------------------------------- */}
-          <Section
-            id="handoff"
-            marker="05"
-            title="Complete the Internal Handoff"
-            intro={
-              <p>
-                Social starts from the proposal and the{" "}
-                <Link href="/templates-resources/internal-service-brief">
-                  Internal Service Brief
-                </Link>
-                , not from a conversation with the client. The{" "}
-                <Link href="/client-onboarding/internal-handoff">
-                  Internal Handoff
-                </Link>{" "}
-                standard covers how the meeting runs.
-              </p>
-            }
-          >
-            <Checklist
-              caption="Delivery should leave the handoff knowing"
-              items={[
-                "What was sold",
-                "Which channels are included",
-                "Posting cadence",
-                "The client's goals",
-                "Who is responsible for content",
-                "The reporting commitment",
-                "Whether community management is in scope",
-                "Whether Paid Media is also included",
-                "Any unusual commitments or client context",
-              ]}
-            />
           </Section>
 
           {/* ---------------------------------------------------------------- */}
