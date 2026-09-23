@@ -5,7 +5,6 @@ import {
   ALLOWED_EMAIL_DOMAIN,
   isAllowedEmail,
   isPublicPath,
-  oauthLandingTarget,
   safeNext,
 } from "../lib/auth/access.ts";
 
@@ -111,34 +110,5 @@ describe("returning to where you were going", () => {
     assert.equal(safeNext(null), "/");
     assert.equal(safeNext(undefined), "/");
     assert.equal(safeNext(""), "/");
-  });
-});
-
-describe("an OAuth return that lands on the root", () => {
-  const q = (s: string) => new URLSearchParams(s);
-
-  test("an ordinary visit to the Hub is untouched", () => {
-    assert.equal(oauthLandingTarget("/", q("")), null);
-    assert.equal(oauthLandingTarget("/", q("utm_source=email")), null);
-  });
-
-  test("other paths are untouched, even carrying a code", () => {
-    assert.equal(oauthLandingTarget("/intakes", q("code=abc")), null);
-    assert.equal(oauthLandingTarget("/auth/callback", q("code=abc")), null);
-  });
-
-  test("a code at the root is forwarded to the callback", () => {
-    const target = oauthLandingTarget("/", q("code=abc123"));
-    assert.equal(target, "/auth/callback?code=abc123");
-  });
-
-  test("a refused sign-in is forwarded so the user sees a message", () => {
-    const target = oauthLandingTarget(
-      "/",
-      q("error=access_denied&error_description=User+cancelled"),
-    );
-    const params = new URLSearchParams(target!.split("?")[1]);
-    assert.equal(params.get("error"), "access_denied");
-    assert.equal(params.get("error_description"), "User cancelled");
   });
 });

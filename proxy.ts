@@ -1,10 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
-import {
-  isAllowedEmail,
-  isPublicPath,
-  oauthLandingTarget,
-} from "@/lib/auth/access";
+import { isAllowedEmail, isPublicPath } from "@/lib/auth/access";
 
 /**
  * The gate on the whole application.
@@ -20,14 +16,6 @@ import {
  */
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-
-  /*
-   * Checked before anything else: a sign-in returning to the root carries the
-   * credential that would let the rest of this function pass. See
-   * oauthLandingTarget.
-   */
-  const landing = oauthLandingTarget(pathname, request.nextUrl.searchParams);
-  if (landing) return NextResponse.redirect(new URL(landing, request.url));
 
   if (isPublicPath(pathname)) return NextResponse.next();
 

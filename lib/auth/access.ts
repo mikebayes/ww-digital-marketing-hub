@@ -77,35 +77,3 @@ export function safeNext(next: string | null | undefined, fallback = "/"): strin
   if (next.startsWith("/login")) return fallback;
   return next;
 }
-
-/**
- * Where an OAuth return that landed on the wrong page should be sent.
- *
- * Supabase validates the redirect it was asked for against the project's own
- * allow list and silently substitutes the Site URL when a URL is not on it.
- * The Site URL is the Hub's root, so a sign-in can come back to "/" carrying
- * the authorization code rather than to /auth/callback. The root is a
- * protected route, so without this the code would be thrown away and the user
- * bounced to /login — a sign-in loop with no error to explain it.
- *
- * This forwards the credential to the route that can spend it. It becomes
- * inert the moment /auth/callback is added to the Supabase redirect allow
- * list, and can be deleted once that is confirmed in every environment.
- *
- * Deliberately narrow: the root only, and only when OAuth parameters are
- * present. An ordinary visit to the homepage is untouched.
- */
-export function oauthLandingTarget(
-  pathname: string,
-  params: URLSearchParams,
-): string | null {
-  if (pathname !== "/") return null;
-  if (!params.has("code") && !params.has("error")) return null;
-
-  const forwarded = new URLSearchParams();
-  for (const key of ["code", "error", "error_description"]) {
-    const value = params.get(key);
-    if (value !== null) forwarded.set(key, value);
-  }
-  return `/auth/callback?${forwarded.toString()}`;
-}

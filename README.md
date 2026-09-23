@@ -174,9 +174,14 @@ One Supabase project serves the whole Hub.
    admitted. Microsoft is the only staff sign-in method.
 5. **Authentication → URL Configuration**: add your deployed origin and
    `http://localhost:3000` to the redirect allow list, both with `/auth/callback`.
-   Until this is done Supabase substitutes the Site URL and the sign-in comes
-   back to `/`; `oauthLandingTarget` in `lib/auth/access.ts` catches that so
-   sign-in still works, but the list is the real fix.
+   Supabase substitutes the Site URL for any redirect not on this list, so
+   sign-in silently returns to `/` and never completes if it is missing.
+
+   To check it without completing a sign-in, request a one-off link and follow
+   it with `redirect_to` set explicitly — the verify endpoint enforces the same
+   list the OAuth callback does. Note that `admin/generate_link` reports the
+   Site URL in its own `redirect_to` response field regardless, so that field
+   is not evidence either way.
 6. **Authentication → Providers → Email**: turn it off. Nothing uses it, and
    leaving it on keeps a second way into an internal application.
 7. **Authentication → Sign-ups**: staff accounts are created by their first
