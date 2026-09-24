@@ -7,7 +7,9 @@ import { NavTree } from "./NavTree";
 import { Wordmark } from "./Wordmark";
 import { site } from "@/lib/site";
 // TEMPORARY: SignOutButton is not rendered while Microsoft sign-in is
-// disabled — there is no session to end. See lib/auth/microsoft-gate.ts.
+// dormant — there is no session to end. AccessControl stands in for it on
+// /intakes only. See lib/auth/temporary-gate.ts.
+import { AccessControl } from "./AccessControl";
 
 /**
  * Below `lg` the rail becomes a charcoal bar with a full-height drawer. The
@@ -77,6 +79,7 @@ export function MobileBar() {
         >
           <NavTree onNavigate={() => setOpen(false)} />
           <div className="border-t border-white/[0.09] px-5 py-5">
+            <AccessControl className="mb-3" />
             <p className="text-xs text-white/40">
               Version {site.version} · {site.updated}
             </p>

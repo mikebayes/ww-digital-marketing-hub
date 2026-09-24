@@ -198,42 +198,54 @@ One Supabase project serves the whole Hub.
 | `NEXT_PUBLIC_SUPABASE_URL` | no | everything |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | no | Microsoft sign-in and internal queries |
 | `SUPABASE_SERVICE_ROLE_KEY` | **yes** | the public questionnaire, and — temporarily — the intake admin |
+| `INTAKES_ACCESS_KEY` | **yes** | **TEMPORARY.** The shared key holding `/intakes` |
 
 The service role key bypasses Row Level Security. It is read by
 `lib/supabase/admin.ts`, which is marked `server-only` — importing it from a
 client component is a build error.
 
-### TEMPORARY: authentication is off
+### TEMPORARY: Microsoft sign-in is dormant
 
-Disabled 2026-09-24. **The whole Hub, including `/intakes`, is reachable by
-anyone with the URL.** Treat the deployed address as unlisted, not private,
-and do not put anything in an intake you would not accept that risk for.
+Disabled 2026-09-24, because the Azure provider in Supabase holds a **Secret
+ID** where its **Secret Value** belongs. Microsoft refuses the token exchange
+with `AADSTS7000215` and nobody can sign in. Everything else was verified
+correct against Entra — tenant, client ID, redirect URI, scope. The
+administrator who can reissue the secret is away, and the work could not wait.
 
-Why: the Azure provider in Supabase holds a **Secret ID** where its **Secret
-Value** belongs, so Microsoft refuses the token exchange with `AADSTS7000215`
-and nobody can sign in. Everything else was verified correct against Entra —
-tenant, client ID, redirect URI, scope. The administrator who can reissue the
-secret is away, and the work could not wait.
+| Routes | State |
+| --- | --- |
+| The documentation Hub | **open** — anyone with the URL, `noindex` as always |
+| `/intake/<token>` | **open**, unchanged — the token is the credential |
+| `/intakes`, `/intakes/*` | **held** by a shared key |
 
-What that changed:
+The documentation being readable is an accepted risk. `/intakes` is not, and
+the reason is the second change below.
 
-- there is no `proxy.ts`, so no middleware runs and nothing is gated
-- the intake admin queries as the service role, because with no session the
-  anon key resolves to the `anon` role, which the migration grants nothing —
-  every screen under `/intakes` returned `42501`. **RLS is therefore not
-  enforcing anything for the internal admin.**
-- the sign-out control is not rendered, there being no session to end
+- **The intake admin queries as the service role.** With no session the anon
+  key resolves to the `anon` role, which the migration grants nothing, so
+  every screen under `/intakes` returned `42501`. **RLS is no longer
+  underneath the intake admin** — the shared key is the only thing in front of
+  client records, which is exactly why `/intakes` cannot be left open.
+- **The key is checked in two places**: `proxy.ts` and `lib/intake/queries.ts`.
+  Not redundancy — a Next.js Server Action can be dispatched at any route,
+  including the documentation pages the proxy deliberately does not match, so
+  a check only in the proxy would leave the intake mutations reachable.
+- The sign-out control is replaced by a lock control, shown on `/intakes` only.
 
 What did **not** change: the anon key still grants nothing on any table, so a
 leaked anon key reads nothing through PostgREST; the client questionnaire's
-projection boundary is untouched; and `noindex, nofollow` still applies to
-every page and every route.
+projection boundary is untouched; and `noindex, nofollow` still applies
+everywhere.
+
+One shared key identifies nobody and cannot be revoked for one person. Use a
+long random value; rotating it means changing the variable **and redeploying**,
+after which every cookie already issued stops working.
 
 The Microsoft implementation is intact, not deleted — `lib/auth/access.ts`,
 `app/login/`, `app/auth/callback/` and the gate itself in
 `lib/auth/microsoft-gate.ts`, which still compiles and whose rules are still
 covered by `tests/auth-access.test.ts`. The header of that file has the
-reactivation steps.
+reactivation steps; `lib/auth/temporary-gate.ts` has the removal steps.
 
 ### Security model
 

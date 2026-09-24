@@ -6,7 +6,9 @@ import { NavTree } from "./NavTree";
 import { Wordmark } from "./Wordmark";
 import { site } from "@/lib/site";
 // TEMPORARY: SignOutButton is not rendered while Microsoft sign-in is
-// disabled — there is no session to end. See lib/auth/microsoft-gate.ts.
+// dormant — there is no session to end. AccessControl stands in for it on
+// /intakes only. See lib/auth/temporary-gate.ts.
+import { AccessControl } from "./AccessControl";
 
 /**
  * Fixed left rail. Desktop only — the mobile drawer renders the same NavTree.
@@ -50,6 +52,7 @@ export function SiteRail() {
         <p className="mt-2 text-xs leading-relaxed text-white/50">
           Version {site.version} · {site.updated}
         </p>
+        <AccessControl className="mt-3" />
       </div>
     </aside>
   );

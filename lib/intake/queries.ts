@@ -1,5 +1,12 @@
 import "server-only";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  ACCESS_COOKIE,
+  UNLOCK_PATH,
+  isValidToken,
+} from "@/lib/auth/temporary-gate";
 import { generatePublicToken } from "./token";
 import type {
   Client,
@@ -22,14 +29,17 @@ import type {
  * no session, and that client resolves to the `anon` role — which the
  * migration grants nothing. Every screen under /intakes returned 42501.
  *
- * So these run as the service role for now. Be clear about what that costs:
- * RLS is no longer enforcing anything for the internal admin, and with no
- * gate in front of it either, **anyone who knows the Hub's URL can read and
- * write client intake records**. That is the accepted state while the Hub is
- * unauthenticated, not a property to design anything else around.
+ * So these run as the service role, and because RLS is no longer underneath
+ * them, the shared key in lib/auth/temporary-gate.ts is what stands in front.
+ * The key is checked here as well as in proxy.ts, and that is not belt and
+ * braces: a Next.js Server Action can be dispatched at any route in the
+ * application, including the documentation pages the proxy deliberately does
+ * not match, so a check that lived only in the proxy would leave the
+ * mutations in app/(hub)/intakes/actions.ts reachable without it. Putting it
+ * where the data is covers every caller regardless of how it arrived.
  *
- * What it does not cost: the anon key still grants nothing on any table, so a
- * leaked anon key reads nothing through PostgREST, and the client
+ * What this does not cost: the anon key still grants nothing on any table, so
+ * a leaked anon key reads nothing through PostgREST, and the client
  * questionnaire's projection boundary in lib/intake/public.ts is untouched.
  *
  * TO RESTORE: put back `import { createClient } from "@/lib/supabase/server";`
@@ -39,6 +49,10 @@ import type {
  */
 
 async function createClient() {
+  const store = await cookies();
+  if (!(await isValidToken(store.get(ACCESS_COOKIE)?.value))) {
+    redirect(`${UNLOCK_PATH}?next=%2Fintakes`);
+  }
   return createAdminClient();
 }
 

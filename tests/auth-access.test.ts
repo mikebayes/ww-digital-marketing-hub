@@ -13,8 +13,10 @@ import {
  * here is either a stranger reading client work, or staff locked out of it.
  *
  * DORMANT (2026-09-24): nothing calls these right now. Microsoft sign-in is
- * disabled and there is no proxy.ts, so the whole Hub is open — see
- * lib/auth/microsoft-gate.ts for why and how to bring it back.
+ * disabled, the documentation Hub is open, and the proxy holds /intakes with
+ * a shared key instead — see lib/auth/microsoft-gate.ts for why and how to
+ * bring the real gate back, and tests/temporary-gate.test.ts for what is
+ * actually enforced today.
  *
  * They are still run, deliberately. These are the rules the Hub returns to,
  * and a rule that stops being tested while it waits is a rule that comes back
