@@ -168,3 +168,88 @@ describe("no service is left with an empty client questionnaire", async () => {
     }
   });
 });
+
+/**
+ * The Social Media team's feedback, pinned.
+ *
+ * Six contributions were incorporated: three as new questions, three merged
+ * into questions that already covered most of the ground. A merge is the
+ * easiest kind of change to lose — the contribution has no row of its own, so
+ * nothing fails if the wording quietly reverts. These assert the substance.
+ */
+describe("the team's six contributions survive", async () => {
+  const sql = await migration("0005_social_media_team_feedback.sql");
+
+  test("(1) success measures is a standalone question", () => {
+    assert.match(sql, /'sm_success_measures'/);
+    assert.match(sql, /How will you judge whether social media is working\?/);
+    assert.match(sql, /This can change over time\./);
+  });
+
+  test("(2) brand and style guidelines are inside the assets question", () => {
+    // Merged rather than added: a separate "do you have a brand guide?" is
+    // answered by whoever is already listing what we can draw from.
+    assert.match(sql, /brand guidelines, style guides/);
+    assert.match(sql, /question_key = 'core_existing_assets'/);
+    assert.ok(!/'core_brand_guidelines'/.test(sql), "must not become its own question");
+  });
+
+  test("(3) Business Manager ownership is inside the access question", () => {
+    assert.match(sql, /associated Business Manager/);
+    assert.match(sql, /question_key = 'sm_access_admin'/);
+  });
+
+  test("(4) approval turnaround is a standalone question", () => {
+    assert.match(sql, /'sm_approval_turnaround'/);
+    assert.match(sql, /how far in advance does your team need content to review it\?/);
+  });
+
+  test("(5) everyone involved in the process is inside the reviewers question", () => {
+    assert.match(sql, /otherwise be involved in the content process/);
+    assert.match(sql, /question_key = 'core_other_reviewers'/);
+    assert.match(sql, /graphic designers or other internal stakeholders/);
+  });
+
+  test("(6) compliance is a standalone Common question", () => {
+    assert.match(sql, /'core_compliance_requirements'/);
+    assert.match(sql, /regulatory, legal or compliance requirements/);
+    assert.match(sql, /'common', 'Audience & Content Direction'/);
+  });
+
+  test("compliance does not open a seventh client step", () => {
+    // A Risk & Compliance step would have made the client's questionnaire
+    // seven steps. It lives inside Audience & Content Direction instead.
+    assert.ok(!/Risk & Compliance/.test(sql));
+    assert.ok(!/client_step_order, 70/.test(sql));
+  });
+});
+
+describe("the refined set stays the size it was trimmed to", async () => {
+  const sql = await migration("0005_social_media_team_feedback.sql");
+
+  test("the split is asserted by the migration itself", () => {
+    assert.match(sql, /Common should hold 18 default client questions/);
+    assert.match(sql, /Social Media should hold 9 default client questions/);
+    assert.match(sql, /Community Management should be 4 and excluded/);
+  });
+
+  test("Common is not deactivated again", () => {
+    assert.ok(
+      !/set active = false/.test(sql),
+      "0005 must not retire anything; that is how Common was lost the first time",
+    );
+  });
+
+  test("the second Access question stops asking what we can check ourselves", () => {
+    // "Have you granted us access yet" is an internal status. Do Not Ask Twice.
+    assert.match(sql, /'core_access_status', 'sm_access_arrangements'/);
+    assert.match(sql, /unusual account-access arrangements/);
+    assert.ok(!/Has Web Wizards already been granted/.test(sql));
+  });
+
+  test("the conditional four are untouched", () => {
+    for (const key of CONDITIONAL_KEYS) {
+      assert.ok(!sql.includes(key), `${key} must not be modified by 0005`);
+    }
+  });
+});

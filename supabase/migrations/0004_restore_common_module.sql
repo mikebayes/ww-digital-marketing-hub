@@ -75,6 +75,18 @@ declare
   common_client int;
   social_client int;
 begin
+  /*
+   * Skipped once 0005 has run. This assertion describes the shape at the end
+   * of 0004 — 18 and 6 — and 0005 deliberately takes Social Media to 9. A
+   * replay from an empty database runs them in order and both hold; re-running
+   * this one alone afterwards would otherwise fail on a state that is correct.
+   */
+  if exists (
+    select 1 from question_definitions where question_key = 'sm_success_measures'
+  ) then
+    return;
+  end if;
+
   select count(*) into common_client
   from question_definitions d
   join services s on s.id = d.service_id
