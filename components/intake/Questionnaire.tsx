@@ -76,6 +76,19 @@ export function Questionnaire({
       {steps.map((step, index) => (
         <div key={step.title} hidden={index !== active}>
           {/*
+           * The step's own introduction, above the warning: it says what we
+           * are about to do and who we will do it with, which is the context
+           * that makes the questions beneath it answerable.
+           */}
+          {step.intro && (
+            <div className="mb-6 max-w-2xl space-y-3 text-[1.0625rem] leading-relaxed text-slate">
+              {step.intro.split(/\n\s*\n/).map((paragraph, i) => (
+                <p key={i}>{paragraph}</p>
+              ))}
+            </div>
+          )}
+
+          {/*
            * The credentials warning is repeated on any access step, because the
            * intro is a long way up the page by the time someone reaches it and
            * this is the one place they might reach for a password. Matched on

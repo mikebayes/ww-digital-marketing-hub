@@ -41,6 +41,8 @@ const PUBLIC_QUESTION_COLUMNS = [
   "options",
   "client_step",
   "client_step_order",
+  // Written by us and meant for the client to read. Not internal.
+  "step_intro",
   "sort_order",
   "included",
   "required_mode",

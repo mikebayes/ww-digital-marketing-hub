@@ -34,6 +34,7 @@ function question(overrides: Partial<IntakeQuestion> = {}): IntakeQuestion {
     options: [],
     client_step: "Your Business",
     client_step_order: 10,
+    step_intro: null,
     sort_order: 100,
     included: true,
     required_mode: "optional",
@@ -322,5 +323,68 @@ describe("what the public query is allowed to ask for", async () => {
     // No public entry point takes an intake id, so one client cannot ask for
     // another client's intake by guessing a uuid.
     assert.ok(!/export\s+async\s+function\s+\w+\(\s*\w*[Ii]ntakeId/.test(source));
+  });
+});
+
+/**
+ * A step can introduce itself.
+ *
+ * Stored on a question because steps are not rows — they are produced by
+ * grouping on client_step, so a service composes its own without any schema
+ * knowing about it. That makes "which question carries it" a real question,
+ * and these answer it.
+ */
+describe("step introductions", () => {
+  test("the intro is lifted off the question onto the step", () => {
+    const steps = buildSteps([
+      question({
+        id: "a",
+        client_step: "Access",
+        client_step_order: 60,
+        sort_order: 10,
+        step_intro: "We will be managing three channels with your team.",
+      }),
+      question({
+        id: "b",
+        client_step: "Access",
+        client_step_order: 60,
+        sort_order: 20,
+      }),
+    ]);
+    assert.equal(steps.length, 1);
+    assert.equal(steps[0].intro, "We will be managing three channels with your team.");
+  });
+
+  test("a step whose questions carry none has none", () => {
+    const steps = buildSteps([question({ id: "a" })]);
+    assert.equal(steps[0].intro, null);
+  });
+
+  test("the first one wins rather than being concatenated", () => {
+    // Two intros on one step is a seeding mistake. Joining them would hide it.
+    const steps = buildSteps([
+      question({ id: "a", sort_order: 10, step_intro: "First." }),
+      question({ id: "b", sort_order: 20, step_intro: "Second." }),
+    ]);
+    assert.equal(steps[0].intro, "First.");
+  });
+
+  test("whitespace is not an introduction", () => {
+    const steps = buildSteps([question({ id: "a", step_intro: "   " })]);
+    assert.equal(steps[0].intro, null);
+  });
+
+  test("an intro never carries an internal-only question into view", () => {
+    // The intro rides on a question; the projection still decides which
+    // questions exist. An internal question's intro must not create a step.
+    const steps = buildSteps([
+      question({
+        id: "hidden",
+        client_visible: false,
+        client_step: "Access",
+        step_intro: "Internal preamble.",
+      }),
+    ]);
+    assert.deepEqual(steps, []);
   });
 });

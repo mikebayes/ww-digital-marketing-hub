@@ -251,6 +251,7 @@ async function snapshotQuestions(
         options: d.options,
         client_step: d.client_step,
         client_step_order: d.client_step_order,
+        step_intro: d.step_intro,
         sort_order: d.sort_order,
         included: d.default_enabled,
         required_mode: d.required_mode,

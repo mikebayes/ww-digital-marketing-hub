@@ -31,6 +31,7 @@ function question(overrides: Partial<IntakeQuestion> = {}): IntakeQuestion {
     options: [],
     client_step: "Approvals & Working Together",
     client_step_order: 50,
+    step_intro: null,
     sort_order: 400,
     included: true,
     required_mode: "required_by_completion",

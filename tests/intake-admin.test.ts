@@ -44,6 +44,7 @@ function question(overrides: Partial<IntakeQuestion> = {}): IntakeQuestion {
     options: [],
     client_step: "Your Business",
     client_step_order: 10,
+    step_intro: null,
     sort_order: 1,
     included: true,
     required_mode: "required",

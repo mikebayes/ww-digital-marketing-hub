@@ -62,6 +62,8 @@ export interface IntakeQuestion {
   options: string[];
   client_step: string | null;
   client_step_order: number;
+  /** Shown once above this question's step. Null on all but the first. */
+  step_intro: string | null;
   sort_order: number;
   included: boolean;
   required_mode: RequiredMode;
@@ -142,6 +144,8 @@ export interface PublicQuestion {
 
 export interface PublicStep {
   title: string;
+  /** The step's own opening paragraphs, when it has any. */
+  intro: string | null;
   questions: PublicQuestion[];
 }
 

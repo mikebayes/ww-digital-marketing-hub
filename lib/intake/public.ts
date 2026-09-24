@@ -75,10 +75,20 @@ export function buildSteps(questions: IntakeQuestion[]): PublicStep[] {
     const title = question.client_step?.trim() || "Anything Else";
     let step = index.get(title);
     if (!step) {
-      step = { title, questions: [] };
+      step = { title, intro: null, questions: [] };
       index.set(title, step);
       steps.push(step);
     }
+    /*
+     * The intro belongs to the step, but it is stored on a question because
+     * steps are produced by grouping rather than being rows of their own. The
+     * first one found wins; a second would be a seeding mistake, and silently
+     * concatenating them would hide it.
+     */
+    if (!step.intro && question.step_intro?.trim()) {
+      step.intro = question.step_intro.trim();
+    }
+
     step.questions.push(toPublicQuestion(question));
   }
 
