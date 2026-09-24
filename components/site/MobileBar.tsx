@@ -6,7 +6,8 @@ import { usePathname } from "next/navigation";
 import { NavTree } from "./NavTree";
 import { Wordmark } from "./Wordmark";
 import { site } from "@/lib/site";
-import { SignOutButton } from "./SignOutButton";
+// TEMPORARY: SignOutButton is not rendered while Microsoft sign-in is
+// disabled — there is no session to end. See lib/auth/microsoft-gate.ts.
 
 /**
  * Below `lg` the rail becomes a charcoal bar with a full-height drawer. The
@@ -76,9 +77,6 @@ export function MobileBar() {
         >
           <NavTree onNavigate={() => setOpen(false)} />
           <div className="border-t border-white/[0.09] px-5 py-5">
-            <div className="mb-3">
-              <SignOutButton />
-            </div>
             <p className="text-xs text-white/40">
               Version {site.version} · {site.updated}
             </p>

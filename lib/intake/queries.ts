@@ -1,5 +1,5 @@
 import "server-only";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { generatePublicToken } from "./token";
 import type {
   Client,
@@ -10,12 +10,37 @@ import type {
 } from "./types";
 
 /**
- * Internal reads and writes, all through the signed-in staff member's session.
+ * Internal reads and writes for the staff intake admin.
  *
- * Nothing here uses the service role. If an RLS policy is wrong an internal
- * screen breaks loudly, which is the failure we want; the alternative hides
- * policy mistakes until the day they matter.
+ * TEMPORARY (2026-09-24) — how these reach the database.
+ * ==========================================================================
+ * These ran through createClient() in lib/supabase/server.ts: the anon key
+ * plus the staff member's Supabase session, so every query executed as the
+ * `authenticated` role with RLS applied on top.
+ *
+ * Microsoft sign-in is disabled (see lib/auth/microsoft-gate.ts), so there is
+ * no session, and that client resolves to the `anon` role — which the
+ * migration grants nothing. Every screen under /intakes returned 42501.
+ *
+ * So these run as the service role for now. Be clear about what that costs:
+ * RLS is no longer enforcing anything for the internal admin, and with no
+ * gate in front of it either, **anyone who knows the Hub's URL can read and
+ * write client intake records**. That is the accepted state while the Hub is
+ * unauthenticated, not a property to design anything else around.
+ *
+ * What it does not cost: the anon key still grants nothing on any table, so a
+ * leaked anon key reads nothing through PostgREST, and the client
+ * questionnaire's projection boundary in lib/intake/public.ts is untouched.
+ *
+ * TO RESTORE: put back `import { createClient } from "@/lib/supabase/server";`
+ * and delete createClient() below. No call site changes — the local name is
+ * the same for exactly that reason.
+ * ==========================================================================
  */
+
+async function createClient() {
+  return createAdminClient();
+}
 
 const INTAKE_COLUMNS =
   "id, client_id, account_manager_name, status, public_token, sent_at, submitted_at, reviewed_at, completed_at, created_at, updated_at";

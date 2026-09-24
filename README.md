@@ -197,13 +197,48 @@ One Supabase project serves the whole Hub.
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | no | everything |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | no | Microsoft sign-in and internal queries |
-| `SUPABASE_SERVICE_ROLE_KEY` | **yes** | the public questionnaire only |
+| `SUPABASE_SERVICE_ROLE_KEY` | **yes** | the public questionnaire, and — temporarily — the intake admin |
 
 The service role key bypasses Row Level Security. It is read by
 `lib/supabase/admin.ts`, which is marked `server-only` — importing it from a
 client component is a build error.
 
+### TEMPORARY: authentication is off
+
+Disabled 2026-09-24. **The whole Hub, including `/intakes`, is reachable by
+anyone with the URL.** Treat the deployed address as unlisted, not private,
+and do not put anything in an intake you would not accept that risk for.
+
+Why: the Azure provider in Supabase holds a **Secret ID** where its **Secret
+Value** belongs, so Microsoft refuses the token exchange with `AADSTS7000215`
+and nobody can sign in. Everything else was verified correct against Entra —
+tenant, client ID, redirect URI, scope. The administrator who can reissue the
+secret is away, and the work could not wait.
+
+What that changed:
+
+- there is no `proxy.ts`, so no middleware runs and nothing is gated
+- the intake admin queries as the service role, because with no session the
+  anon key resolves to the `anon` role, which the migration grants nothing —
+  every screen under `/intakes` returned `42501`. **RLS is therefore not
+  enforcing anything for the internal admin.**
+- the sign-out control is not rendered, there being no session to end
+
+What did **not** change: the anon key still grants nothing on any table, so a
+leaked anon key reads nothing through PostgREST; the client questionnaire's
+projection boundary is untouched; and `noindex, nofollow` still applies to
+every page and every route.
+
+The Microsoft implementation is intact, not deleted — `lib/auth/access.ts`,
+`app/login/`, `app/auth/callback/` and the gate itself in
+`lib/auth/microsoft-gate.ts`, which still compiles and whose rules are still
+covered by `tests/auth-access.test.ts`. The header of that file has the
+reactivation steps.
+
 ### Security model
+
+This is the model the Hub returns to. See the section above for what is
+actually in force today.
 
 Two access paths exist, and only two.
 

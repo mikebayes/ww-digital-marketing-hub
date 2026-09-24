@@ -3,18 +3,49 @@ import { createServerClient } from "@supabase/ssr";
 import { isAllowedEmail, isPublicPath } from "@/lib/auth/access";
 
 /**
- * The gate on the whole application.
+ * The Microsoft gate — DORMANT.
  *
- * The Hub used to be readable by anyone with the URL, and only /intakes was
- * protected. It now holds client intake data alongside the standards, and the
- * decision is that all of it is internal, so this denies by default: every
- * request is authenticated unless lib/auth/access.ts exempts it.
+ * ==========================================================================
+ * This was the body of proxy.ts until 2026-09-24. It is not wired to
+ * anything: there is no proxy.ts, so no middleware runs and the Hub is open.
+ *
+ * It was disabled because the Azure provider in Supabase holds a Secret ID
+ * where its Secret Value belongs, so Microsoft's token exchange fails with
+ * AADSTS7000215 and nobody can sign in. The Entra app itself is correct —
+ * tenant, client ID, redirect URI and scope were all verified against Entra
+ * directly. Only the secret is wrong, and the administrator who can reissue
+ * it is away.
+ *
+ * It is kept rather than deleted, and kept compiling rather than commented
+ * out, so it cannot quietly rot while it waits. The rules it enforces live in
+ * lib/auth/access.ts and are still covered by tests/auth-access.test.ts.
+ *
+ * TO REACTIVATE, once Supabase holds a valid Azure client secret Value:
+ *
+ *   1. create proxy.ts at the repository root:
+ *
+ *        import { microsoftGate } from "@/lib/auth/microsoft-gate";
+ *        export const proxy = microsoftGate;
+ *        export const config = {
+ *          matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+ *        };
+ *
+ *   2. put `import { createClient } from "@/lib/supabase/server";` back at the
+ *      top of lib/intake/queries.ts, replacing the local createClient() there
+ *   3. render <SignOutButton /> again in SiteRail and MobileBar
+ *   4. delete this paragraph and the one above it
+ * ==========================================================================
+ *
+ * The gate denies by default: every request is authenticated unless
+ * lib/auth/access.ts exempts it, so a route added later is protected because
+ * nobody remembered to protect it, rather than exposed because nobody
+ * remembered to list it.
  *
  * The client questionnaire at /intake/<token> is the one substantive
  * exemption. Its token is its credential, and it is served to people who do
  * not have Microsoft accounts with us.
  */
-export async function proxy(request: NextRequest) {
+export async function microsoftGate(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (isPublicPath(pathname)) return NextResponse.next();
@@ -74,14 +105,3 @@ export async function proxy(request: NextRequest) {
 
   return response;
 }
-
-export const config = {
-  matcher: [
-    /*
-     * Everything except Next internals and static files. The handler decides
-     * what is public; this only keeps the middleware off asset requests, which
-     * would otherwise pay for a Supabase round trip each.
-     */
-    "/((?!_next/static|_next/image|favicon.ico).*)",
-  ],
-};

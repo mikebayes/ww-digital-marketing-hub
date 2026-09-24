@@ -1,5 +1,6 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 
 import {
   acceptClientAnswers,
@@ -282,5 +283,44 @@ describe("link liveness", () => {
     assert.equal(isVisibleToClient("submitted"), true);
     assert.equal(isOpenForClient("submitted"), false);
     assert.equal(isOpenForClient("complete"), false);
+  });
+});
+
+/**
+ * The projection above is the guarantee; the query is the second line behind
+ * it. This reads the source rather than the behaviour, because the failure it
+ * guards against is somebody reaching for select("*") one day and nothing
+ * looking any different until a client reads an internal note.
+ *
+ * It matters more than it used to: while the Hub is unauthenticated the
+ * internal admin queries as the service role, so RLS is not underneath any of
+ * this any more. See lib/intake/queries.ts.
+ */
+describe("what the public query is allowed to ask for", async () => {
+  const source = await readFile(
+    new URL("../lib/intake/public-queries.ts", import.meta.url),
+    "utf8",
+  );
+
+  test("never selects every column", () => {
+    assert.ok(
+      !/\.select\(\s*["'`]\s*\*/.test(source),
+      "the public path must name its columns",
+    );
+  });
+
+  test("internal-only columns are not among the ones it names", () => {
+    for (const column of ["internal_notes", "final_answer"]) {
+      assert.ok(
+        !new RegExp(`["']${column}["']`).test(source),
+        `${column} must never be selected on the public path`,
+      );
+    }
+  });
+
+  test("a client can only address an intake by its token", () => {
+    // No public entry point takes an intake id, so one client cannot ask for
+    // another client's intake by guessing a uuid.
+    assert.ok(!/export\s+async\s+function\s+\w+\(\s*\w*[Ii]ntakeId/.test(source));
   });
 });
