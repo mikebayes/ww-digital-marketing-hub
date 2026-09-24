@@ -43,7 +43,7 @@ export default async function SettingsTab({
   const archived = Boolean(intake.archived_at);
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="max-w-[52rem] space-y-6">
       {saved && (
         <p
           className="label border-l-2 border-teal bg-teal-tint px-4 py-3 text-teal-ink"

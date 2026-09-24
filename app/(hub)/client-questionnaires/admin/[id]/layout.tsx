@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 import { Tabs } from "@/components/admin/Tabs";
 import { AdminHeader, AdminPage } from "@/components/admin/ui";
 import { StatusPill } from "../page";
-import { progress, serviceSummary } from "@/lib/intake/admin";
-import { getIntake, getIntakeQuestions } from "@/lib/intake/queries";
+import { serviceSummary } from "@/lib/intake/admin";
+import { getIntake } from "@/lib/intake/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -27,8 +27,6 @@ export default async function QuestionnaireLayout({
   const intake = await getIntake(id);
   if (!intake) notFound();
 
-  const questions = await getIntakeQuestions(id);
-  const counts = progress(questions);
   const base = `/client-questionnaires/admin/${id}`;
 
   return (
@@ -47,11 +45,13 @@ export default async function QuestionnaireLayout({
             { href: base, label: "Overview" },
             { href: `${base}/questions`, label: "Questions" },
             { href: `${base}/client-access`, label: "Client Access" },
-            {
-              href: `${base}/responses`,
-              label: "Responses",
-              badge: counts.outstanding,
-            },
+            /*
+             * No count here. "Responses 47" read as forty-seven client
+             * responses when it was the number of unanswered questions, most
+             * of them optional. A number that could mean several things is
+             * worse on a tab than no number at all.
+             */
+            { href: `${base}/responses`, label: "Responses" },
             { href: `${base}/settings`, label: "Settings" },
           ]}
         />

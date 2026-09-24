@@ -278,3 +278,169 @@ export function isArchived(intake: Pick<Intake, "archived_at">): boolean {
 export function byRecency(a: IntakeWithRelations, b: IntakeWithRelations) {
   return (b.updated_at ?? "").localeCompare(a.updated_at ?? "");
 }
+
+/* -------------------------------------------------------------------------- */
+/* Client questions vs internal preparation                                   */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The two halves of a questionnaire, which are not two kinds of the same thing.
+ *
+ * A client question is something we are asking someone outside Web Wizards and
+ * deciding whether to send. An internal preparation field is a note we write to
+ * ourselves before kickoff. Showing them in one list made "Internal
+ * preparation" read as a seventh section of the client's questionnaire, which
+ * is the opposite of what it is.
+ */
+export function clientQuestions(questions: IntakeQuestion[]): IntakeQuestion[] {
+  return questions.filter((question) => question.client_visible);
+}
+
+export function internalPreparation(
+  questions: IntakeQuestion[],
+): IntakeQuestion[] {
+  return questions.filter((question) => !question.client_visible);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Needs follow-up before completion                                          */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Client questions we must settle before the questionnaire can be finished.
+ *
+ * Specifically: client-facing, included, marked required_by_completion, and
+ * resolved by neither the client's answer nor our own finalised one. A
+ * pre-fill does not resolve it — a pre-fill is what we guessed, and the point
+ * of the mark is that somebody confirms it.
+ *
+ * Not "every unanswered question". Optional questions are optional, and an
+ * internal note we have not written yet is not a debt to the client.
+ */
+export function needsFollowUp(questions: IntakeQuestion[]): IntakeQuestion[] {
+  return questions.filter(
+    (question) =>
+      question.included &&
+      question.client_visible &&
+      question.required_mode === "required_by_completion" &&
+      isBlank(question.client_answer) &&
+      isBlank(question.final_answer),
+  );
+}
+
+/**
+ * Whether the questionnaire may be marked complete.
+ *
+ * The lifecycle rule: a client may submit with these unresolved — they are
+ * told to leave anything they are unsure of blank — but Web Wizards cannot
+ * call the onboarding finished while we still owe an answer. Checked where the
+ * buttons are drawn and again where the status is written, because a stale tab
+ * is otherwise a way around it.
+ */
+export function canMarkComplete(questions: IntakeQuestion[]): boolean {
+  return needsFollowUp(questions).length === 0;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Headline counts                                                            */
+/* -------------------------------------------------------------------------- */
+
+export interface QuestionnaireSummary {
+  /** Included, client-facing. The number people mean by "how many questions". */
+  clientQuestions: number;
+  /** Included, client-facing, with an answer from the client or from us. */
+  clientAnswered: number;
+  /** Included internal preparation fields. */
+  internalPreparation: number;
+  /** Client questions we owe an answer to before completion. */
+  needsFollowUp: number;
+  /** Client questions we pre-filled. */
+  prefilled: number;
+  /** Client questions not being asked. */
+  excluded: number;
+}
+
+/**
+ * The counts the screens label.
+ *
+ * Separate from progress() on purpose: that one counts every record, which is
+ * the right number for the Questions tab and the wrong number for a headline.
+ * "57 questions" was true and told nobody anything useful.
+ */
+export function summarize(questions: IntakeQuestion[]): QuestionnaireSummary {
+  const client = clientQuestions(questions);
+  const included = client.filter((question) => question.included);
+
+  return {
+    clientQuestions: included.length,
+    clientAnswered: included.filter((question) =>
+      ["answered", "finalized"].includes(responseState(question)),
+    ).length,
+    internalPreparation: internalPreparation(questions).filter(
+      (question) => question.included,
+    ).length,
+    needsFollowUp: needsFollowUp(questions).length,
+    prefilled: included.filter((question) => !isBlank(question.prefill_answer))
+      .length,
+    excluded: client.length - included.length,
+  };
+}
+
+/* -------------------------------------------------------------------------- */
+/* Review filters                                                             */
+/* -------------------------------------------------------------------------- */
+
+export type ReviewFilter = "client" | "follow-up" | "finalised" | "internal";
+
+export const REVIEW_FILTERS: { key: ReviewFilter; label: string }[] = [
+  { key: "client", label: "Client responses" },
+  { key: "follow-up", label: "Needs follow-up" },
+  { key: "finalised", label: "Finalised" },
+  { key: "internal", label: "Internal preparation" },
+];
+
+export const DEFAULT_REVIEW_FILTER: ReviewFilter = "client";
+
+export function parseReviewFilter(value: string | undefined): ReviewFilter {
+  return (
+    REVIEW_FILTERS.find((filter) => filter.key === value)?.key ??
+    DEFAULT_REVIEW_FILTER
+  );
+}
+
+/**
+ * Which questions a review filter shows.
+ *
+ * "client" is everything we asked them, answered or not — reviewing the
+ * questionnaire means reading it in order, not reading only the parts that
+ * came back.
+ */
+export function matchesReview(
+  question: IntakeQuestion,
+  filter: ReviewFilter,
+): boolean {
+  if (!question.included) return false;
+
+  switch (filter) {
+    case "client":
+      return question.client_visible;
+    case "follow-up":
+      return (
+        question.client_visible &&
+        question.required_mode === "required_by_completion" &&
+        isBlank(question.client_answer) &&
+        isBlank(question.final_answer)
+      );
+    case "finalised":
+      return question.client_visible && !isBlank(question.final_answer);
+    case "internal":
+      return !question.client_visible;
+  }
+}
+
+export function reviewCount(
+  questions: IntakeQuestion[],
+  filter: ReviewFilter,
+): number {
+  return questions.filter((question) => matchesReview(question, filter)).length;
+}

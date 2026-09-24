@@ -15,6 +15,7 @@ import {
   updateIntakeQuestion,
   updateIntakeSettings,
 } from "@/lib/intake/queries";
+import { canMarkComplete } from "@/lib/intake/admin";
 import { normalizeAnswer } from "@/lib/intake/public";
 import { canTransition, timestampsFor } from "@/lib/intake/status";
 import type { AnswerValue, IntakeStatus } from "@/lib/intake/types";
@@ -84,9 +85,18 @@ export async function saveQuestionsAction(formData: FormData) {
   const intakeId = String(formData.get("intake_id") ?? "");
   if (!intakeId) return;
 
+  const view = String(formData.get("view") ?? "");
   const questions = await getIntakeQuestions(intakeId);
 
   for (const question of questions) {
+    /*
+     * Only what was on screen. The tab shows client questions or internal
+     * preparation, never both, and an absent checkbox means "not rendered"
+     * rather than "unchecked" — without this, saving the internal view would
+     * exclude every client question the Account Manager could not even see.
+     */
+    if (!formData.has(`present:${question.id}`)) continue;
+
     const included = formData.get(`included:${question.id}`) === "on";
     const raw = formData.getAll(`prefill:${question.id}`).map(String);
 
@@ -108,7 +118,11 @@ export async function saveQuestionsAction(formData: FormData) {
   }
 
   refresh(intakeId);
-  redirect(`${ADMIN}/${intakeId}/questions?saved=1`);
+
+  // Back to the view they were working in, not to the default one.
+  const query = new URLSearchParams({ saved: "1" });
+  if (view) query.set("view", view);
+  redirect(`${ADMIN}/${intakeId}/questions?${query}`);
 }
 
 /** Include or exclude one question without saving the whole screen. */
@@ -136,10 +150,14 @@ export async function saveResponsesAction(formData: FormData) {
   const questions = await getIntakeQuestions(intakeId);
 
   for (const question of questions) {
-    // Only questions actually rendered on this pass are written. A filtered
-    // view posts a subset, and treating an absent field as "cleared" would
-    // wipe answers the Account Manager could not even see.
-    if (!formData.has(`final:${question.id}`)) continue;
+    /*
+     * Only questions actually rendered on this pass are written. A filtered
+     * view posts a subset, and treating an absent field as "cleared" would
+     * wipe answers the Account Manager could not even see. The marker is
+     * checked rather than the field itself, because a multiselect with nothing
+     * ticked is a real answer that posts no value of its own.
+     */
+    if (!formData.has(`present:${question.id}`)) continue;
 
     const raw = formData.getAll(`final:${question.id}`).map(String);
     const value: AnswerValue =
@@ -186,6 +204,20 @@ export async function setStatusAction(formData: FormData) {
 
   if (!canTransition(intake.status, to)) {
     redirect(`${ADMIN}/${intakeId}?error=transition`);
+  }
+
+  /*
+   * The completion rule, enforced where the status is written as well as in
+   * the button that offers it. A client may submit with required-by-completion
+   * questions unresolved — they are told to leave anything they are unsure of
+   * blank — but Web Wizards cannot call the onboarding finished while we still
+   * owe an answer. Not showing the button is a courtesy; this is the rule.
+   */
+  if (to === "complete") {
+    const questions = await getIntakeQuestions(intakeId);
+    if (!canMarkComplete(questions)) {
+      redirect(`${ADMIN}/${intakeId}?error=followup`);
+    }
   }
 
   await updateIntake(intakeId, { status: to, ...timestampsFor(to) });

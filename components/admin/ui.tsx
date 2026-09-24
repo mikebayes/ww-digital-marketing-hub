@@ -253,23 +253,33 @@ export function DetailGrid({ children }: { children: ReactNode }) {
   );
 }
 
-/** A single number with its name. Restrained — no giant decorative metrics. */
+/**
+ * One fact with its name. Restrained — no giant decorative metrics.
+ *
+ * Two sizes, because the strip carries both. A count can be read at a glance
+ * at display size; a service name or a status cannot, and setting one in the
+ * same type only makes the row wrap.
+ */
 export function Stat({
   label,
   value,
   tone,
+  variant = "number",
 }: {
   label: string;
   value: ReactNode;
   tone?: "warn";
+  variant?: "number" | "text";
 }) {
   return (
-    <div className="border-r border-rule px-5 py-4 last:border-r-0">
+    <div className="border-r border-b border-rule px-5 py-4 last:border-r-0">
       <p className="label text-muted">{label}</p>
       <p
-        className={`mt-1.5 text-[1.375rem] leading-none font-semibold tabular-nums ${
-          tone === "warn" ? "text-[#7A5B10]" : "text-charcoal"
-        }`}
+        className={`mt-1.5 font-semibold ${
+          variant === "number"
+            ? "text-[1.375rem] leading-none tabular-nums"
+            : "text-[0.9375rem] leading-snug"
+        } ${tone === "warn" ? "text-[#7A5B10]" : "text-charcoal"}`}
       >
         {value}
       </p>

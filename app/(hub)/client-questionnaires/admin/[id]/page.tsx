@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import {
   Detail,
   DetailGrid,
-  Empty,
   Panel,
-  Pill,
   Stat,
   StatRow,
 } from "@/components/admin/ui";
@@ -16,9 +15,15 @@ import {
   SecondaryAction,
   ShortDate,
 } from "@/components/intake/ui";
-import { progress, questionnaireTitle, serviceSummary } from "@/lib/intake/admin";
+import {
+  canMarkComplete,
+  needsFollowUp,
+  questionnaireTitle,
+  serviceSummary,
+  summarize,
+} from "@/lib/intake/admin";
 import { getIntake, getIntakeQuestions } from "@/lib/intake/queries";
-import { availableActions, outstandingQuestions } from "@/lib/intake/status";
+import { STATUS_LABELS, availableActions } from "@/lib/intake/status";
 import { clientIntakeUrl, resolveOrigin } from "@/lib/intake/token";
 import { setStatusAction } from "../actions";
 
@@ -42,10 +47,20 @@ export default async function OverviewTab({
   if (!intake) notFound();
 
   const questions = await getIntakeQuestions(id);
-  const counts = progress(questions);
-  const outstanding = outstandingQuestions(questions);
-  const actions = availableActions(intake.status);
+  const counts = summarize(questions);
+  const followUp = needsFollowUp(questions);
+  const completable = canMarkComplete(questions);
   const base = `/client-questionnaires/admin/${id}`;
+
+  /*
+   * A questionnaire cannot be called finished while we still owe the client an
+   * answer to something marked required by completion. The move is hidden here
+   * and refused again in the action, because hiding a button is a courtesy and
+   * not a rule.
+   */
+  const actions = availableActions(intake.status).filter(
+    (action) => action.to !== "complete" || completable,
+  );
 
   const requestHeaders = await headers();
   const clientUrl = clientIntakeUrl(
@@ -58,15 +73,28 @@ export default async function OverviewTab({
 
   return (
     <div className="space-y-8">
+      {/*
+       * Operational facts, not arithmetic. The old strip counted five kinds of
+       * record and made "Outstanding 47" the loudest thing on the page, which
+       * read as 47 unanswered client questions when most of them were optional.
+       */}
       <StatRow>
-        <Stat label="Questions" value={counts.included} />
-        <Stat label="Client sees" value={counts.clientFacing} />
-        <Stat label="Internal" value={counts.internalOnly} />
-        <Stat label="Answered" value={counts.answered} />
+        <Stat variant="text" label="Status" value={STATUS_LABELS[intake.status]} />
+        <Stat variant="text" label="Service" value={serviceSummary(intake.services)} />
         <Stat
-          label="Outstanding"
-          value={counts.outstanding}
-          tone={counts.outstanding > 0 ? "warn" : undefined}
+          variant="text"
+          label="Account Manager"
+          value={
+            intake.account_manager_name || (
+              <span className="text-muted">Not set</span>
+            )
+          }
+        />
+        <Stat label="Client questions" value={counts.clientQuestions} />
+        <Stat
+          variant="text"
+          label="Last updated"
+          value={<ShortDate value={intake.updated_at} />}
         />
       </StatRow>
 
@@ -84,10 +112,16 @@ export default async function OverviewTab({
               <Detail label="Title">
                 {questionnaireTitle(intake, intake.services)}
               </Detail>
-              <Detail label="Prefilled answers">
-                {counts.prefilled} of {counts.included}
+              <Detail label="Client questions">
+                {counts.clientQuestions} included
+                {counts.excluded > 0 && `, ${counts.excluded} excluded`}
               </Detail>
-              <Detail label="Excluded">{counts.excluded}</Detail>
+              <Detail label="Prefilled">
+                {counts.prefilled} of {counts.clientQuestions}
+              </Detail>
+              <Detail label="Internal preparation">
+                {counts.internalPreparation} fields
+              </Detail>
             </DetailGrid>
           </Panel>
 
@@ -114,31 +148,49 @@ export default async function OverviewTab({
             </DetailGrid>
           </Panel>
 
+          {/*
+           * Not "every unanswered question". These are the client questions
+           * marked required by completion that neither the client nor we have
+           * answered — the list to work through at kickoff, and the reason the
+           * questionnaire cannot be marked complete yet.
+           */}
           <Panel
-            title={`Outstanding — ${outstanding.length}`}
-            padded={outstanding.length === 0}
+            title={`Needs follow-up before completion — ${followUp.length}`}
+            action={
+              followUp.length > 0 ? (
+                <Link
+                  href={`${base}/responses?filter=follow-up`}
+                  className="label text-teal-ink underline underline-offset-2"
+                >
+                  Review
+                </Link>
+              ) : undefined
+            }
+            padded={followUp.length === 0}
           >
-            {outstanding.length === 0 ? (
+            {followUp.length === 0 ? (
               <p className="text-[0.9375rem] text-slate">
-                Nothing outstanding. Every question we need an answer to before
-                finishing has one.
+                Nothing to follow up. Every client question we owe an answer to
+                before completion has one.
               </p>
             ) : (
-              <ul className="divide-y divide-rule">
-                {outstanding.map((question) => (
-                  <li
-                    key={question.id}
-                    className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 px-5 py-3.5"
-                  >
-                    <span className="min-w-0 flex-1 text-[0.9375rem] leading-snug text-charcoal">
+              <>
+                <ul className="divide-y divide-rule">
+                  {followUp.map((question) => (
+                    <li
+                      key={question.id}
+                      className="px-5 py-3.5 text-[0.9375rem] leading-snug text-charcoal"
+                    >
                       {question.question_text}
-                    </span>
-                    <Pill tone={question.client_visible ? "warn" : "quiet"}>
-                      {question.client_visible ? "Client" : "Internal"}
-                    </Pill>
-                  </li>
-                ))}
-              </ul>
+                    </li>
+                  ))}
+                </ul>
+                <p className="border-t border-rule bg-neutral-tint px-5 py-3 text-[0.875rem] leading-relaxed text-slate">
+                  The client can submit with these unanswered. The
+                  questionnaire cannot be marked complete until each one is
+                  resolved, by their answer or by ours.
+                </p>
+              </>
             )}
           </Panel>
         </div>

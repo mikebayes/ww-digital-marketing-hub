@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Meta, Panel, Pill } from "@/components/admin/ui";
+import { Panel, Pill } from "@/components/admin/ui";
 import { AnswerInput } from "@/components/intake/AnswerInput";
 import {
   PrimaryAction,
@@ -9,16 +9,16 @@ import {
   inputClass,
 } from "@/components/intake/ui";
 import {
-  RESPONSE_FILTERS,
-  RESPONSE_STATE_LABELS,
-  type ResponseFilter,
+  DEFAULT_REVIEW_FILTER,
+  REVIEW_FILTERS,
   formatAnswer,
   groupQuestions,
   isBlank,
-  matchesFilter,
+  matchesReview,
   needsReview,
-  progress,
+  parseReviewFilter,
   responseState,
+  reviewCount,
 } from "@/lib/intake/admin";
 import { getIntake, getIntakeQuestions } from "@/lib/intake/queries";
 import type { IntakeQuestion } from "@/lib/intake/types";
@@ -33,12 +33,16 @@ export const metadata: Metadata = { title: "Responses" };
  *
  * Deliberately not a results dashboard. There is one client and one set of
  * answers, so there is nothing to aggregate and no chart worth drawing — what
- * this screen is for is working down the questionnaire before kickoff and
- * settling what each answer actually is.
+ * this is for is working down the questionnaire before kickoff and settling
+ * what each answer actually is.
  *
- * The client's words are shown as text and never in an editable field, so the
- * record of what they said cannot be overwritten by someone tidying it up.
- * Corrections go in the finalised answer beside it.
+ * It opens on the client's responses. Leading with internal preparation made
+ * the page read as a review of our own notes, which is the last thing anyone
+ * comes here to do.
+ *
+ * The client's words are text and never an editable field, so the record of
+ * what they said cannot be overwritten by someone tidying it up. Corrections
+ * go in the finalised answer beside it.
  */
 export default async function ResponsesTab({
   params,
@@ -53,21 +57,15 @@ export default async function ResponsesTab({
   const intake = await getIntake(id);
   if (!intake) notFound();
 
-  const filter = (RESPONSE_FILTERS.find((f) => f.key === query.filter)?.key ??
-    "all") as ResponseFilter;
-
+  const filter = parseReviewFilter(query.filter);
   const questions = await getIntakeQuestions(id);
-  const counts = progress(questions);
   const base = `/client-questionnaires/admin/${id}/responses`;
 
-  const groups = groupQuestions(questions)
-    .map((group) => ({
-      ...group,
-      questions: group.questions.filter((q) => matchesFilter(q, filter)),
-    }))
-    .filter((group) => group.questions.length > 0);
-
+  const groups = groupQuestions(
+    questions.filter((question) => matchesReview(question, filter)),
+  );
   const shown = groups.reduce((n, group) => n + group.questions.length, 0);
+  const internalView = filter === "internal";
 
   return (
     <form action={saveResponsesAction}>
@@ -75,33 +73,28 @@ export default async function ResponsesTab({
       <input type="hidden" name="filter" value={filter} />
 
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <nav aria-label="Filter" className="flex flex-wrap gap-1">
-          {RESPONSE_FILTERS.map((option) => {
+        <nav aria-label="Review" className="flex flex-wrap gap-1">
+          {REVIEW_FILTERS.map((option) => {
             const active = option.key === filter;
-            const count =
-              option.key === "all"
-                ? counts.included
-                : option.key === "outstanding"
-                  ? counts.outstanding
-                  : option.key === "answered"
-                    ? counts.answered
-                    : option.key === "review"
-                      ? counts.needsReview
-                      : counts.internalOnly;
-
             return (
               <Link
                 key={option.key}
-                href={option.key === "all" ? base : `${base}?filter=${option.key}`}
+                href={
+                  option.key === DEFAULT_REVIEW_FILTER
+                    ? base
+                    : `${base}?filter=${option.key}`
+                }
                 aria-current={active ? "page" : undefined}
-                className={`label border px-3 py-2 transition-colors ${
+                className={`label border px-3.5 py-2.5 transition-colors ${
                   active
                     ? "border-charcoal bg-charcoal text-white"
                     : "border-rule-strong text-slate hover:border-charcoal hover:text-charcoal"
                 }`}
               >
                 {option.label}
-                <span className="ml-2 tabular-nums opacity-60">{count}</span>
+                <span className="ml-2 tabular-nums opacity-60">
+                  {reviewCount(questions, option.key)}
+                </span>
               </Link>
             );
           })}
@@ -114,11 +107,20 @@ export default async function ResponsesTab({
         )}
       </div>
 
+      {internalView && (
+        <p className="mt-5 border-l-2 border-charcoal bg-neutral-tint px-4 py-3 text-[0.875rem] leading-relaxed text-charcoal">
+          <strong className="font-semibold">Internal only.</strong> Our own
+          preparation notes. Never shown to the client.
+        </p>
+      )}
+
       <div className="mt-5 space-y-6">
         {shown === 0 ? (
           <Panel title="Nothing to show">
             <p className="text-[0.9375rem] text-slate">
-              No questions match this filter.
+              {filter === "follow-up"
+                ? "Nothing needs following up. Every question we owe an answer to before completion has one."
+                : "No questions match this view."}
             </p>
           </Panel>
         ) : (
@@ -128,16 +130,18 @@ export default async function ResponsesTab({
               title={group.title}
               padded={false}
               action={
-                <Pill tone={group.clientFacing ? "quiet" : "neutral"}>
-                  {group.clientFacing
-                    ? `${group.questions.length}`
-                    : "Internal only"}
-                </Pill>
+                <span className="label text-muted tabular-nums">
+                  {group.questions.length}
+                </span>
               }
             >
               <ul className="divide-y divide-rule">
                 {group.questions.map((question) => (
-                  <ResponseRow key={question.id} question={question} />
+                  <ResponseRow
+                    key={question.id}
+                    question={question}
+                    internal={!question.client_visible}
+                  />
                 ))}
               </ul>
             </Panel>
@@ -158,49 +162,73 @@ export default async function ResponsesTab({
   );
 }
 
-function ResponseRow({ question }: { question: IntakeQuestion }) {
+/* -------------------------------------------------------------------------- */
+
+function ResponseRow({
+  question,
+  internal,
+}: {
+  question: IntakeQuestion;
+  internal: boolean;
+}) {
   const state = responseState(question);
   const clientAnswer = formatAnswer(question.client_answer);
   const prefill = formatAnswer(question.prefill_answer);
   const review = needsReview(question);
+  const followUp =
+    question.required_mode === "required_by_completion" &&
+    isBlank(question.client_answer) &&
+    isBlank(question.final_answer);
 
   return (
     <li className="px-5 py-5">
+      <input type="hidden" name={`present:${question.id}`} value="1" />
+
       <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-2">
         <p className="min-w-0 flex-1 text-[0.9375rem] leading-snug font-medium text-charcoal">
           {question.question_text}
         </p>
         <div className="flex flex-wrap items-center gap-2">
-          {review && <Pill tone="warn">Needs review</Pill>}
-          <Pill
-            tone={
-              state === "outstanding"
-                ? "warn"
-                : state === "finalized"
+          {review && <Pill tone="warn">Changed from client</Pill>}
+          {followUp && !internal && <Pill tone="warn">Needs follow-up</Pill>}
+          {!followUp && (
+            <Pill
+              tone={
+                state === "finalized"
                   ? "teal"
                   : state === "answered"
                     ? "neutral"
                     : "quiet"
-            }
-          >
-            {RESPONSE_STATE_LABELS[state]}
-          </Pill>
-          {!question.client_visible && <Meta>Internal</Meta>}
+              }
+            >
+              {state === "finalized"
+                ? "Finalised"
+                : state === "answered"
+                  ? "Answered"
+                  : state === "prepared"
+                    ? internal
+                      ? "Written"
+                      : "Prefilled"
+                    : internal
+                      ? "Empty"
+                      : "No answer"}
+            </Pill>
+          )}
         </div>
       </div>
 
       <div className="mt-4 grid gap-5 lg:grid-cols-2">
         <div className="space-y-4">
-          {question.client_visible && (
+          {!internal && (
             <div>
               <p className="label text-muted">Client response</p>
               {clientAnswer ? (
-                <p className="mt-1.5 text-[0.9375rem] leading-relaxed whitespace-pre-line text-charcoal">
+                <p className="mt-1.5 rounded-none border-l-2 border-rule-strong pl-3 text-[0.9375rem] leading-relaxed whitespace-pre-line text-charcoal">
                   {clientAnswer}
                 </p>
               ) : (
                 <p className="mt-1.5 text-[0.9375rem] text-muted">
-                  No answer given
+                  Not answered
                 </p>
               )}
             </div>
@@ -209,7 +237,7 @@ function ResponseRow({ question }: { question: IntakeQuestion }) {
           {prefill && (
             <div>
               <p className="label text-muted">
-                {question.client_visible ? "Prefilled" : "Internal preparation"}
+                {internal ? "Internal preparation" : "Prefilled answer"}
               </p>
               <p className="mt-1.5 text-[0.9375rem] leading-relaxed whitespace-pre-line text-slate">
                 {prefill}
@@ -220,9 +248,15 @@ function ResponseRow({ question }: { question: IntakeQuestion }) {
 
         <div className="space-y-4">
           <div>
-            <p className="label text-muted">Finalised answer</p>
+            <label
+              htmlFor={`final-${question.id}`}
+              className="label block text-muted"
+            >
+              {internal ? "Resolved value" : "Finalised answer"}
+            </label>
             <div className="mt-2">
               <AnswerInput
+                id={`final-${question.id}`}
                 name={`final:${question.id}`}
                 fieldType={question.field_type}
                 options={question.options ?? []}

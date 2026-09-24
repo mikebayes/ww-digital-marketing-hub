@@ -3,14 +3,22 @@ import assert from "node:assert/strict";
 
 import {
   authoritativeAnswer,
+  canMarkComplete,
+  clientQuestions,
   documentFileName,
   formatAnswer,
   groupQuestions,
+  internalPreparation,
   matchesFilter,
+  matchesReview,
+  needsFollowUp,
   needsReview,
+  parseReviewFilter,
   progress,
   questionnaireTitle,
   responseState,
+  reviewCount,
+  summarize,
   serviceSummary,
 } from "../lib/intake/admin.ts";
 import type { IntakeQuestion } from "../lib/intake/types.ts";
@@ -278,5 +286,143 @@ describe("formatting an answer", () => {
     assert.equal(formatAnswer(null), "");
     assert.equal(formatAnswer("  "), "");
     assert.equal(formatAnswer([]), "");
+  });
+});
+
+describe("client questions and internal preparation are different things", () => {
+  const rows = [
+    question({ id: "c1" }),
+    question({ id: "c2", included: false }),
+    question({ id: "i1", client_visible: false, client_step: null }),
+  ];
+
+  test("the split is by who may see it, not by section name", () => {
+    assert.deepEqual(clientQuestions(rows).map((q) => q.id), ["c1", "c2"]);
+    assert.deepEqual(internalPreparation(rows).map((q) => q.id), ["i1"]);
+  });
+
+  test("the headline count is included client questions only", () => {
+    const counts = summarize(rows);
+    assert.equal(counts.clientQuestions, 1);
+    assert.equal(counts.excluded, 1);
+    assert.equal(counts.internalPreparation, 1);
+  });
+
+  test("internal preparation is never counted as a client question", () => {
+    const counts = summarize([
+      question({ id: "i", client_visible: false, client_step: null }),
+    ]);
+    assert.equal(counts.clientQuestions, 0);
+    assert.equal(counts.internalPreparation, 1);
+  });
+});
+
+describe("needs follow-up before completion", () => {
+  const rbc = (over = {}) =>
+    question({ required_mode: "required_by_completion", ...over });
+
+  test("a required-by-completion question nobody has answered", () => {
+    assert.equal(needsFollowUp([rbc({ id: "a" })]).length, 1);
+  });
+
+  test("the client answering resolves it", () => {
+    assert.equal(needsFollowUp([rbc({ client_answer: "yes" })]).length, 0);
+  });
+
+  test("our finalised answer resolves it too", () => {
+    assert.equal(needsFollowUp([rbc({ final_answer: "we decided" })]).length, 0);
+  });
+
+  test("a prefill does NOT resolve it", () => {
+    // A prefill is what we guessed. The whole point of the mark is that
+    // somebody confirms it.
+    assert.equal(needsFollowUp([rbc({ prefill_answer: "we guessed" })]).length, 1);
+  });
+
+  test("optional and plain-required questions are not follow-up", () => {
+    assert.equal(needsFollowUp([question({ required_mode: "optional" })]).length, 0);
+    assert.equal(needsFollowUp([question({ required_mode: "required" })]).length, 0);
+  });
+
+  test("excluded questions are not owed to anyone", () => {
+    assert.equal(needsFollowUp([rbc({ included: false })]).length, 0);
+  });
+
+  test("internal preparation is never client follow-up", () => {
+    assert.equal(
+      needsFollowUp([rbc({ client_visible: false, client_step: null })]).length,
+      0,
+    );
+  });
+});
+
+describe("the completion rule", () => {
+  test("complete is refused while a required-by-completion question is open", () => {
+    assert.equal(
+      canMarkComplete([question({ required_mode: "required_by_completion" })]),
+      false,
+    );
+  });
+
+  test("complete is allowed once each one is resolved", () => {
+    assert.equal(
+      canMarkComplete([
+        question({ required_mode: "required_by_completion", client_answer: "a" }),
+        question({ required_mode: "required_by_completion", final_answer: "b" }),
+        question({ required_mode: "optional" }),
+      ]),
+      true,
+    );
+  });
+
+  test("an empty questionnaire is completable", () => {
+    assert.equal(canMarkComplete([]), true);
+  });
+});
+
+describe("review filters", () => {
+  const rows = [
+    question({ id: "asked" }),
+    question({ id: "answered", client_answer: "yes" }),
+    question({ id: "final", client_answer: "yes", final_answer: "no" }),
+    question({ id: "owed", required_mode: "required_by_completion" }),
+    question({ id: "internal", client_visible: false, client_step: null }),
+    question({ id: "excluded", included: false }),
+  ];
+  const ids = (f: Parameters<typeof matchesReview>[1]) =>
+    rows.filter((q) => matchesReview(q, f)).map((q) => q.id);
+
+  test("the default view is the client's questionnaire", () => {
+    assert.equal(parseReviewFilter(undefined), "client");
+    assert.equal(parseReviewFilter("nonsense"), "client");
+  });
+
+  test("client responses means everything we asked them, answered or not", () => {
+    assert.deepEqual(ids("client"), ["asked", "answered", "final", "owed"]);
+  });
+
+  test("internal preparation is its own view, never mixed into client", () => {
+    assert.deepEqual(ids("internal"), ["internal"]);
+    assert.ok(!ids("client").includes("internal"));
+  });
+
+  test("follow-up is only what we owe before completion", () => {
+    assert.deepEqual(ids("follow-up"), ["owed"]);
+  });
+
+  test("finalised is what we wrote our own answer to", () => {
+    assert.deepEqual(ids("finalised"), ["final"]);
+  });
+
+  test("excluded questions appear in no view", () => {
+    for (const f of ["client", "follow-up", "finalised", "internal"] as const) {
+      assert.ok(!ids(f).includes("excluded"), f);
+    }
+  });
+
+  test("counts agree with what the view shows", () => {
+    for (const f of ["client", "follow-up", "finalised", "internal"] as const) {
+      assert.equal(reviewCount(rows, f), ids(f).length, f);
+    }
   });
 });
