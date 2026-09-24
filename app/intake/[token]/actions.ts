@@ -12,7 +12,7 @@ import {
 import {
   findApprovedContact,
   markContactActive,
-  markContactFinished,
+  markContactSubmitted,
   resolveSessionContact,
   saveClientAnswers,
 } from "@/lib/intake/public-queries";
@@ -106,22 +106,32 @@ export async function saveProgressAction(formData: FormData) {
 }
 
 /**
- * "Finish for now".
+ * "Submit responses".
  *
- * Saves, marks this person done, and changes nothing for anybody else. The
- * questionnaire stays open: one contact finishing used to close it for the
- * whole client, which meant the second person to open the link got a thank-you
- * page for work they had not done.
+ * Saves, marks this person as having sent theirs, and changes nothing for
+ * anybody else. The questionnaire stays live: one contact submitting used to
+ * close it for the whole client, which meant the second person to open the
+ * link got a thank-you page for work they had not done.
+ *
+ * Lands on its own route rather than back here with a flag. A Server Action
+ * redirecting to the path it was posted from does not reliably carry a query
+ * string, and the confirmation is a screen rather than a banner anyway.
  */
-export async function finishForNowAction(formData: FormData) {
+export async function submitResponsesAction(formData: FormData) {
   const token = String(formData.get("token") ?? "");
 
   const active = await activeContact(token);
   if (!active) redirect(`/intake/${token}`);
 
   await saveClientAnswers(token, collectAnswers(formData), active.contact.id);
-  await markContactFinished(active.contact.id);
+  await markContactSubmitted(active.contact.id);
 
-  revalidatePath(`/intake/${token}`);
-  redirect(`/intake/${token}?finished=1`);
+  /*
+   * No revalidatePath here. Revalidating the route this action was posted from
+   * and then redirecting away raced: the refresh of the current page won and
+   * the browser stayed on the questionnaire, having saved and submitted
+   * silently. Both routes are force-dynamic, so there is nothing cached to
+   * invalidate anyway.
+   */
+  redirect(`/intake/${token}/submitted`);
 }

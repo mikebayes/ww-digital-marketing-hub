@@ -36,7 +36,7 @@ function formatMoment(value: string): string {
 export function Questionnaire({
   intake,
   saveAction,
-  finishAction,
+  submitAction,
   readOnly,
   token,
 }: {
@@ -44,7 +44,7 @@ export function Questionnaire({
   /** Carried in the form so every write is addressed by token, never by id. */
   token?: string;
   saveAction?: (formData: FormData) => void | Promise<void>;
-  finishAction?: (formData: FormData) => void | Promise<void>;
+  submitAction?: (formData: FormData) => void | Promise<void>;
   readOnly?: boolean;
 }) {
   const [active, setActive] = useState(0);
@@ -211,7 +211,7 @@ export function Questionnaire({
           </button>
         )}
 
-        {!readOnly && saveAction && (
+        {!readOnly && !onLastStep && saveAction && (
           <button
             type="submit"
             formAction={saveAction}
@@ -221,13 +221,13 @@ export function Questionnaire({
           </button>
         )}
 
-        {!readOnly && onLastStep && finishAction && (
+        {!readOnly && onLastStep && submitAction && (
           <button
             type="submit"
-            formAction={finishAction}
+            formAction={submitAction}
             className="label inline-flex items-center gap-3 bg-charcoal px-5 py-3.5 text-white transition-colors hover:bg-teal-ink"
           >
-            Finish for Now
+            Submit Responses
             <span aria-hidden className="h-px w-6 bg-teal" />
           </button>
         )}
@@ -235,8 +235,8 @@ export function Questionnaire({
 
       {!readOnly && onLastStep && (
         <p className="mt-4 max-w-2xl text-[0.875rem] leading-relaxed text-slate">
-          You can finish with questions left blank — anything missing, we will
-          pick up at kickoff. Finishing does not close the questionnaire: you
+          You can submit with questions left blank — anything missing, we will
+          pick up at kickoff. Submitting does not close the questionnaire: you
           and your colleagues can come back to this link and change answers for
           as long as it stays open.
         </p>

@@ -10,7 +10,7 @@ import { SESSION_COOKIE, readSession } from "@/lib/intake/client-session";
 import { resolveSessionContact } from "@/lib/intake/public-queries";
 import {
   enterAction,
-  finishForNowAction,
+  submitResponsesAction,
   saveProgressAction,
   switchContactAction,
 } from "./actions";
@@ -138,7 +138,7 @@ export default async function ClientIntakePage({
   }
 
   const open = isOpenForClient(intake.status);
-  const hasFinished = active.contact.participation === "finished";
+  const hasSubmitted = active.contact.participation === "submitted";
 
   return (
     <ClientShell
@@ -166,20 +166,19 @@ export default async function ClientIntakePage({
       }
     >
       {/*
-       * Derived from the contact's own state rather than a query flag, so it
-       * survives a refresh and is still there when they come back tomorrow —
-       * "have I done this already?" is the question someone returning to a
-       * shared questionnaire actually has.
+       * Not the confirmation — that is its own screen at /submitted. This is
+       * for somebody coming back afterwards, answering the question they
+       * actually have: yes, you already sent these, and yes, you can still
+       * change them.
        */}
-      {hasFinished && (
+      {hasSubmitted && (
         <p className="mb-8 border-l-2 border-teal bg-teal-tint px-5 py-4 text-[0.9375rem] leading-relaxed text-charcoal">
-          Thanks. Your responses have been saved. You can return to this
-          questionnaire using the same link if you need to make changes while it
-          remains open.
+          You have already submitted your responses. You can still change them
+          while this questionnaire is open.
         </p>
       )}
 
-      {saved && !hasFinished && (
+      {saved && !hasSubmitted && (
         <p className="mb-8 border-l-2 border-teal bg-teal-tint px-5 py-4 text-[0.9375rem] text-charcoal">
           Saved. You can close this and come back to the same link later.
         </p>
@@ -201,7 +200,7 @@ export default async function ClientIntakePage({
           token={token}
           readOnly={!open}
           saveAction={open ? saveProgressAction : undefined}
-          finishAction={open ? finishForNowAction : undefined}
+          submitAction={open ? submitResponsesAction : undefined}
         />
       </div>
     </ClientShell>

@@ -249,7 +249,7 @@ export async function resolveSessionContact(
 }
 
 const CONTACT_COLUMNS =
-  "id, intake_id, name, email, is_primary, participation, first_accessed_at, last_activity_at, finished_at, created_at, updated_at";
+  "id, intake_id, name, email, is_primary, participation, first_accessed_at, last_activity_at, submitted_at, created_at, updated_at";
 
 /** Note that a contact has opened the questionnaire. */
 export async function markContactActive(
@@ -275,14 +275,15 @@ export async function markContactActive(
       .update({ first_accessed_at: now })
       .eq("id", contactId)
       .is("first_accessed_at", null);
-    return;
   }
 
   /*
-   * Opening the questionnaire is not the same as working on it, so the status
-   * only moves on the first saved answer. Somebody who looked and closed the
-   * tab has not started. Guarded on the current value so a contact who has
-   * already finished is not dragged back to in progress by an autosave.
+   * Getting through the email gate is enough to be in progress. The admin
+   * shows status beside last activity, and "Not started" next to a timestamp
+   * from four minutes ago is a contradiction somebody has to stop and resolve.
+   *
+   * Guarded on the current value so a contact who has already submitted is not
+   * dragged back to in progress by returning to look at their answers.
    */
   await supabase
     .from("intake_contacts")
@@ -291,13 +292,23 @@ export async function markContactActive(
     .eq("participation", "not_started");
 }
 
-/** "Finish for now" — for this person, and nobody else. */
-export async function markContactFinished(contactId: string): Promise<void> {
+/**
+ * One contact has sent their answers.
+ *
+ * About that person and nobody else: the questionnaire stays live, the other
+ * contacts are untouched, and this one can come back and change things while
+ * it remains open. Only Web Wizards ends a questionnaire.
+ */
+export async function markContactSubmitted(contactId: string): Promise<void> {
   const supabase = createAdminClient();
   const now = new Date().toISOString();
   await supabase
     .from("intake_contacts")
-    .update({ participation: "finished", finished_at: now, last_activity_at: now })
+    .update({
+      participation: "submitted",
+      submitted_at: now,
+      last_activity_at: now,
+    })
     .eq("id", contactId);
 }
 

@@ -40,7 +40,7 @@ const PARTICIPATION: Record<
 > = {
   not_started: { label: "Not started", tone: "quiet" },
   in_progress: { label: "In progress", tone: "live" },
-  finished: { label: "Finished for now", tone: "teal" },
+  submitted: { label: "Submitted", tone: "teal" },
 };
 
 /**

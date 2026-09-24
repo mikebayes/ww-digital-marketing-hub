@@ -333,7 +333,7 @@ export async function listContacts(intakeId: string): Promise<IntakeContact[]> {
   const { data, error } = await supabase
     .from("intake_contacts")
     .select(
-      "id, intake_id, name, email, is_primary, participation, first_accessed_at, last_activity_at, finished_at, created_at, updated_at",
+      "id, intake_id, name, email, is_primary, participation, first_accessed_at, last_activity_at, submitted_at, created_at, updated_at",
     )
     .eq("intake_id", intakeId)
     .order("is_primary", { ascending: false })

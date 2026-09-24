@@ -106,7 +106,7 @@ export interface Intake {
  * Record-keeping only today: the public questionnaire still authenticates with
  * the token alone. The approved-email gate is separate work.
  */
-export type ContactParticipation = "not_started" | "in_progress" | "finished";
+export type ContactParticipation = "not_started" | "in_progress" | "submitted";
 
 export interface IntakeContact {
   id: string;
@@ -118,7 +118,8 @@ export interface IntakeContact {
   participation: ContactParticipation;
   first_accessed_at: string | null;
   last_activity_at: string | null;
-  finished_at: string | null;
+  /** When this person sent their answers. Not the questionnaire's own. */
+  submitted_at: string | null;
   created_at: string;
   updated_at: string;
 }
