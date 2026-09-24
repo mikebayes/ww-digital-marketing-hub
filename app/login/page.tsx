@@ -20,11 +20,18 @@ export const metadata: Metadata = {
  * the internal navigation.
  */
 const MESSAGES: Record<string, string> = {
+  cancelled: "That sign-in was cancelled at the Microsoft screen.",
+  conflict:
+    "Your Web Wizards account exists but is not yet joined to Microsoft sign-in. Tell the Digital Marketing lead — it is a one-off fix on our side, not something you can do from here.",
   denied:
     "That account is not a Web Wizards account. The Hub is internal, so sign in with your Web Wizards Microsoft account.",
+  exchange:
+    "Sign-in came back from Microsoft but could not be completed here. Close any other Hub tabs and try once more; if it happens again, tell the Digital Marketing lead.",
   failed: "That sign-in did not complete. Please try again.",
   newuser:
     "Your Web Wizards account has not been given Hub access yet. Ask the Digital Marketing lead to enable it — you will not need to do anything else.",
+  noemail:
+    "Microsoft did not return an email address for that account, so the Hub cannot tell whether it is a Web Wizards one. Tell the Digital Marketing lead.",
   provider:
     "Microsoft sign-in is unavailable right now. If it keeps happening, tell the Digital Marketing lead.",
   unconfigured:
@@ -34,11 +41,27 @@ const MESSAGES: Record<string, string> = {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string; error?: string; signedout?: string }>;
+  searchParams: Promise<{
+    next?: string;
+    error?: string;
+    ref?: string;
+    signedout?: string;
+  }>;
 }) {
   const params = await searchParams;
   const next = safeNext(params.next);
-  const message = params.error ? MESSAGES[params.error] : undefined;
+  const message = params.error
+    ? (MESSAGES[params.error] ?? MESSAGES.failed)
+    : undefined;
+
+  /*
+   * The reason and the provider's own code, shown small. Whoever is standing
+   * at the screen is the one who can report it, and "failed · invalid_client"
+   * is the difference between a guess and an answer.
+   */
+  const reference = [params.error, params.ref]
+    .filter((part) => part && /^[a-z0-9_]{1,24}$/.test(part))
+    .join(" · ");
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-charcoal px-6 py-16">
@@ -54,9 +77,14 @@ export default async function LoginPage({
         </p>
 
         {message && (
-          <p className="mt-6 border-l-2 border-teal bg-white/[0.06] px-4 py-3 text-[0.875rem] leading-relaxed text-white/80">
-            {message}
-          </p>
+          <div className="mt-6 border-l-2 border-teal bg-white/[0.06] px-4 py-3">
+            <p className="text-[0.875rem] leading-relaxed text-white/80">
+              {message}
+            </p>
+            {reference && (
+              <p className="label mt-2 text-white/35">{reference}</p>
+            )}
+          </div>
         )}
 
         {params.signedout && !message && (
