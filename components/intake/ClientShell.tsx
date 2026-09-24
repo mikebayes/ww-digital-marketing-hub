@@ -47,7 +47,15 @@ export function ClientShell({
 /**
  * The introduction, in the words agreed for it.
  *
- * `introText` replaces the opening paragraphs when a questionnaire sets one in
+ * Says nothing about what we have already filled in. The old opening promised
+ * the client we had pre-filled what we knew, which was a claim the
+ * questionnaire could not keep: All Weather went out with nothing pre-filled,
+ * and most will. The wording now has to read correctly whether the
+ * questionnaire arrives empty or half-answered, so it describes what the
+ * questionnaire is for instead of what is in it. Pre-filled answers still show
+ * up in their fields wherever they exist.
+ *
+ * `introText` replaces the opening paragraph when a questionnaire sets one in
  * Settings — some engagements need to say who we are or why we are asking. The
  * two lines that follow it are not replaceable: "answer what you can" is the
  * instruction that makes the whole thing work, and the line about credentials
@@ -71,14 +79,13 @@ export function ClientIntro({ introText }: { introText?: string | null }) {
             .map((paragraph, index) => <p key={index}>{paragraph}</p>)
         ) : (
           <p>
-            We&rsquo;ve already filled in anything we know from our previous
-            conversations and research. Please review what&rsquo;s here and fill
-            in anything that&rsquo;s missing.
+            This questionnaire will help us understand your business, priorities
+            and how we&rsquo;ll work together on social media.
           </p>
         )}
         <p>
-          Answer what you can. If you&rsquo;re unsure about something, leave it
-          blank and we can discuss it during kickoff.
+          Please answer what you can. If you&rsquo;re unsure about something,
+          leave it blank and we can discuss it during kickoff.
         </p>
         <p className="font-medium text-charcoal">
           Please do not include passwords or authentication codes.

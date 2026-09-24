@@ -15,6 +15,14 @@ import type { PublicIntake } from "@/lib/intake/types";
  * Progress is shown as "Step 2 of 6" and a rule. Not a count of questions
  * remaining — the client is being asked to help, not to clear a backlog.
  */
+/** Whether a field actually has something in it, across the answer types. */
+function hasValue(value: PublicIntake["steps"][number]["questions"][number]["value"]): boolean {
+  if (value === null || value === undefined) return false;
+  if (typeof value === "string") return value.trim() !== "";
+  if (Array.isArray(value)) return value.length > 0;
+  return true;
+}
+
 /** A readable local moment, for the attribution line. */
 function formatMoment(value: string): string {
   return new Date(value).toLocaleString(undefined, {
@@ -145,9 +153,18 @@ export function Questionnaire({
                     />
                   </div>
 
+                  {/*
+                   * A read-only question we have filled in is "check this";
+                   * a read-only question we have not is "we will do this with
+                   * you". Branching rather than one sentence, because the
+                   * shorter version told a client to correct something that
+                   * was not there.
+                   */}
                   {!question.editable && (
                     <p className="mt-2 text-[0.875rem] text-muted">
-                      Shown for reference. Let us know at kickoff if this is wrong.
+                      {hasValue(question.value)
+                        ? "Shown for reference. Let us know at kickoff if this is wrong."
+                        : "For information only. We will cover this at kickoff."}
                     </p>
                   )}
 
