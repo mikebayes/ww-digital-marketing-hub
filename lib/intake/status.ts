@@ -3,10 +3,13 @@ import type { IntakeStatus, IntakeQuestion } from "./types";
 /**
  * The intake lifecycle.
  *
- * Statuses move forward through the list, with two exceptions that exist
- * because real onboarding is not a straight line: a sent intake can be pulled
- * back to ready, and a submitted one can be reopened for the client if
- * something important was missed.
+ * Seven stored statuses, four that staff ever see. The extra three are history
+ * — "ready" was a staging step nobody used, "in_progress" is set by the client
+ * touching the form, "reviewed" was a stage between submitted and complete
+ * that turned out to be the same conversation. They stay in the column so old
+ * questionnaires still read correctly and so the client-side transitions that
+ * write them keep working; they are folded into a phase before anything is
+ * rendered.
  */
 export const STATUS_ORDER: IntakeStatus[] = [
   "draft",
@@ -18,6 +21,7 @@ export const STATUS_ORDER: IntakeStatus[] = [
   "complete",
 ];
 
+/** The stored value, for audit surfaces. Not what the admin screens show. */
 export const STATUS_LABELS: Record<IntakeStatus, string> = {
   draft: "Draft",
   ready: "Ready to send",
@@ -27,6 +31,52 @@ export const STATUS_LABELS: Record<IntakeStatus, string> = {
   reviewed: "Reviewed",
   complete: "Complete",
 };
+
+/* -------------------------------------------------------------------------- */
+/* What staff see                                                             */
+/* -------------------------------------------------------------------------- */
+
+export type StaffPhase = "draft" | "live" | "submitted" | "complete";
+
+export const PHASE_LABELS: Record<StaffPhase, string> = {
+  draft: "Draft",
+  /*
+   * Not "Sent". The application does not send anything — making a
+   * questionnaire live opens its URL, and somebody still has to email the
+   * link. Calling it Sent claimed an action the tool had not performed.
+   */
+  live: "Live",
+  submitted: "Submitted",
+  complete: "Complete",
+};
+
+export const PHASE_DESCRIPTIONS: Record<StaffPhase, string> = {
+  draft: "Being prepared. The client link does not work yet.",
+  live: "The client can open the link and answer.",
+  submitted: "The client has sent their answers back.",
+  complete: "Finished and on the record.",
+};
+
+export function phaseOf(status: IntakeStatus): StaffPhase {
+  switch (status) {
+    case "draft":
+    case "ready":
+      return "draft";
+    case "sent":
+    case "in_progress":
+      return "live";
+    case "submitted":
+    case "reviewed":
+      return "submitted";
+    case "complete":
+      return "complete";
+  }
+}
+
+/** What the admin screens call a questionnaire. */
+export function phaseLabel(status: IntakeStatus): string {
+  return PHASE_LABELS[phaseOf(status)];
+}
 
 /**
  * What the Account Manager can do next, given where the intake is.
@@ -39,33 +89,32 @@ export interface StatusAction {
   label: string;
 }
 
+/**
+ * What the Account Manager can do next.
+ *
+ * One move forward per phase, and one way back. The old model offered six
+ * buttons across four screens for a process with two decisions in it: open the
+ * questionnaire to the client, and call it finished.
+ *
+ * "Mark submitted" is deliberately absent. Submitting is the client's act —
+ * the public route writes that status itself when they press the button — and
+ * a staff button for it invited someone to declare a questionnaire returned
+ * that had not been.
+ */
 export function availableActions(status: IntakeStatus): StatusAction[] {
-  switch (status) {
+  switch (phaseOf(status)) {
     case "draft":
-      return [{ to: "ready", label: "Mark ready to send" }];
-    case "ready":
-      return [
-        { to: "sent", label: "Mark sent" },
-        { to: "draft", label: "Back to draft" },
-      ];
-    case "sent":
-    case "in_progress":
-      return [
-        { to: "submitted", label: "Mark submitted" },
-        { to: "ready", label: "Unsend" },
-      ];
+      return [{ to: "sent", label: "Make live" }];
+    case "live":
+      // Closes the client's link again. Answers already given are kept.
+      return [{ to: "draft", label: "Take offline" }];
     case "submitted":
       return [
-        { to: "reviewed", label: "Mark reviewed" },
-        { to: "in_progress", label: "Reopen for client" },
-      ];
-    case "reviewed":
-      return [
         { to: "complete", label: "Mark complete" },
-        { to: "submitted", label: "Back to submitted" },
+        { to: "sent", label: "Reopen for client" },
       ];
     case "complete":
-      return [{ to: "reviewed", label: "Reopen" }];
+      return [{ to: "submitted", label: "Reopen" }];
   }
 }
 

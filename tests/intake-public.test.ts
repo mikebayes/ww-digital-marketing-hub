@@ -388,3 +388,66 @@ describe("step introductions", () => {
     assert.deepEqual(steps, []);
   });
 });
+
+describe("when the client link works", () => {
+  test("a draft is not reachable", () => {
+    // Make Live is what opens the URL. Before that the token 404s.
+    assert.equal(isVisibleToClient("draft"), false);
+    assert.equal(isVisibleToClient("ready"), false);
+  });
+
+  test("going live opens it immediately", () => {
+    assert.equal(isVisibleToClient("sent"), true);
+    assert.equal(isOpenForClient("sent"), true);
+  });
+
+  test("it stays readable after submission, but closed to edits", () => {
+    for (const status of ["submitted", "reviewed", "complete"] as const) {
+      assert.equal(isVisibleToClient(status), true, status);
+      assert.equal(isOpenForClient(status), false, status);
+    }
+  });
+});
+
+describe("the client-facing title", () => {
+  test("carries the questionnaire name, resolved", () => {
+    const intake = toPublicIntake({
+      clientName: "All Weather at Home",
+      title: "Social Media Questionnaire",
+      status: "sent",
+      submittedAt: null,
+      questions: [question({ id: "a" })],
+    });
+    assert.equal(intake.title, "Social Media Questionnaire");
+    assert.equal(
+      `${intake.clientName} | ${intake.title} | Web Wizards`,
+      "All Weather at Home | Social Media Questionnaire | Web Wizards",
+    );
+  });
+
+  test("an unnamed questionnaire still gets a client-facing title", () => {
+    const intake = toPublicIntake({
+      clientName: "Acme",
+      status: "sent",
+      submittedAt: null,
+      questions: [question({ id: "a" })],
+    });
+    assert.equal(intake.title, "Client Questionnaire");
+    assert.ok(!intake.title.includes("Digital Marketing Hub"));
+  });
+
+  test("the title never carries internal language", () => {
+    for (const title of [undefined, "  ", "Social Media Questionnaire"]) {
+      const intake = toPublicIntake({
+        clientName: "Acme",
+        title,
+        status: "sent",
+        submittedAt: null,
+        questions: [question({ id: "a" })],
+      });
+      for (const banned of ["Digital Marketing Hub", "Admin", "Intake", "Preview"]) {
+        assert.ok(!intake.title.includes(banned), `${title} -> ${intake.title}`);
+      }
+    }
+  });
+});

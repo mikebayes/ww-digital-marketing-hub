@@ -4,6 +4,8 @@ import assert from "node:assert/strict";
 import {
   availableActions,
   canTransition,
+  phaseLabel,
+  phaseOf,
   effectiveAnswer,
   outstandingQuestions,
   STATUS_ORDER,
@@ -84,40 +86,83 @@ describe("tokens", () => {
   });
 });
 
+describe("the four phases staff see", () => {
+  test("seven stored statuses fold into four", () => {
+    assert.deepEqual(
+      STATUS_ORDER.map(phaseOf),
+      ["draft", "draft", "live", "live", "submitted", "submitted", "complete"],
+    );
+  });
+
+  test("nothing is called Sent, because nothing is sent", () => {
+    // Making a questionnaire live opens its URL. A person still emails the
+    // link, so labelling the state "Sent" claimed an act the tool had not done.
+    for (const status of STATUS_ORDER) {
+      assert.notEqual(phaseLabel(status), "Sent", status);
+    }
+    assert.equal(phaseLabel("sent"), "Live");
+    assert.equal(phaseLabel("in_progress"), "Live");
+  });
+
+  test("the legacy staging states read as the phase they belong to", () => {
+    assert.equal(phaseLabel("ready"), "Draft");
+    assert.equal(phaseLabel("reviewed"), "Submitted");
+  });
+});
+
 describe("lifecycle", () => {
   test("every status offers at least one action", () => {
     for (const status of STATUS_ORDER) {
-      assert.ok(
-        availableActions(status).length > 0,
-        `${status} is a dead end`,
-      );
+      assert.ok(availableActions(status).length > 0, `${status} is a dead end`);
     }
   });
 
-  test("the happy path runs draft to complete", () => {
-    const path: IntakeStatus[] = [
-      "draft",
-      "ready",
-      "sent",
-      "submitted",
-      "reviewed",
-      "complete",
-    ];
-    for (let i = 0; i < path.length - 1; i++) {
-      assert.ok(
-        canTransition(path[i], path[i + 1]),
-        `${path[i]} should reach ${path[i + 1]}`,
-      );
-    }
+  test("a draft goes live in one move", () => {
+    const actions = availableActions("draft");
+    assert.equal(actions.length, 1);
+    assert.equal(actions[0].label, "Make live");
+    assert.equal(canTransition("draft", "sent"), true);
   });
 
-  test("a draft cannot skip straight to complete", () => {
+  test("there is no staging step before going live", () => {
+    // "Ready to send" was a state nobody used, between two they did.
+    assert.equal(canTransition("draft", "ready"), false);
+    assert.ok(!availableActions("draft").some((a) => a.to === "ready"));
+  });
+
+  test("staff are not offered a way to declare the client submitted", () => {
+    // Submitting is the client's act. The public route writes that status
+    // itself; a staff button invited someone to mark a questionnaire returned
+    // that had not been.
+    for (const status of STATUS_ORDER) {
+      assert.ok(
+        !availableActions(status).some((a) => a.to === "submitted" && phaseOf(status) === "live"),
+        `${status} should not offer "mark submitted"`,
+      );
+    }
+    assert.equal(canTransition("sent", "submitted"), false);
+    assert.equal(canTransition("in_progress", "submitted"), false);
+  });
+
+  test("a live questionnaire can be taken offline again", () => {
+    assert.equal(canTransition("sent", "draft"), true);
+    assert.equal(canTransition("in_progress", "draft"), true);
+  });
+
+  test("complete is reachable only once the client has submitted", () => {
+    assert.equal(canTransition("submitted", "complete"), true);
+    assert.equal(canTransition("reviewed", "complete"), true);
     assert.equal(canTransition("draft", "complete"), false);
-    assert.equal(canTransition("draft", "sent"), false);
+    assert.equal(canTransition("sent", "complete"), false);
+    assert.equal(canTransition("in_progress", "complete"), false);
   });
 
-  test("a submitted intake can be reopened for the client", () => {
-    assert.equal(canTransition("submitted", "in_progress"), true);
+  test("a submitted questionnaire can be reopened for the client", () => {
+    assert.equal(canTransition("submitted", "sent"), true);
+  });
+
+  test("a completed questionnaire can be reopened", () => {
+    assert.equal(canTransition("complete", "submitted"), true);
   });
 
   test("entering a status stamps only its own timestamp", () => {

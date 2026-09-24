@@ -17,10 +17,33 @@ export const dynamic = "force-dynamic";
  * noindex is inherited from the root layout and reinforced by the site-wide
  * X-Robots-Tag header, which matters more here than anywhere else in the Hub.
  */
-export const metadata: Metadata = {
-  title: "Web Wizards · Getting started",
-  robots: { index: false, follow: false },
-};
+/**
+ * The tab the client sees.
+ *
+ * `absolute` on purpose: the root layout appends "· Digital Marketing Hub" to
+ * every title, which is internal language on a page we send outside the
+ * company. This is the one route where the Hub must not be named at all.
+ *
+ * A bad token gets the generic title, because the 404 should not confirm which
+ * client a guessed token belonged to.
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ token: string }>;
+}): Promise<Metadata> {
+  const { token } = await params;
+  const intake = await getPublicIntake(token);
+
+  return {
+    title: {
+      absolute: intake
+        ? `${intake.clientName} | ${intake.title} | Web Wizards`
+        : "Web Wizards",
+    },
+    robots: { index: false, follow: false },
+  };
+}
 
 export default async function ClientIntakePage({
   params,

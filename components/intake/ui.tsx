@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { STATUS_LABELS } from "@/lib/intake/status";
+import { phaseLabel } from "@/lib/intake/status";
 import type { IntakeStatus } from "@/lib/intake/types";
 
 /**
@@ -22,7 +22,7 @@ export function StatusMark({ status }: { status: IntakeStatus }) {
         done ? "text-teal-ink" : live ? "text-charcoal" : "text-muted"
       }`}
     >
-      {STATUS_LABELS[status]}
+      {phaseLabel(status)}
     </span>
   );
 }

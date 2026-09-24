@@ -97,6 +97,7 @@ export function buildSteps(questions: IntakeQuestion[]): PublicStep[] {
 
 export function toPublicIntake(input: {
   clientName: string;
+  title?: string;
   status: IntakeStatus;
   submittedAt: string | null;
   introText?: string | null;
@@ -104,6 +105,7 @@ export function toPublicIntake(input: {
 }): PublicIntake {
   return {
     clientName: input.clientName,
+    title: input.title?.trim() || "Client Questionnaire",
     status: input.status,
     submittedAt: input.submittedAt,
     introText: input.introText ?? null,

@@ -12,7 +12,7 @@ import {
 import { PrimaryAction, ShortDate } from "@/components/intake/ui";
 import { serviceSummary } from "@/lib/intake/admin";
 import { countArchivedIntakes, listIntakes } from "@/lib/intake/queries";
-import { STATUS_LABELS } from "@/lib/intake/status";
+import { phaseLabel, phaseOf } from "@/lib/intake/status";
 import type { IntakeStatus } from "@/lib/intake/types";
 
 export const dynamic = "force-dynamic";
@@ -25,15 +25,14 @@ export const metadata: Metadata = {
 
 /** Status, compact. Live work reads loudest; finished work recedes. */
 export function StatusPill({ status }: { status: IntakeStatus }) {
-  const tone =
-    status === "complete"
-      ? "teal"
-      : status === "sent" || status === "in_progress"
-        ? "live"
-        : status === "submitted" || status === "reviewed"
-          ? "neutral"
-          : "quiet";
-  return <Pill tone={tone}>{STATUS_LABELS[status]}</Pill>;
+  const tone = {
+    draft: "quiet",
+    live: "live",
+    submitted: "neutral",
+    complete: "teal",
+  }[phaseOf(status)] as "quiet" | "live" | "neutral" | "teal";
+
+  return <Pill tone={tone}>{phaseLabel(status)}</Pill>;
 }
 
 const COLUMNS = [
@@ -41,7 +40,7 @@ const COLUMNS = [
   { label: "Service", width: "18%" },
   { label: "Account Manager", width: "16%" },
   { label: "Status", width: "14%" },
-  { label: "Sent" },
+  { label: "Made live" },
   { label: "Submitted" },
   { label: "Updated" },
 ];

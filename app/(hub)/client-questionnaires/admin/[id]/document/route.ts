@@ -8,7 +8,7 @@ import {
   serviceSummary,
 } from "@/lib/intake/admin";
 import { getIntake, getIntakeQuestions } from "@/lib/intake/queries";
-import { STATUS_LABELS } from "@/lib/intake/status";
+import { phaseLabel } from "@/lib/intake/status";
 import type { IntakeQuestion } from "@/lib/intake/types";
 
 export const dynamic = "force-dynamic";
@@ -117,7 +117,7 @@ export async function GET(
     <div><dt>Service</dt><dd>${escapeHtml(serviceSummary(intake.services))}</dd></div>
     <div><dt>Account Manager</dt><dd>${escapeHtml(intake.account_manager_name ?? "Not set")}</dd></div>
     <div><dt>Questionnaire</dt><dd>${escapeHtml(questionnaireTitle(intake, intake.services))}</dd></div>
-    <div><dt>Status</dt><dd>${escapeHtml(STATUS_LABELS[intake.status])}</dd></div>
+    <div><dt>Status</dt><dd>${escapeHtml(phaseLabel(intake.status))}</dd></div>
     <div><dt>${completed === intake.completed_at && intake.completed_at ? "Completed" : "Submitted"}</dt><dd>${escapeHtml(longDate(completed))}</dd></div>
   </dl>
 

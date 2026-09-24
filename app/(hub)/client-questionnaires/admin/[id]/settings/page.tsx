@@ -9,7 +9,7 @@ import {
 } from "@/components/intake/ui";
 import { billableServices, questionnaireTitle } from "@/lib/intake/admin";
 import { getIntake, listServices } from "@/lib/intake/queries";
-import { STATUS_LABELS } from "@/lib/intake/status";
+import { phaseLabel } from "@/lib/intake/status";
 import { saveSettingsAction, setArchivedAction } from "../../actions";
 
 export const dynamic = "force-dynamic";
@@ -169,7 +169,7 @@ export default async function SettingsTab({
 
       <Panel title="Status">
         <p className="text-[0.9375rem] text-charcoal">
-          {STATUS_LABELS[intake.status]}
+          {phaseLabel(intake.status)}
         </p>
         <p className="mt-2 text-[0.8125rem] leading-relaxed text-muted">
           Status moves from the Overview tab, which only offers the moves the

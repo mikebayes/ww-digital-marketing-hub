@@ -1,6 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { acceptClientAnswers, isOpenForClient, isVisibleToClient, toPublicIntake } from "./public";
+import { questionnaireTitle } from "./admin";
 import { isPlausibleToken } from "./token";
 import type { AnswerValue, IntakeQuestion, PublicIntake } from "./types";
 
@@ -55,6 +56,7 @@ const PUBLIC_QUESTION_COLUMNS = [
 interface TokenLookup {
   intakeId: string;
   clientName: string;
+  title: string;
   introText: string | null;
   status: PublicIntake["status"];
   submittedAt: string | null;
@@ -80,7 +82,7 @@ async function lookup(token: string): Promise<TokenLookup | null> {
 
   const { data: intake, error } = await supabase
     .from("intakes")
-    .select("id, status, submitted_at, intro_text, client:clients (name)")
+    .select("id, status, submitted_at, intro_text, title, client:clients (name), intake_services (service:services (name, slug))")
     .eq("public_token", token)
     .maybeSingle();
 
@@ -91,7 +93,9 @@ async function lookup(token: string): Promise<TokenLookup | null> {
     status: PublicIntake["status"];
     submitted_at: string | null;
     intro_text: string | null;
+    title: string | null;
     client: { name: string } | null;
+    intake_services: { service: { name: string; slug: string } | null }[];
   };
 
   // An intake that has not been sent has no live link, even with a valid token.
@@ -112,6 +116,17 @@ async function lookup(token: string): Promise<TokenLookup | null> {
     intakeId: row.id,
     clientName: row.client?.name ?? "",
     introText: row.intro_text,
+    /*
+     * Resolved here rather than in the page: the client tab should say what
+     * they were sent, and the fallback needs the service names, which only
+     * this query has. Service names are not internal — the client bought them.
+     */
+    title: questionnaireTitle(
+      { title: row.title },
+      (row.intake_services ?? [])
+        .map((link) => link.service)
+        .filter((service): service is { name: string; slug: string } => Boolean(service)),
+    ),
     status: row.status,
     submittedAt: row.submitted_at,
     questions: (questions ?? []) as unknown as IntakeQuestion[],
@@ -128,6 +143,7 @@ export async function getPublicIntake(token: string): Promise<PublicIntake | nul
     status: found.status,
     submittedAt: found.submittedAt,
     introText: found.introText,
+    title: found.title,
     questions: found.questions,
   });
 }

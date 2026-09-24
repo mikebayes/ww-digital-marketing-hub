@@ -23,7 +23,7 @@ import {
   summarize,
 } from "@/lib/intake/admin";
 import { getIntake, getIntakeQuestions } from "@/lib/intake/queries";
-import { STATUS_LABELS, availableActions } from "@/lib/intake/status";
+import { availableActions, phaseLabel } from "@/lib/intake/status";
 import { clientIntakeUrl, resolveOrigin } from "@/lib/intake/token";
 import { setStatusAction } from "../actions";
 
@@ -79,7 +79,7 @@ export default async function OverviewTab({
        * read as 47 unanswered client questions when most of them were optional.
        */}
       <StatRow>
-        <Stat variant="text" label="Status" value={STATUS_LABELS[intake.status]} />
+        <Stat variant="text" label="Status" value={phaseLabel(intake.status)} />
         <Stat variant="text" label="Service" value={serviceSummary(intake.services)} />
         <Stat
           variant="text"
@@ -130,7 +130,7 @@ export default async function OverviewTab({
               <Detail label="Created">
                 <ShortDate value={intake.created_at} />
               </Detail>
-              <Detail label="Sent">
+              <Detail label="Made live">
                 <ShortDate value={intake.sent_at} />
               </Detail>
               <Detail label="Submitted">

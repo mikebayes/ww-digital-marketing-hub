@@ -5,10 +5,32 @@ import { ClientIntro, ClientShell } from "@/components/intake/ClientShell";
 import { Questionnaire } from "@/components/intake/Questionnaire";
 import { getIntake, getIntakeQuestions } from "@/lib/intake/queries";
 import { toPublicIntake } from "@/lib/intake/public";
+import { questionnaireTitle } from "@/lib/intake/admin";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = { title: "Preview" };
+/**
+ * The same tab the client would see.
+ *
+ * A preview that says "Preview · Digital Marketing Hub" is not showing what
+ * the client gets, and the title is one of the things being checked.
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const intake = await getIntake(id);
+  if (!intake) return { title: { absolute: "Web Wizards" } };
+
+  return {
+    title: {
+      absolute: `${intake.client.name} | ${questionnaireTitle(intake, intake.services)} | Web Wizards`,
+    },
+    robots: { index: false, follow: false },
+  };
+}
 
 /**
  * Preview.

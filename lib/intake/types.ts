@@ -151,6 +151,8 @@ export interface PublicStep {
 
 export interface PublicIntake {
   clientName: string;
+  /** What this questionnaire is called, resolved. Used for the browser tab. */
+  title: string;
   /**
    * The paragraph above the first question, when this intake sets one.
    * Authored by Web Wizards for this client; null uses the standard wording.
