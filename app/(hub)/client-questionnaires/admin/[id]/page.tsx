@@ -119,9 +119,6 @@ export default async function OverviewTab({
               <Detail label="Prefilled">
                 {counts.prefilled} of {counts.clientQuestions}
               </Detail>
-              <Detail label="Internal preparation">
-                {counts.internalPreparation} fields
-              </Detail>
             </DetailGrid>
           </Panel>
 

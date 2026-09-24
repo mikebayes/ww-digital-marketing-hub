@@ -9,6 +9,7 @@ import {
 } from "@/lib/auth/temporary-gate";
 import { generatePublicToken } from "./token";
 import type {
+  AnswerValue,
   Client,
   Intake,
   IntakeContact,
@@ -331,7 +332,9 @@ export async function listContacts(intakeId: string): Promise<IntakeContact[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("intake_contacts")
-    .select("id, intake_id, name, email, is_primary, created_at, updated_at")
+    .select(
+      "id, intake_id, name, email, is_primary, participation, first_accessed_at, last_activity_at, finished_at, created_at, updated_at",
+    )
     .eq("intake_id", intakeId)
     .order("is_primary", { ascending: false })
     .order("name");
@@ -457,4 +460,52 @@ export async function setIntakeServices(
     .insert(toAdd.map((serviceId) => ({ intake_id: intakeId, service_id: serviceId })));
 
   await snapshotQuestions(supabase, intakeId, toAdd);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Answer history                                                             */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Every recorded change to one client answer, newest first.
+ *
+ * Staff only, and it lives here rather than in public-queries for that reason:
+ * the revision trail names which colleague changed what, and the client's own
+ * page shows only the most recent attribution.
+ */
+export async function answerHistory(
+  intakeId: string,
+  questionId: string,
+): Promise<
+  {
+    id: string;
+    contactName: string | null;
+    previous: AnswerValue;
+    next: AnswerValue;
+    at: string;
+  }[]
+> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("intake_answer_revisions")
+    .select("id, previous_answer, new_answer, created_at, contact:intake_contacts (name)")
+    .eq("intake_id", intakeId)
+    .eq("intake_question_id", questionId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+
+  return ((data ?? []) as unknown as {
+    id: string;
+    previous_answer: AnswerValue;
+    new_answer: AnswerValue;
+    created_at: string;
+    contact: { name: string } | null;
+  }[]).map((row) => ({
+    id: row.id,
+    contactName: row.contact?.name ?? null,
+    previous: row.previous_answer,
+    next: row.new_answer,
+    at: row.created_at,
+  }));
 }

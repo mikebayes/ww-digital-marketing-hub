@@ -137,7 +137,7 @@ export type ResponseState =
   | "finalized"
   /** Asked, included, and still nothing to show for it. */
   | "outstanding"
-  /** Internal preparation, or a client-visible question we pre-filled. */
+  /** We pre-filled it and no client has touched it yet. */
   | "prepared"
   /** Not asked. */
   | "excluded";
@@ -182,76 +182,6 @@ export function needsReview(question: IntakeQuestion): boolean {
   );
 }
 
-export type ResponseFilter =
-  | "all"
-  | "outstanding"
-  | "answered"
-  | "review"
-  | "internal";
-
-export const RESPONSE_FILTERS: { key: ResponseFilter; label: string }[] = [
-  { key: "all", label: "All" },
-  { key: "outstanding", label: "Outstanding" },
-  { key: "answered", label: "Answered" },
-  { key: "review", label: "Needs review" },
-  { key: "internal", label: "Internal" },
-];
-
-export function matchesFilter(
-  question: IntakeQuestion,
-  filter: ResponseFilter,
-): boolean {
-  switch (filter) {
-    case "all":
-      return question.included;
-    case "outstanding":
-      return question.included && responseState(question) === "outstanding";
-    case "answered":
-      return (
-        question.included &&
-        ["answered", "finalized"].includes(responseState(question))
-      );
-    case "review":
-      return needsReview(question);
-    case "internal":
-      return question.included && !question.client_visible;
-  }
-}
-
-/* -------------------------------------------------------------------------- */
-/* Counts                                                                     */
-/* -------------------------------------------------------------------------- */
-
-export interface QuestionnaireProgress {
-  total: number;
-  included: number;
-  excluded: number;
-  clientFacing: number;
-  internalOnly: number;
-  answered: number;
-  outstanding: number;
-  prefilled: number;
-  needsReview: number;
-}
-
-export function progress(questions: IntakeQuestion[]): QuestionnaireProgress {
-  const included = questions.filter((q) => q.included);
-  return {
-    total: questions.length,
-    included: included.length,
-    excluded: questions.length - included.length,
-    clientFacing: included.filter((q) => q.client_visible).length,
-    internalOnly: included.filter((q) => !q.client_visible).length,
-    answered: included.filter((q) =>
-      ["answered", "finalized"].includes(responseState(q)),
-    ).length,
-    outstanding: included.filter((q) => responseState(q) === "outstanding")
-      .length,
-    prefilled: included.filter((q) => !isBlank(q.prefill_answer)).length,
-    needsReview: included.filter(needsReview).length,
-  };
-}
-
 /* -------------------------------------------------------------------------- */
 /* Display                                                                    */
 /* -------------------------------------------------------------------------- */
@@ -284,22 +214,16 @@ export function byRecency(a: IntakeWithRelations, b: IntakeWithRelations) {
 /* -------------------------------------------------------------------------- */
 
 /**
- * The two halves of a questionnaire, which are not two kinds of the same thing.
+ * The questions this module is about.
  *
- * A client question is something we are asking someone outside Web Wizards and
- * deciding whether to send. An internal preparation field is a note we write to
- * ourselves before kickoff. Showing them in one list made "Internal
- * preparation" read as a seventh section of the client's questionnaire, which
- * is the opposite of what it is.
+ * Everything not client-visible is retired Internal Preparation: nine fields
+ * that duplicated the Internal Service Brief and asked an Account Manager to
+ * retype it. They are deactivated in the library and filtered out here rather
+ * than deleted, so questionnaires that already carry them keep the rows and no
+ * screen has to explain them.
  */
 export function clientQuestions(questions: IntakeQuestion[]): IntakeQuestion[] {
   return questions.filter((question) => question.client_visible);
-}
-
-export function internalPreparation(
-  questions: IntakeQuestion[],
-): IntakeQuestion[] {
-  return questions.filter((question) => !question.client_visible);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -350,8 +274,6 @@ export interface QuestionnaireSummary {
   clientQuestions: number;
   /** Included, client-facing, with an answer from the client or from us. */
   clientAnswered: number;
-  /** Included internal preparation fields. */
-  internalPreparation: number;
   /** Client questions we owe an answer to before completion. */
   needsFollowUp: number;
   /** Client questions we pre-filled. */
@@ -376,9 +298,6 @@ export function summarize(questions: IntakeQuestion[]): QuestionnaireSummary {
     clientAnswered: included.filter((question) =>
       ["answered", "finalized"].includes(responseState(question)),
     ).length,
-    internalPreparation: internalPreparation(questions).filter(
-      (question) => question.included,
-    ).length,
     needsFollowUp: needsFollowUp(questions).length,
     prefilled: included.filter((question) => !isBlank(question.prefill_answer))
       .length,
@@ -390,13 +309,12 @@ export function summarize(questions: IntakeQuestion[]): QuestionnaireSummary {
 /* Review filters                                                             */
 /* -------------------------------------------------------------------------- */
 
-export type ReviewFilter = "client" | "follow-up" | "finalised" | "internal";
+export type ReviewFilter = "client" | "follow-up" | "finalised";
 
 export const REVIEW_FILTERS: { key: ReviewFilter; label: string }[] = [
   { key: "client", label: "Client responses" },
   { key: "follow-up", label: "Needs follow-up" },
   { key: "finalised", label: "Finalised" },
-  { key: "internal", label: "Internal preparation" },
 ];
 
 export const DEFAULT_REVIEW_FILTER: ReviewFilter = "client";
@@ -433,8 +351,6 @@ export function matchesReview(
       );
     case "finalised":
       return question.client_visible && !isBlank(question.final_answer);
-    case "internal":
-      return !question.client_visible;
   }
 }
 

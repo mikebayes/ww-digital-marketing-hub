@@ -41,6 +41,9 @@ function question(overrides: Partial<IntakeQuestion> = {}): IntakeQuestion {
     client_editable: true,
     prefill_answer: null,
     client_answer: null,
+    answered_by_contact_id: null,
+    answered_at: null,
+    answer_revision_count: 0,
     final_answer: null,
     internal_notes: null,
     ...overrides,
@@ -87,10 +90,10 @@ describe("tokens", () => {
 });
 
 describe("the four phases staff see", () => {
-  test("seven stored statuses fold into four", () => {
+  test("seven stored statuses fold into three", () => {
     assert.deepEqual(
       STATUS_ORDER.map(phaseOf),
-      ["draft", "draft", "live", "live", "submitted", "submitted", "complete"],
+      ["draft", "draft", "live", "live", "live", "live", "complete"],
     );
   });
 
@@ -106,7 +109,10 @@ describe("the four phases staff see", () => {
 
   test("the legacy staging states read as the phase they belong to", () => {
     assert.equal(phaseLabel("ready"), "Draft");
-    assert.equal(phaseLabel("reviewed"), "Submitted");
+    // Written back when one contact pressing Send closed the questionnaire for
+    // the whole client. Those records are still open for their contacts.
+    assert.equal(phaseLabel("submitted"), "Live");
+    assert.equal(phaseLabel("reviewed"), "Live");
   });
 });
 
@@ -130,18 +136,15 @@ describe("lifecycle", () => {
     assert.ok(!availableActions("draft").some((a) => a.to === "ready"));
   });
 
-  test("staff are not offered a way to declare the client submitted", () => {
-    // Submitting is the client's act. The public route writes that status
-    // itself; a staff button invited someone to mark a questionnaire returned
-    // that had not been.
+  test("nothing anywhere can put a questionnaire into Submitted", () => {
+    // One contact finishing used to close it for the whole client. Now
+    // "submitted" is a state only old records carry, and no action reaches it.
     for (const status of STATUS_ORDER) {
       assert.ok(
-        !availableActions(status).some((a) => a.to === "submitted" && phaseOf(status) === "live"),
-        `${status} should not offer "mark submitted"`,
+        !availableActions(status).some((a) => a.to === "submitted"),
+        `${status} should not reach submitted`,
       );
     }
-    assert.equal(canTransition("sent", "submitted"), false);
-    assert.equal(canTransition("in_progress", "submitted"), false);
   });
 
   test("a live questionnaire can be taken offline again", () => {
@@ -149,20 +152,16 @@ describe("lifecycle", () => {
     assert.equal(canTransition("in_progress", "draft"), true);
   });
 
-  test("complete is reachable only once the client has submitted", () => {
+  test("only Web Wizards closes a questionnaire, and only from Live", () => {
+    assert.equal(canTransition("sent", "complete"), true);
+    assert.equal(canTransition("in_progress", "complete"), true);
     assert.equal(canTransition("submitted", "complete"), true);
-    assert.equal(canTransition("reviewed", "complete"), true);
+    // A draft has never been seen by anyone; there is nothing to finish.
     assert.equal(canTransition("draft", "complete"), false);
-    assert.equal(canTransition("sent", "complete"), false);
-    assert.equal(canTransition("in_progress", "complete"), false);
   });
 
-  test("a submitted questionnaire can be reopened for the client", () => {
-    assert.equal(canTransition("submitted", "sent"), true);
-  });
-
-  test("a completed questionnaire can be reopened", () => {
-    assert.equal(canTransition("complete", "submitted"), true);
+  test("a completed questionnaire can be reopened to the client", () => {
+    assert.equal(canTransition("complete", "sent"), true);
   });
 
   test("entering a status stamps only its own timestamp", () => {

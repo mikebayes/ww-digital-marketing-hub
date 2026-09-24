@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Panel, Pill } from "@/components/admin/ui";
 import { AnswerInput } from "@/components/intake/AnswerInput";
@@ -11,7 +10,6 @@ import {
 import {
   clientQuestions,
   groupQuestions,
-  internalPreparation,
   isBlank,
   summarize,
 } from "@/lib/intake/admin";
@@ -52,10 +50,10 @@ export default async function QuestionsTab({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ view?: string; saved?: string }>;
+  searchParams: Promise<{ saved?: string }>;
 }) {
   const { id } = await params;
-  const { view, saved } = await searchParams;
+  const { saved } = await searchParams;
 
   const intake = await getIntake(id);
   if (!intake) notFound();
@@ -64,29 +62,18 @@ export default async function QuestionsTab({
   const counts = summarize(questions);
   const serviceName = new Map(intake.services.map((s) => [s.id, s.name]));
 
-  const internalView = view === "internal";
-  const base = `/client-questionnaires/admin/${id}/questions`;
-  const visible = internalView
-    ? internalPreparation(questions)
-    : clientQuestions(questions);
-  const groups = groupQuestions(visible);
+  const groups = groupQuestions(clientQuestions(questions));
 
   return (
     <form action={saveQuestionsAction}>
       <input type="hidden" name="intake_id" value={id} />
-      <input type="hidden" name="view" value={internalView ? "internal" : ""} />
 
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <nav aria-label="Question set" className="flex flex-wrap gap-1">
-          <ViewLink href={base} active={!internalView}>
-            Client questions
-            <Count>{counts.clientQuestions}</Count>
-          </ViewLink>
-          <ViewLink href={`${base}?view=internal`} active={internalView}>
-            Internal preparation
-            <Count>{counts.internalPreparation}</Count>
-          </ViewLink>
-        </nav>
+        <p className="text-[0.875rem] text-slate">
+          {counts.clientQuestions} client questions included
+          {counts.excluded > 0 && ` · ${counts.excluded} excluded`}
+          {counts.prefilled > 0 && ` · ${counts.prefilled} prefilled`}
+        </p>
 
         {saved && (
           <p className="label text-teal-ink" role="status">
@@ -95,62 +82,31 @@ export default async function QuestionsTab({
         )}
       </div>
 
-      {internalView ? (
-        <>
-          <p className="mt-5 border-l-2 border-charcoal bg-neutral-tint px-4 py-3 text-[0.875rem] leading-relaxed text-charcoal">
-            <strong className="font-semibold">Internal only.</strong> Never
-            shown to the client, on the questionnaire or anywhere else. These
-            are the notes we take before kickoff, not questions we are deciding
-            whether to send.
-          </p>
-
-          <div className="mt-5 space-y-6">
-            {groups.map((group) => (
-              <Panel key={group.title} title={group.title}>
-                <div className="space-y-6">
-                  {group.questions.map((question) => (
-                    <InternalField key={question.id} question={question} />
-                  ))}
-                </div>
-              </Panel>
-            ))}
-          </div>
-        </>
-      ) : (
-        <>
-          <p className="mt-5 text-[0.875rem] text-slate">
-            {counts.clientQuestions} client questions included
-            {counts.excluded > 0 && ` · ${counts.excluded} excluded`}
-            {counts.prefilled > 0 && ` · ${counts.prefilled} prefilled`}
-          </p>
-
-          <div className="mt-4 space-y-6">
-            {groups.map((group) => (
-              <Panel
-                key={group.title}
-                title={group.title}
-                padded={false}
-                action={
-                  <span className="label text-muted tabular-nums">
-                    {group.questions.filter((q) => q.included).length} of{" "}
-                    {group.questions.length}
-                  </span>
-                }
-              >
-                <ul className="divide-y divide-rule">
-                  {group.questions.map((question) => (
-                    <ClientQuestionRow
-                      key={question.id}
-                      question={question}
-                      serviceName={serviceName}
-                    />
-                  ))}
-                </ul>
-              </Panel>
-            ))}
-          </div>
-        </>
-      )}
+      <div className="mt-5 space-y-6">
+        {groups.map((group) => (
+          <Panel
+            key={group.title}
+            title={group.title}
+            padded={false}
+            action={
+              <span className="label text-muted tabular-nums">
+                {group.questions.filter((q) => q.included).length} of{" "}
+                {group.questions.length}
+              </span>
+            }
+          >
+            <ul className="divide-y divide-rule">
+              {group.questions.map((question) => (
+                <ClientQuestionRow
+                  key={question.id}
+                  question={question}
+                  serviceName={serviceName}
+                />
+              ))}
+            </ul>
+          </Panel>
+        ))}
+      </div>
 
       <div className="sticky bottom-0 mt-8 flex flex-wrap items-center gap-3 border-t border-rule bg-paper py-5">
         <PrimaryAction>Save changes</PrimaryAction>
@@ -160,44 +116,13 @@ export default async function QuestionsTab({
         <SecondaryAction href={`/client-questionnaires/admin/${id}`}>
           Back to overview
         </SecondaryAction>
-        <p className="text-[0.8125rem] text-muted">
-          Saves the {internalView ? "internal preparation" : "client questions"}{" "}
-          shown here.
-        </p>
+
       </div>
     </form>
   );
 }
 
 /* -------------------------------------------------------------------------- */
-
-function ViewLink({
-  href,
-  active,
-  children,
-}: {
-  href: string;
-  active: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <Link
-      href={href}
-      aria-current={active ? "true" : undefined}
-      className={`label inline-flex items-center border px-3.5 py-2.5 transition-colors ${
-        active
-          ? "border-charcoal bg-charcoal text-white"
-          : "border-rule-strong text-slate hover:border-charcoal hover:text-charcoal"
-      }`}
-    >
-      {children}
-    </Link>
-  );
-}
-
-function Count({ children }: { children: React.ReactNode }) {
-  return <span className="ml-2 tabular-nums opacity-60">{children}</span>;
-}
 
 /**
  * One client question.
@@ -319,43 +244,5 @@ function ClientQuestionRow({
         </details>
       </div>
     </li>
-  );
-}
-
-/**
- * One internal preparation field.
- *
- * A working form, not a questionnaire row. No include checkbox: these are
- * always part of the record, and asking the Account Manager whether to "send"
- * a note they are writing to themselves was a control with no meaning.
- */
-function InternalField({ question }: { question: IntakeQuestion }) {
-  return (
-    <div>
-      <input type="hidden" name={`present:${question.id}`} value="1" />
-      {/* Always included. The AM is not deciding whether to send these. */}
-      <input type="hidden" name={`included:${question.id}`} value="on" />
-
-      <label
-        htmlFor={`prep-${question.id}`}
-        className="block text-[0.9375rem] leading-snug font-medium text-charcoal"
-      >
-        {question.question_text}
-      </label>
-      {question.help_text && (
-        <p className="mt-1.5 text-[0.875rem] leading-relaxed text-slate">
-          {question.help_text}
-        </p>
-      )}
-      <div className="mt-2.5">
-        <AnswerInput
-          id={`prep-${question.id}`}
-          name={`prefill:${question.id}`}
-          fieldType={question.field_type}
-          options={question.options ?? []}
-          value={question.prefill_answer}
-        />
-      </div>
-    </div>
   );
 }

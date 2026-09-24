@@ -1,4 +1,5 @@
 import type {
+  AnswerAttribution,
   AnswerValue,
   IntakeQuestion,
   IntakeStatus,
@@ -43,7 +44,10 @@ export function resolveClientValue(question: IntakeQuestion): AnswerValue {
   return question.client_answer ?? question.prefill_answer ?? null;
 }
 
-function toPublicQuestion(question: IntakeQuestion): PublicQuestion {
+function toPublicQuestion(
+  question: IntakeQuestion,
+  names: Map<string, string>,
+): PublicQuestion {
   return {
     id: question.id,
     question_key: question.question_key,
@@ -56,7 +60,42 @@ function toPublicQuestion(question: IntakeQuestion): PublicQuestion {
     // than hidden, so they can still see what we believe.
     editable: question.client_editable,
     value: resolveClientValue(question),
+    attribution: attributionFor(question, names),
   };
+}
+
+/**
+ * Who last answered this question, for the line under the field.
+ *
+ * Only ever built from a client answer. A Web Wizards pre-fill sitting in the
+ * field is our guess, not theirs, and signing their colleague's name to it
+ * would be a lie they can read.
+ *
+ * A null name is an answer given before contacts existed. The page says the
+ * contributor was not recorded rather than naming somebody who may not have
+ * written it.
+ */
+export function attributionFor(
+  question: IntakeQuestion,
+  names: Map<string, string>,
+): AnswerAttribution | null {
+  if (isBlankAnswer(question.client_answer)) return null;
+  if (!question.answered_at) return null;
+
+  return {
+    name: question.answered_by_contact_id
+      ? (names.get(question.answered_by_contact_id) ?? null)
+      : null,
+    at: question.answered_at,
+    updated: question.answer_revision_count > 1,
+  };
+}
+
+function isBlankAnswer(value: AnswerValue): boolean {
+  if (value === null || value === undefined) return true;
+  if (typeof value === "string") return value.trim() === "";
+  if (Array.isArray(value)) return value.length === 0;
+  return false;
 }
 
 /**
@@ -66,7 +105,10 @@ function toPublicQuestion(question: IntakeQuestion): PublicQuestion {
  * Media later is a seed-data change rather than a form change. A question with
  * no client_step is placed in a trailing unnamed step rather than dropped.
  */
-export function buildSteps(questions: IntakeQuestion[]): PublicStep[] {
+export function buildSteps(
+  questions: IntakeQuestion[],
+  names: Map<string, string> = new Map(),
+): PublicStep[] {
   const ordered = visibleQuestions(questions);
   const steps: PublicStep[] = [];
   const index = new Map<string, PublicStep>();
@@ -89,7 +131,7 @@ export function buildSteps(questions: IntakeQuestion[]): PublicStep[] {
       step.intro = question.step_intro.trim();
     }
 
-    step.questions.push(toPublicQuestion(question));
+    step.questions.push(toPublicQuestion(question, names));
   }
 
   return steps;
@@ -102,6 +144,8 @@ export function toPublicIntake(input: {
   submittedAt: string | null;
   introText?: string | null;
   questions: IntakeQuestion[];
+  /** Contact id to display name, for answer attribution. */
+  contactNames?: Map<string, string>;
 }): PublicIntake {
   return {
     clientName: input.clientName,
@@ -109,7 +153,7 @@ export function toPublicIntake(input: {
     status: input.status,
     submittedAt: input.submittedAt,
     introText: input.introText ?? null,
-    steps: buildSteps(input.questions),
+    steps: buildSteps(input.questions, input.contactNames ?? new Map()),
   };
 }
 
@@ -120,7 +164,18 @@ export function toPublicIntake(input: {
  * reopening it is an internal decision, not something a stale tab can do.
  */
 export function isOpenForClient(status: IntakeStatus): boolean {
-  return status === "sent" || status === "in_progress";
+  /*
+   * Everything in the Live phase. submitted and reviewed are included on
+   * purpose: they were written when one contact pressing Send closed the
+   * questionnaire for the whole client, and those questionnaires should still
+   * be editable by the people sharing them.
+   */
+  return (
+    status === "sent" ||
+    status === "in_progress" ||
+    status === "submitted" ||
+    status === "reviewed"
+  );
 }
 
 /**

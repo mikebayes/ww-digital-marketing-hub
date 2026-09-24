@@ -8,13 +8,10 @@ import {
   documentFileName,
   formatAnswer,
   groupQuestions,
-  internalPreparation,
-  matchesFilter,
   matchesReview,
   needsFollowUp,
   needsReview,
   parseReviewFilter,
-  progress,
   questionnaireTitle,
   responseState,
   reviewCount,
@@ -52,6 +49,9 @@ function question(overrides: Partial<IntakeQuestion> = {}): IntakeQuestion {
     client_editable: true,
     prefill_answer: null,
     client_answer: null,
+    answered_by_contact_id: null,
+    answered_at: null,
+    answer_revision_count: 0,
     final_answer: null,
     internal_notes: null,
     ...overrides,
@@ -208,71 +208,6 @@ describe("needs review", () => {
   });
 });
 
-describe("filters", () => {
-  const rows = [
-    question({ id: "out" }),
-    question({ id: "ans", client_answer: "yes" }),
-    question({ id: "fin", client_answer: "yes", final_answer: "no" }),
-    question({ id: "int", client_visible: false, client_step: null }),
-    question({ id: "exc", included: false }),
-  ];
-
-  const ids = (filter: Parameters<typeof matchesFilter>[1]) =>
-    rows.filter((q) => matchesFilter(q, filter)).map((q) => q.id);
-
-  test("excluded questions are in no filter at all", () => {
-    for (const filter of ["all", "outstanding", "answered", "internal"] as const) {
-      assert.ok(!ids(filter).includes("exc"), filter);
-    }
-  });
-
-  test("all means every included question", () => {
-    assert.deepEqual(ids("all"), ["out", "ans", "fin", "int"]);
-  });
-
-  test("answered covers finalised too", () => {
-    assert.deepEqual(ids("answered"), ["ans", "fin"]);
-  });
-
-  test("outstanding is what nobody has answered", () => {
-    assert.deepEqual(ids("outstanding"), ["out", "int"]);
-  });
-
-  test("needs review is only the disagreement", () => {
-    assert.deepEqual(ids("review"), ["fin"]);
-  });
-
-  test("internal is the preparation set", () => {
-    assert.deepEqual(ids("internal"), ["int"]);
-  });
-});
-
-describe("counts", () => {
-  test("included and excluded always account for every question", () => {
-    const rows = [
-      question({ id: "a" }),
-      question({ id: "b", included: false }),
-      question({ id: "c", client_visible: false }),
-    ];
-    const counts = progress(rows);
-    assert.equal(counts.total, 3);
-    assert.equal(counts.included + counts.excluded, counts.total);
-    assert.equal(counts.clientFacing + counts.internalOnly, counts.included);
-  });
-
-  test("answered and outstanding do not double count", () => {
-    const rows = [
-      question({ id: "a", client_answer: "x" }),
-      question({ id: "b" }),
-      question({ id: "c", prefill_answer: "y" }),
-    ];
-    const counts = progress(rows);
-    assert.equal(counts.answered, 1);
-    assert.equal(counts.outstanding, 1);
-    assert.equal(counts.prefilled, 1);
-  });
-});
-
 describe("formatting an answer", () => {
   test("a multiselect reads as a list", () => {
     assert.equal(formatAnswer(["Facebook", "Instagram"]), "Facebook, Instagram");
@@ -297,24 +232,25 @@ describe("client questions and internal preparation are different things", () =>
     question({ id: "i1", client_visible: false, client_step: null }),
   ];
 
-  test("the split is by who may see it, not by section name", () => {
+  test("only client-visible questions survive the filter", () => {
     assert.deepEqual(clientQuestions(rows).map((q) => q.id), ["c1", "c2"]);
-    assert.deepEqual(internalPreparation(rows).map((q) => q.id), ["i1"]);
   });
 
   test("the headline count is included client questions only", () => {
     const counts = summarize(rows);
     assert.equal(counts.clientQuestions, 1);
     assert.equal(counts.excluded, 1);
-    assert.equal(counts.internalPreparation, 1);
   });
 
-  test("internal preparation is never counted as a client question", () => {
+  test("retired internal preparation is never counted", () => {
+    // A questionnaire created before the retirement still holds those rows.
+    // They must not make "27 client questions" read as 36.
     const counts = summarize([
+      question({ id: "c" }),
       question({ id: "i", client_visible: false, client_step: null }),
     ]);
-    assert.equal(counts.clientQuestions, 0);
-    assert.equal(counts.internalPreparation, 1);
+    assert.equal(counts.clientQuestions, 1);
+    assert.equal(counts.excluded, 0);
   });
 });
 
@@ -402,9 +338,13 @@ describe("review filters", () => {
     assert.deepEqual(ids("client"), ["asked", "answered", "final", "owed"]);
   });
 
-  test("internal preparation is its own view, never mixed into client", () => {
-    assert.deepEqual(ids("internal"), ["internal"]);
-    assert.ok(!ids("client").includes("internal"));
+  test("retired internal preparation appears in no view at all", () => {
+    // The nine fields are deactivated in the library and filtered out here.
+    // Questionnaires that already carry them keep the rows; no screen shows
+    // them, and no count includes them.
+    for (const f of ["client", "follow-up", "finalised"] as const) {
+      assert.ok(!ids(f).includes("internal"), f);
+    }
   });
 
   test("follow-up is only what we owe before completion", () => {
@@ -416,13 +356,13 @@ describe("review filters", () => {
   });
 
   test("excluded questions appear in no view", () => {
-    for (const f of ["client", "follow-up", "finalised", "internal"] as const) {
+    for (const f of ["client", "follow-up", "finalised"] as const) {
       assert.ok(!ids(f).includes("excluded"), f);
     }
   });
 
   test("counts agree with what the view shows", () => {
-    for (const f of ["client", "follow-up", "finalised", "internal"] as const) {
+    for (const f of ["client", "follow-up", "finalised"] as const) {
       assert.equal(reviewCount(rows, f), ids(f).length, f);
     }
   });

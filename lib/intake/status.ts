@@ -36,7 +36,7 @@ export const STATUS_LABELS: Record<IntakeStatus, string> = {
 /* What staff see                                                             */
 /* -------------------------------------------------------------------------- */
 
-export type StaffPhase = "draft" | "live" | "submitted" | "complete";
+export type StaffPhase = "draft" | "live" | "complete";
 
 export const PHASE_LABELS: Record<StaffPhase, string> = {
   draft: "Draft",
@@ -46,15 +46,13 @@ export const PHASE_LABELS: Record<StaffPhase, string> = {
    * link. Calling it Sent claimed an action the tool had not performed.
    */
   live: "Live",
-  submitted: "Submitted",
   complete: "Complete",
 };
 
 export const PHASE_DESCRIPTIONS: Record<StaffPhase, string> = {
   draft: "Being prepared. The client link does not work yet.",
-  live: "The client can open the link and answer.",
-  submitted: "The client has sent their answers back.",
-  complete: "Finished and on the record.",
+  live: "Client contacts can open the link and answer.",
+  complete: "Closed by Web Wizards. Read-only for the client.",
 };
 
 export function phaseOf(status: IntakeStatus): StaffPhase {
@@ -64,10 +62,16 @@ export function phaseOf(status: IntakeStatus): StaffPhase {
       return "draft";
     case "sent":
     case "in_progress":
-      return "live";
+    /*
+     * submitted and reviewed were written when one client pressing Send closed
+     * the questionnaire for everybody. Nothing writes them now, and the
+     * questionnaires that carry them are still open for their contacts to work
+     * on — so they read as Live rather than stranding a record in a state with
+     * no way forward.
+     */
     case "submitted":
     case "reviewed":
-      return "submitted";
+      return "live";
     case "complete":
       return "complete";
   }
@@ -106,15 +110,15 @@ export function availableActions(status: IntakeStatus): StatusAction[] {
     case "draft":
       return [{ to: "sent", label: "Make live" }];
     case "live":
-      // Closes the client's link again. Answers already given are kept.
-      return [{ to: "draft", label: "Take offline" }];
-    case "submitted":
       return [
+        // Only Web Wizards ends a questionnaire. A client finishing is a
+        // statement about themselves, not about the questionnaire.
         { to: "complete", label: "Mark complete" },
-        { to: "sent", label: "Reopen for client" },
+        // Closes the client's link again. Answers already given are kept.
+        { to: "draft", label: "Take offline" },
       ];
     case "complete":
-      return [{ to: "submitted", label: "Reopen" }];
+      return [{ to: "sent", label: "Reopen for the client" }];
   }
 }
 

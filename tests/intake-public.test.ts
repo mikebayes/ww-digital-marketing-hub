@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 
 import {
   acceptClientAnswers,
+  attributionFor,
   buildSteps,
   isOpenForClient,
   isVisibleToClient,
@@ -42,6 +43,9 @@ function question(overrides: Partial<IntakeQuestion> = {}): IntakeQuestion {
     client_editable: true,
     prefill_answer: null,
     client_answer: null,
+    answered_by_contact_id: null,
+    answered_at: null,
+    answer_revision_count: 0,
     final_answer: null,
     internal_notes: null,
     ...overrides,
@@ -280,9 +284,12 @@ describe("link liveness", () => {
     assert.equal(isOpenForClient("in_progress"), true);
   });
 
-  test("a submitted intake is readable but closed to further edits", () => {
-    assert.equal(isVisibleToClient("submitted"), true);
-    assert.equal(isOpenForClient("submitted"), false);
+  test("only Web Wizards closes it", () => {
+    // A contact finishing no longer closes the questionnaire for everyone, so
+    // a record left in "submitted" by the old behaviour is still editable.
+    assert.equal(isOpenForClient("submitted"), true);
+    assert.equal(isOpenForClient("reviewed"), true);
+    assert.equal(isVisibleToClient("complete"), true);
     assert.equal(isOpenForClient("complete"), false);
   });
 });
@@ -401,11 +408,15 @@ describe("when the client link works", () => {
     assert.equal(isOpenForClient("sent"), true);
   });
 
-  test("it stays readable after submission, but closed to edits", () => {
-    for (const status of ["submitted", "reviewed", "complete"] as const) {
-      assert.equal(isVisibleToClient(status), true, status);
-      assert.equal(isOpenForClient(status), false, status);
+  test("it stays open while live, whatever the stored status says", () => {
+    for (const status of ["sent", "in_progress", "submitted", "reviewed"] as const) {
+      assert.equal(isOpenForClient(status), true, status);
     }
+  });
+
+  test("Complete is the only thing that makes it read-only", () => {
+    assert.equal(isVisibleToClient("complete"), true);
+    assert.equal(isOpenForClient("complete"), false);
   });
 });
 
@@ -449,5 +460,113 @@ describe("the client-facing title", () => {
         assert.ok(!intake.title.includes(banned), `${title} -> ${intake.title}`);
       }
     }
+  });
+});
+
+/**
+ * Attribution, on a questionnaire several people share.
+ *
+ * The line under an answer is the only way a second contact knows somebody
+ * already answered before they type over it, so what it says has to be true:
+ * never our own pre-fill dressed up as theirs, and never a name we guessed.
+ */
+describe("who answered", () => {
+  const names = new Map([["c1", "Theresa Tsoukalas"], ["c2", "Fay Poholko"]]);
+
+  test("a first client answer reads as provided", () => {
+    const at = attributionFor(
+      question({
+        client_answer: "leads",
+        answered_by_contact_id: "c1",
+        answered_at: "2026-09-24T15:31:00Z",
+        answer_revision_count: 1,
+      }),
+      names,
+    );
+    assert.deepEqual(at, {
+      name: "Theresa Tsoukalas",
+      at: "2026-09-24T15:31:00Z",
+      updated: false,
+    });
+  });
+
+  test("a later change reads as updated, by whoever changed it", () => {
+    const at = attributionFor(
+      question({
+        client_answer: "leads first",
+        answered_by_contact_id: "c2",
+        answered_at: "2026-09-25T16:14:00Z",
+        answer_revision_count: 2,
+      }),
+      names,
+    );
+    assert.equal(at?.name, "Fay Poholko");
+    assert.equal(at?.updated, true);
+  });
+
+  test("our own pre-fill is never attributed to the client", () => {
+    // The field has a value, but no client has touched it. Signing a
+    // colleague's name to a Web Wizards guess is a lie they can read.
+    assert.equal(
+      attributionFor(question({ prefill_answer: "we guessed this" }), names),
+      null,
+    );
+  });
+
+  test("an unanswered question has no attribution", () => {
+    assert.equal(attributionFor(question(), names), null);
+    assert.equal(attributionFor(question({ client_answer: "  " }), names), null);
+    assert.equal(attributionFor(question({ client_answer: [] }), names), null);
+  });
+
+  test("an answer from before contacts existed names nobody", () => {
+    // Preserved, not discarded, and not credited to someone who may not have
+    // written it.
+    const at = attributionFor(
+      question({
+        client_answer: "an older answer",
+        answered_by_contact_id: null,
+        answered_at: "2026-09-20T10:00:00Z",
+        answer_revision_count: 1,
+      }),
+      names,
+    );
+    assert.equal(at?.name, null);
+    assert.equal(at?.updated, false);
+  });
+
+  test("a contact removed since answering names nobody either", () => {
+    const at = attributionFor(
+      question({
+        client_answer: "x",
+        answered_by_contact_id: "deleted-contact",
+        answered_at: "2026-09-24T15:31:00Z",
+        answer_revision_count: 1,
+      }),
+      names,
+    );
+    assert.equal(at?.name, null);
+  });
+
+  test("the projection emits a name and never a contact id", () => {
+    const intake = toPublicIntake({
+      clientName: "Acme",
+      status: "sent",
+      submittedAt: null,
+      contactNames: names,
+      questions: [
+        question({
+          id: "q",
+          client_answer: "yes",
+          answered_by_contact_id: "c1",
+          answered_at: "2026-09-24T15:31:00Z",
+          answer_revision_count: 1,
+        }),
+      ],
+    });
+    const emitted = JSON.stringify(intake);
+    assert.ok(emitted.includes("Theresa Tsoukalas"));
+    assert.ok(!emitted.includes("c1"), "no contact id may reach the client");
+    assert.ok(!emitted.includes("answered_by_contact_id"));
   });
 });

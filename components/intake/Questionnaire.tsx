@@ -15,10 +15,20 @@ import type { PublicIntake } from "@/lib/intake/types";
  * Progress is shown as "Step 2 of 6" and a rule. Not a count of questions
  * remaining — the client is being asked to help, not to clear a backlog.
  */
+/** A readable local moment, for the attribution line. */
+function formatMoment(value: string): string {
+  return new Date(value).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
 export function Questionnaire({
   intake,
   saveAction,
-  submitAction,
+  finishAction,
   readOnly,
   token,
 }: {
@@ -26,7 +36,7 @@ export function Questionnaire({
   /** Carried in the form so every write is addressed by token, never by id. */
   token?: string;
   saveAction?: (formData: FormData) => void | Promise<void>;
-  submitAction?: (formData: FormData) => void | Promise<void>;
+  finishAction?: (formData: FormData) => void | Promise<void>;
   readOnly?: boolean;
 }) {
   const [active, setActive] = useState(0);
@@ -42,7 +52,7 @@ export function Questionnaire({
   }
 
   return (
-    <form action={submitAction} className="@container">
+    <form action={saveAction} className="@container">
       {token && <input type="hidden" name="token" value={token} />}
       <nav aria-label="Progress" className="border-b border-rule pb-5">
         <p className="label text-muted">
@@ -140,6 +150,21 @@ export function Questionnaire({
                       Shown for reference. Let us know at kickoff if this is wrong.
                     </p>
                   )}
+
+                  {/*
+                   * Who last answered, directly under the field it belongs to.
+                   * Several people share this questionnaire, so "someone has
+                   * already answered this" is the single most useful thing to
+                   * know before typing over it.
+                   */}
+                  {question.attribution && (
+                    <p className="mt-2 text-[0.8125rem] text-muted">
+                      {question.attribution.updated ? "Answer updated by" : "Answer provided by"}{" "}
+                      {question.attribution.name ?? "a colleague"}
+                      {" · "}
+                      {formatMoment(question.attribution.at)}
+                    </p>
+                  )}
                 </li>
               );
             })}
@@ -179,21 +204,24 @@ export function Questionnaire({
           </button>
         )}
 
-        {!readOnly && onLastStep && submitAction && (
+        {!readOnly && onLastStep && finishAction && (
           <button
             type="submit"
+            formAction={finishAction}
             className="label inline-flex items-center gap-3 bg-charcoal px-5 py-3.5 text-white transition-colors hover:bg-teal-ink"
           >
-            Send to Web Wizards
+            Finish for Now
             <span aria-hidden className="h-px w-6 bg-teal" />
           </button>
         )}
       </div>
 
       {!readOnly && onLastStep && (
-        <p className="mt-4 text-[0.875rem] leading-relaxed text-slate">
-          You can send this with questions left blank. Anything missing, we will
-          pick up at kickoff.
+        <p className="mt-4 max-w-2xl text-[0.875rem] leading-relaxed text-slate">
+          You can finish with questions left blank — anything missing, we will
+          pick up at kickoff. Finishing does not close the questionnaire: you
+          and your colleagues can come back to this link and change answers for
+          as long as it stays open.
         </p>
       )}
     </form>

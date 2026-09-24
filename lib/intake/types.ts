@@ -71,6 +71,11 @@ export interface IntakeQuestion {
   client_editable: boolean;
   prefill_answer: AnswerValue;
   client_answer: AnswerValue;
+  /** Which approved contact last wrote client_answer. Null for legacy answers. */
+  answered_by_contact_id: string | null;
+  answered_at: string | null;
+  /** 0 = never answered, 1 = provided, more = updated. */
+  answer_revision_count: number;
   final_answer: AnswerValue;
   internal_notes: string | null;
 }
@@ -101,14 +106,30 @@ export interface Intake {
  * Record-keeping only today: the public questionnaire still authenticates with
  * the token alone. The approved-email gate is separate work.
  */
+export type ContactParticipation = "not_started" | "in_progress" | "finished";
+
 export interface IntakeContact {
   id: string;
   intake_id: string;
   name: string;
   email: string;
   is_primary: boolean;
+  /** How far this person has got. Not a separate set of answers. */
+  participation: ContactParticipation;
+  first_accessed_at: string | null;
+  last_activity_at: string | null;
+  finished_at: string | null;
   created_at: string;
   updated_at: string;
+}
+
+/** Who last wrote an answer, as the client's own page shows it. */
+export interface AnswerAttribution {
+  /** The contact's name, or null when it predates the contact gate. */
+  name: string | null;
+  at: string;
+  /** False on the first client answer, true on every change after it. */
+  updated: boolean;
 }
 
 /** An intake joined with the things every screen needs alongside it. */
@@ -140,6 +161,12 @@ export interface PublicQuestion {
   editable: boolean;
   /** Pre-fill and client answer resolved into the value to show in the field. */
   value: AnswerValue;
+  /**
+   * Who last answered, when a client has. Null while the only value on the
+   * question is a Web Wizards pre-fill — attributing our own guess to the
+   * client would be a lie the client can see.
+   */
+  attribution: AnswerAttribution | null;
 }
 
 export interface PublicStep {

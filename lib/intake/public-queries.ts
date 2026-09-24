@@ -2,8 +2,14 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { acceptClientAnswers, isOpenForClient, isVisibleToClient, toPublicIntake } from "./public";
 import { questionnaireTitle } from "./admin";
+import { emailMatches } from "./client-session";
 import { isPlausibleToken } from "./token";
-import type { AnswerValue, IntakeQuestion, PublicIntake } from "./types";
+import type {
+  AnswerValue,
+  IntakeContact,
+  IntakeQuestion,
+  PublicIntake,
+} from "./types";
 
 /**
  * Everything the public questionnaire is allowed to do.
@@ -51,6 +57,14 @@ const PUBLIC_QUESTION_COLUMNS = [
   "client_editable",
   "prefill_answer",
   "client_answer",
+  /*
+   * Attribution. The contact id is read to look up a name and is never
+   * emitted — toPublicQuestion builds an AnswerAttribution with the name
+   * only, so no internal id reaches the page.
+   */
+  "answered_by_contact_id",
+  "answered_at",
+  "answer_revision_count",
 ].join(", ");
 
 interface TokenLookup {
@@ -138,7 +152,26 @@ export async function getPublicIntake(token: string): Promise<PublicIntake | nul
   const found = await lookup(token);
   if (!found) return null;
 
+  /*
+   * Contact names, for the attribution line under each answer. Names only —
+   * the client's colleagues know who each other are, and nothing else about a
+   * contact reaches the page.
+   */
+  const supabase = createAdminClient();
+  const { data: contacts } = await supabase
+    .from("intake_contacts")
+    .select("id, name")
+    .eq("intake_id", found.intakeId);
+
+  const contactNames = new Map(
+    ((contacts ?? []) as { id: string; name: string }[]).map((contact) => [
+      contact.id,
+      contact.name,
+    ]),
+  );
+
   return toPublicIntake({
+    contactNames,
     clientName: found.clientName,
     status: found.status,
     submittedAt: found.submittedAt,
@@ -154,28 +187,167 @@ export async function getPublicIntake(token: string): Promise<PublicIntake | nul
  * Answers arrive keyed by question id and are matched against what this intake
  * actually exposed; anything unrecognised is dropped rather than written.
  */
+/* -------------------------------------------------------------------------- */
+/* Who is answering                                                           */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Check a typed email against the contacts approved for this questionnaire.
+ *
+ * Server-side and by token: a browser cannot ask about a questionnaire it was
+ * not sent. Returns the contact or null, and the caller says the same thing
+ * either way — telling a stranger that an address is approved would hand them
+ * half the credential.
+ */
+export async function findApprovedContact(
+  token: string,
+  email: string,
+): Promise<{ intakeId: string; contact: IntakeContact } | null> {
+  const found = await lookup(token);
+  if (!found) return null;
+
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("intake_contacts")
+    .select(CONTACT_COLUMNS)
+    .eq("intake_id", found.intakeId);
+  if (error || !data) return null;
+
+  const contact = (data as IntakeContact[]).find((candidate) =>
+    emailMatches(email, candidate.email),
+  );
+  return contact ? { intakeId: found.intakeId, contact } : null;
+}
+
+/**
+ * Re-check a session claim against the database.
+ *
+ * A valid signature proves the cookie was minted here; it does not prove the
+ * contact is still approved. Removing someone in the admin has to lock them
+ * out of a browser that already holds a cookie, so the row is looked up every
+ * time rather than trusted from the cookie.
+ */
+export async function resolveSessionContact(
+  token: string,
+  session: { intakeId: string; contactId: string } | null,
+): Promise<{ intakeId: string; contact: IntakeContact } | null> {
+  if (!session) return null;
+
+  const found = await lookup(token);
+  if (!found || found.intakeId !== session.intakeId) return null;
+
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("intake_contacts")
+    .select(CONTACT_COLUMNS)
+    .eq("id", session.contactId)
+    .eq("intake_id", found.intakeId)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return { intakeId: found.intakeId, contact: data as IntakeContact };
+}
+
+const CONTACT_COLUMNS =
+  "id, intake_id, name, email, is_primary, participation, first_accessed_at, last_activity_at, finished_at, created_at, updated_at";
+
+/** Note that a contact has opened the questionnaire. */
+export async function markContactActive(
+  contactId: string,
+  { started = false }: { started?: boolean } = {},
+): Promise<void> {
+  const supabase = createAdminClient();
+  const now = new Date().toISOString();
+
+  await supabase
+    .from("intake_contacts")
+    .update({ last_activity_at: now })
+    .eq("id", contactId);
+
+  if (started) {
+    /*
+     * First access only. Guarded on the column being null rather than written
+     * every time, or "first accessed" would quietly mean "last accessed" and
+     * the two timestamps would always agree.
+     */
+    await supabase
+      .from("intake_contacts")
+      .update({ first_accessed_at: now })
+      .eq("id", contactId)
+      .is("first_accessed_at", null);
+    return;
+  }
+
+  /*
+   * Opening the questionnaire is not the same as working on it, so the status
+   * only moves on the first saved answer. Somebody who looked and closed the
+   * tab has not started. Guarded on the current value so a contact who has
+   * already finished is not dragged back to in progress by an autosave.
+   */
+  await supabase
+    .from("intake_contacts")
+    .update({ participation: "in_progress" })
+    .eq("id", contactId)
+    .eq("participation", "not_started");
+}
+
+/** "Finish for now" — for this person, and nobody else. */
+export async function markContactFinished(contactId: string): Promise<void> {
+  const supabase = createAdminClient();
+  const now = new Date().toISOString();
+  await supabase
+    .from("intake_contacts")
+    .update({ participation: "finished", finished_at: now, last_activity_at: now })
+    .eq("id", contactId);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Writing answers                                                            */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Save what a contact has typed.
+ *
+ * Every write is validated three times over: the token resolves the intake,
+ * acceptClientAnswers drops anything that was not actually exposed as
+ * editable, and record_client_answer re-checks in Postgres that the question
+ * belongs to this intake, is included and is client-visible. A forged question
+ * id would have to survive all three.
+ *
+ * The answer and its history move together inside that function, so there is
+ * no window where the current answer has changed but the record of the change
+ * has not.
+ */
 export async function saveClientAnswers(
   token: string,
   answers: Record<string, AnswerValue>,
-): Promise<{ ok: boolean }> {
+  contactId: string,
+): Promise<{ ok: boolean; changed: number }> {
   const found = await lookup(token);
-  if (!found || !isOpenForClient(found.status)) return { ok: false };
+  if (!found || !isOpenForClient(found.status)) return { ok: false, changed: 0 };
 
   const accepted = acceptClientAnswers(found.questions, answers);
-  if (accepted.length === 0) return { ok: true };
-
   const supabase = createAdminClient();
+  let changed = 0;
 
   for (const { id, client_answer } of accepted) {
-    const { error } = await supabase
-      .from("intake_questions")
-      .update({ client_answer })
-      .eq("id", id)
-      .eq("intake_id", found.intakeId);
-    if (error) return { ok: false };
+    const { data, error } = await supabase.rpc("record_client_answer", {
+      p_intake_id: found.intakeId,
+      p_question_id: id,
+      p_contact_id: contactId,
+      p_answer: client_answer,
+    });
+    if (error) return { ok: false, changed };
+    if (data === true) changed += 1;
   }
 
-  // First contact moves the intake off "sent" so the team can see it is live.
+  await markContactActive(contactId);
+
+  /*
+   * The first answer moves the questionnaire off "sent" so the team can see
+   * somebody is working on it. It does not close anything — only Web Wizards
+   * ends a questionnaire.
+   */
   if (found.status === "sent") {
     await supabase
       .from("intakes")
@@ -183,31 +355,5 @@ export async function saveClientAnswers(
       .eq("id", found.intakeId);
   }
 
-  return { ok: true };
-}
-
-/**
- * Submit.
- *
- * Deliberately has no completeness check. required_by_completion is a debt
- * Web Wizards owes, not a gate the client has to clear, and the intro tells
- * them to leave anything they are unsure about blank.
- */
-export async function submitIntake(
-  token: string,
-  answers: Record<string, AnswerValue>,
-): Promise<{ ok: boolean }> {
-  const saved = await saveClientAnswers(token, answers);
-  if (!saved.ok) return { ok: false };
-
-  const found = await lookup(token);
-  if (!found || !isOpenForClient(found.status)) return { ok: false };
-
-  const supabase = createAdminClient();
-  const { error } = await supabase
-    .from("intakes")
-    .update({ status: "submitted", submitted_at: new Date().toISOString() })
-    .eq("id", found.intakeId);
-
-  return { ok: !error };
+  return { ok: true, changed };
 }

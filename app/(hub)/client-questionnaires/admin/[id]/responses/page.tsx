@@ -20,7 +20,7 @@ import {
   responseState,
   reviewCount,
 } from "@/lib/intake/admin";
-import { getIntake, getIntakeQuestions } from "@/lib/intake/queries";
+import { getIntake, getIntakeQuestions, listContacts } from "@/lib/intake/queries";
 import type { IntakeQuestion } from "@/lib/intake/types";
 import { saveResponsesAction } from "../../actions";
 
@@ -59,13 +59,15 @@ export default async function ResponsesTab({
 
   const filter = parseReviewFilter(query.filter);
   const questions = await getIntakeQuestions(id);
+  const contactNames = new Map(
+    (await listContacts(id)).map((contact) => [contact.id, contact.name]),
+  );
   const base = `/client-questionnaires/admin/${id}/responses`;
 
   const groups = groupQuestions(
     questions.filter((question) => matchesReview(question, filter)),
   );
   const shown = groups.reduce((n, group) => n + group.questions.length, 0);
-  const internalView = filter === "internal";
 
   return (
     <form action={saveResponsesAction}>
@@ -107,13 +109,6 @@ export default async function ResponsesTab({
         )}
       </div>
 
-      {internalView && (
-        <p className="mt-5 border-l-2 border-charcoal bg-neutral-tint px-4 py-3 text-[0.875rem] leading-relaxed text-charcoal">
-          <strong className="font-semibold">Internal only.</strong> Our own
-          preparation notes. Never shown to the client.
-        </p>
-      )}
-
       <div className="mt-5 space-y-6">
         {shown === 0 ? (
           <Panel title="Nothing to show">
@@ -140,7 +135,7 @@ export default async function ResponsesTab({
                   <ResponseRow
                     key={question.id}
                     question={question}
-                    internal={!question.client_visible}
+                    contactNames={contactNames}
                   />
                 ))}
               </ul>
@@ -166,10 +161,10 @@ export default async function ResponsesTab({
 
 function ResponseRow({
   question,
-  internal,
+  contactNames,
 }: {
   question: IntakeQuestion;
-  internal: boolean;
+  contactNames: Map<string, string>;
 }) {
   const state = responseState(question);
   const clientAnswer = formatAnswer(question.client_answer);
@@ -179,6 +174,24 @@ function ResponseRow({
     question.required_mode === "required_by_completion" &&
     isBlank(question.client_answer) &&
     isBlank(question.final_answer);
+
+  /*
+   * Who last wrote the client's answer. Several people share the
+   * questionnaire, so "the client said" is not specific enough to act on.
+   */
+  const attribution = clientAnswer
+    ? question.answered_at
+      ? `${question.answer_revision_count > 1 ? "Updated" : "Provided"} by ${
+          contactNames.get(question.answered_by_contact_id ?? "") ??
+          "a contributor we did not record"
+        } · ${new Date(question.answered_at).toLocaleString(undefined, {
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+        })}`
+      : "Provided before contributors were recorded"
+    : null;
 
   return (
     <li className="px-5 py-5">
@@ -190,7 +203,7 @@ function ResponseRow({
         </p>
         <div className="flex flex-wrap items-center gap-2">
           {review && <Pill tone="warn">Changed from client</Pill>}
-          {followUp && !internal && <Pill tone="warn">Needs follow-up</Pill>}
+          {followUp && <Pill tone="warn">Needs follow-up</Pill>}
           {!followUp && (
             <Pill
               tone={
@@ -206,12 +219,8 @@ function ResponseRow({
                 : state === "answered"
                   ? "Answered"
                   : state === "prepared"
-                    ? internal
-                      ? "Written"
-                      : "Prefilled"
-                    : internal
-                      ? "Empty"
-                      : "No answer"}
+                    ? "Prefilled"
+                    : "No answer"}
             </Pill>
           )}
         </div>
@@ -219,8 +228,7 @@ function ResponseRow({
 
       <div className="mt-4 grid gap-5 lg:grid-cols-2">
         <div className="space-y-4">
-          {!internal && (
-            <div>
+          <div>
               <p className="label text-muted">Client response</p>
               {clientAnswer ? (
                 <p className="mt-1.5 rounded-none border-l-2 border-rule-strong pl-3 text-[0.9375rem] leading-relaxed whitespace-pre-line text-charcoal">
@@ -231,14 +239,16 @@ function ResponseRow({
                   Not answered
                 </p>
               )}
+              {attribution && (
+                <p className="mt-2 text-[0.8125rem] text-muted">
+                  {attribution}
+                </p>
+              )}
             </div>
-          )}
 
           {prefill && (
             <div>
-              <p className="label text-muted">
-                {internal ? "Internal preparation" : "Prefilled answer"}
-              </p>
+              <p className="label text-muted">Prefilled answer</p>
               <p className="mt-1.5 text-[0.9375rem] leading-relaxed whitespace-pre-line text-slate">
                 {prefill}
               </p>
@@ -252,7 +262,7 @@ function ResponseRow({
               htmlFor={`final-${question.id}`}
               className="label block text-muted"
             >
-              {internal ? "Resolved value" : "Finalised answer"}
+              Finalised answer
             </label>
             <div className="mt-2">
               <AnswerInput

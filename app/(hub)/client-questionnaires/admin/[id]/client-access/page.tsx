@@ -17,6 +17,7 @@ import {
   inputClass,
 } from "@/components/intake/ui";
 import { getIntake, listContacts } from "@/lib/intake/queries";
+import type { ContactParticipation } from "@/lib/intake/types";
 import { isOpenForClient, isVisibleToClient } from "@/lib/intake/public";
 import { clientIntakeUrl, resolveOrigin } from "@/lib/intake/token";
 import { addContactAction, removeContactAction } from "../../actions";
@@ -26,21 +27,33 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Client Access" };
 
 const COLUMNS = [
-  { label: "Name", width: "26%" },
-  { label: "Email", width: "30%" },
-  { label: "Role", width: "16%" },
-  { label: "Added", width: "16%" },
+  { label: "Name", width: "24%" },
+  { label: "Email", width: "28%" },
+  { label: "Status", width: "18%" },
+  { label: "Last activity", width: "18%" },
   { label: "", align: "right" as const },
 ];
+
+const PARTICIPATION: Record<
+  ContactParticipation,
+  { label: string; tone: "quiet" | "live" | "teal" }
+> = {
+  not_started: { label: "Not started", tone: "quiet" },
+  in_progress: { label: "In progress", tone: "live" },
+  finished: { label: "Finished for now", tone: "teal" },
+};
 
 /**
  * Who the questionnaire is for, and the link they use.
  *
- * Contacts are a record, not a gate. The public route still authenticates with
- * the token alone, so adding someone here changes who we chase and who we
- * address the email to — it does not change who can open the link. Saying so
- * on the screen matters more than it might seem: an admin screen listing
- * "approved" people implies a door, and there is not one yet.
+ * This list is now the gate. The link opens an email prompt, and only an
+ * address recorded here gets past it — so removing somebody from this table
+ * locks them out, including from a browser they already used.
+ *
+ * Everyone here works on the same questionnaire. They are contacts, not
+ * respondents: there is one set of answers between them, and the status column
+ * says how far each person has got with it rather than implying each has their
+ * own copy.
  */
 export default async function ClientAccessTab({
   params,
@@ -86,10 +99,10 @@ export default async function ClientAccessTab({
 
         <p className="mt-4 max-w-2xl text-[0.875rem] leading-relaxed text-slate">
           {open
-            ? "The client can open this link and answer. It never asks them to sign in."
+            ? "Send this one link to everyone below. Opening it asks for an email address, and only the people in this list can get past that."
             : live
-              ? "The client can still open this link, but the questionnaire is closed to further edits."
-              : "This link is not live yet. It starts working when the questionnaire is marked sent, and returns a 404 until then."}
+              ? "The questionnaire is closed, so the link is read-only."
+              : "This link does not work yet. It starts working the moment you make the questionnaire live."}
         </p>
 
         <div className="mt-5 flex flex-wrap gap-3">
@@ -102,8 +115,8 @@ export default async function ClientAccessTab({
       <Panel title="Client contacts" padded={contacts.length === 0}>
         {contacts.length === 0 ? (
           <Empty>
-            No contacts recorded. Add the person at{" "}
-            {intake.client.name} who will answer this.
+            Nobody can open this questionnaire yet. Add the people at{" "}
+            {intake.client.name} who should answer it.
           </Empty>
         ) : (
           <AdminTable columns={COLUMNS} minWidth="44rem">
@@ -124,14 +137,19 @@ export default async function ClientAccessTab({
                   </a>
                 </td>
                 <td className="px-4 py-3.5 align-middle">
-                  {contact.is_primary ? (
-                    <Pill tone="teal">Primary</Pill>
-                  ) : (
-                    <Pill tone="quiet">Contact</Pill>
+                  <Pill tone={PARTICIPATION[contact.participation].tone}>
+                    {PARTICIPATION[contact.participation].label}
+                  </Pill>
+                  {contact.is_primary && (
+                    <span className="label ml-2 text-muted">Primary</span>
                   )}
                 </td>
                 <td className={cellClass}>
-                  <ShortDate value={contact.created_at} />
+                  {contact.last_activity_at ? (
+                    <ShortDate value={contact.last_activity_at} />
+                  ) : (
+                    <span className="text-muted">&mdash;</span>
+                  )}
                 </td>
                 <td className="px-4 py-3.5 text-right align-middle">
                   <form action={removeContactAction} className="inline">
@@ -199,10 +217,10 @@ export default async function ClientAccessTab({
         </form>
 
         <p className="mt-5 max-w-2xl text-[0.875rem] leading-relaxed text-slate">
-          Recorded for our own reference. Anyone holding the link can open the
-          questionnaire — restricting it to these addresses is separate work we
-          have not done yet, so treat the link as the credential and send it
-          only to the people above.
+          They enter this address to get in — no password, and nothing is
+          emailed from here. Everyone added works on the same questionnaire and
+          can see and change what the others have answered. Removing someone
+          takes effect straight away, even if they are already in it.
         </p>
       </Panel>
     </div>
