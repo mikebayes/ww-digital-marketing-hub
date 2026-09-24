@@ -18,9 +18,13 @@ export const metadata: Metadata = { title: "Preview" };
  * a drawing of it. If a question is excluded or internal-only, its absence
  * here is the real reason it will be absent for the client.
  *
- * Sits beside the questionnaire tabs rather than inside them: the client shell
- * is a whole page with its own header, and framing it in admin chrome would
- * stop it being the thing it is meant to prove.
+ * Deliberately outside the app/(hub) route group, alongside app/intake/[token]
+ * rather than alongside the admin tabs. A route group is what decides which
+ * layout wraps a page, so a preview inside (hub) inherits the rail, the module
+ * index and the footer — and a preview wearing internal navigation is not a
+ * preview, it is a different page that happens to contain the same questions.
+ * The URL is unaffected: route groups do not appear in paths, so this is still
+ * /client-questionnaires/admin/preview/<id> and still behind the admin gate.
  *
  * Read-only, and it writes nothing: previewing does not move the intake on.
  */
