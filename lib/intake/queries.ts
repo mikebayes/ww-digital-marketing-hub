@@ -11,6 +11,7 @@ import { generatePublicToken } from "./token";
 import type {
   Client,
   Intake,
+  IntakeContact,
   IntakeQuestion,
   IntakeWithRelations,
   Service,
@@ -51,13 +52,13 @@ import type {
 async function createClient() {
   const store = await cookies();
   if (!(await isValidToken(store.get(ACCESS_COOKIE)?.value))) {
-    redirect(`${UNLOCK_PATH}?next=%2Fintakes`);
+    redirect(`${UNLOCK_PATH}?next=%2Fclient-questionnaires%2Fadmin`);
   }
   return createAdminClient();
 }
 
 const INTAKE_COLUMNS =
-  "id, client_id, account_manager_name, status, public_token, sent_at, submitted_at, reviewed_at, completed_at, created_at, updated_at";
+  "id, client_id, account_manager_name, title, intro_text, archived_at, status, public_token, sent_at, submitted_at, reviewed_at, completed_at, created_at, updated_at";
 
 export async function listServices(): Promise<Service[]> {
   const supabase = await createClient();
@@ -94,18 +95,40 @@ export async function createClientRecord(input: {
   return data;
 }
 
-/** The list screen: one row per intake with the things worth scanning. */
-export async function listIntakes(): Promise<IntakeWithRelations[]> {
+/**
+ * The list screen: one row per questionnaire with the things worth scanning.
+ *
+ * Archived rows are left out unless asked for. Archiving is how a
+ * questionnaire leaves the list without leaving the record, so the default has
+ * to be the list people actually work from.
+ */
+export async function listIntakes(
+  { includeArchived = false }: { includeArchived?: boolean } = {},
+): Promise<IntakeWithRelations[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from("intakes")
     .select(
       `${INTAKE_COLUMNS}, client:clients (id, name, website), intake_services (service:services (id, name, slug))`,
-    )
-    .order("updated_at", { ascending: false });
+    );
+
+  if (!includeArchived) query = query.is("archived_at", null);
+
+  const { data, error } = await query.order("updated_at", { ascending: false });
   if (error) throw error;
 
   return (data ?? []).map(flattenIntake);
+}
+
+/** How many are hidden, so the list can say so rather than just omit them. */
+export async function countArchivedIntakes(): Promise<number> {
+  const supabase = await createClient();
+  const { count, error } = await supabase
+    .from("intakes")
+    .select("id", { count: "exact", head: true })
+    .not("archived_at", "is", null);
+  if (error) throw error;
+  return count ?? 0;
 }
 
 export async function getIntake(id: string): Promise<IntakeWithRelations | null> {
@@ -183,6 +206,27 @@ export async function createIntake(input: {
   );
   if (linkError) throw linkError;
 
+  await snapshotQuestions(supabase, intake.id, serviceIds);
+
+  return intake;
+}
+
+/**
+ * Copy the active question library for these services onto an intake.
+ *
+ * Shared by creation and by adding a service afterwards, so a service added
+ * later brings exactly the questions it would have brought on day one. Only
+ * the services passed in are snapshotted — questions already on the intake are
+ * never re-copied, because a second copy would duplicate wording the client
+ * may already have answered.
+ */
+async function snapshotQuestions(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  intakeId: string,
+  serviceIds: string[],
+): Promise<void> {
+  if (serviceIds.length === 0) return;
+
   const { data: definitions, error: defError } = await supabase
     .from("question_definitions")
     .select("*")
@@ -190,34 +234,31 @@ export async function createIntake(input: {
     .eq("active", true)
     .order("sort_order");
   if (defError) throw defError;
+  if (!definitions || definitions.length === 0) return;
 
-  if (definitions && definitions.length > 0) {
-    const { error: snapshotError } = await supabase
-      .from("intake_questions")
-      .insert(
-        definitions.map((d) => ({
-          intake_id: intake.id,
-          question_definition_id: d.id,
-          service_id: d.service_id,
-          section: d.section,
-          question_key: d.question_key,
-          question_text: d.question_text,
-          help_text: d.help_text,
-          field_type: d.field_type,
-          options: d.options,
-          client_step: d.client_step,
-          client_step_order: d.client_step_order,
-          sort_order: d.sort_order,
-          included: d.default_enabled,
-          required_mode: d.required_mode,
-          client_visible: d.client_visible,
-          client_editable: d.client_editable,
-        })),
-      );
-    if (snapshotError) throw snapshotError;
-  }
-
-  return intake;
+  const { error: snapshotError } = await supabase
+    .from("intake_questions")
+    .insert(
+      definitions.map((d) => ({
+        intake_id: intakeId,
+        question_definition_id: d.id,
+        service_id: d.service_id,
+        section: d.section,
+        question_key: d.question_key,
+        question_text: d.question_text,
+        help_text: d.help_text,
+        field_type: d.field_type,
+        options: d.options,
+        client_step: d.client_step,
+        client_step_order: d.client_step_order,
+        sort_order: d.sort_order,
+        included: d.default_enabled,
+        required_mode: d.required_mode,
+        client_visible: d.client_visible,
+        client_editable: d.client_editable,
+      })),
+    );
+  if (snapshotError) throw snapshotError;
 }
 
 /** Account Manager edits to a snapshotted question. */
@@ -271,4 +312,148 @@ function flattenIntake(row: unknown): IntakeWithRelations {
       .filter(Boolean)
       .sort((a, b) => a.name.localeCompare(b.name)),
   };
+}
+
+/* -------------------------------------------------------------------------- */
+/* Client contacts                                                            */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Who at the client this questionnaire is for.
+ *
+ * Record-keeping only: the public route still authenticates with the token
+ * alone, so adding or removing a contact changes who we chase, not who can
+ * open the link. The approved-email gate is separate work, and conflating the
+ * two here would be a security change nobody asked for.
+ */
+export async function listContacts(intakeId: string): Promise<IntakeContact[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("intake_contacts")
+    .select("id, intake_id, name, email, is_primary, created_at, updated_at")
+    .eq("intake_id", intakeId)
+    .order("is_primary", { ascending: false })
+    .order("name");
+  if (error) throw error;
+  return (data ?? []) as IntakeContact[];
+}
+
+export async function addContact(input: {
+  intakeId: string;
+  name: string;
+  email: string;
+  isPrimary: boolean;
+}): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase.from("intake_contacts").insert({
+    intake_id: input.intakeId,
+    name: input.name,
+    email: input.email.toLowerCase(),
+    is_primary: input.isPrimary,
+  });
+  // A duplicate email on one questionnaire is a mis-click, not a failure worth
+  // throwing a 500 over; the unique constraint has already refused the row.
+  if (error && error.code !== "23505") throw error;
+}
+
+export async function removeContact(
+  intakeId: string,
+  contactId: string,
+): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("intake_contacts")
+    .delete()
+    .eq("id", contactId)
+    .eq("intake_id", intakeId);
+  if (error) throw error;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Settings                                                                   */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Settings the Account Manager may change after an intake exists.
+ *
+ * Deliberately narrow. public_token is absent because a questionnaire's link
+ * is its credential and editing one by hand would break a link already sent;
+ * status is absent because it moves through the lifecycle in status.ts, not by
+ * being typed into a form.
+ */
+export async function updateIntakeSettings(
+  id: string,
+  patch: {
+    title?: string | null;
+    intro_text?: string | null;
+    account_manager_name?: string | null;
+  },
+): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase.from("intakes").update(patch).eq("id", id);
+  if (error) throw error;
+}
+
+/** Archive, or put back. Never deletes: the record is the point. */
+export async function setArchived(id: string, archived: boolean): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("intakes")
+    .update({ archived_at: archived ? new Date().toISOString() : null })
+    .eq("id", id);
+  if (error) throw error;
+}
+
+/** Replace the services on an intake, snapshotting any newly added questions. */
+export async function setIntakeServices(
+  intakeId: string,
+  serviceIds: string[],
+): Promise<void> {
+  const supabase = await createClient();
+
+  const { data: common, error: commonError } = await supabase
+    .from("services")
+    .select("id")
+    .eq("slug", "common")
+    .single();
+  if (commonError) throw commonError;
+
+  const wanted = new Set([common.id, ...serviceIds]);
+
+  const { data: existing, error: existingError } = await supabase
+    .from("intake_services")
+    .select("id, service_id")
+    .eq("intake_id", intakeId);
+  if (existingError) throw existingError;
+
+  const have = new Set((existing ?? []).map((row) => row.service_id));
+
+  /*
+   * Removing a service unlinks it but leaves its snapshotted questions alone.
+   * Those questions may already hold answers the client gave us, and deleting
+   * them to tidy up a service list would throw that away. They are excluded
+   * from the questionnaire instead, which is reversible.
+   */
+  const toRemove = (existing ?? []).filter((row) => !wanted.has(row.service_id));
+  if (toRemove.length > 0) {
+    await supabase
+      .from("intake_services")
+      .delete()
+      .in("id", toRemove.map((row) => row.id));
+
+    await supabase
+      .from("intake_questions")
+      .update({ included: false })
+      .eq("intake_id", intakeId)
+      .in("service_id", toRemove.map((row) => row.service_id));
+  }
+
+  const toAdd = [...wanted].filter((id) => !have.has(id));
+  if (toAdd.length === 0) return;
+
+  await supabase
+    .from("intake_services")
+    .insert(toAdd.map((serviceId) => ({ intake_id: intakeId, service_id: serviceId })));
+
+  await snapshotQuestions(supabase, intakeId, toAdd);
 }

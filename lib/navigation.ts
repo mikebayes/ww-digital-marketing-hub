@@ -25,6 +25,16 @@ export interface HubEntry {
    * sensible.
    */
   children?: HubEntry[];
+  /**
+   * An entry that lives at its own route rather than in content/registry.ts.
+   *
+   * The Hub's documentation is config-driven: [section]/[entry] generates a
+   * static page for everything listed here. An operational module is a real
+   * route with its own layout, data and mutations, so it opts out — the rail
+   * still links it, and generateStaticParams skips it so a generated page and
+   * a real one do not both claim the same URL.
+   */
+  href?: string;
 }
 
 export interface HubSection {
@@ -301,6 +311,25 @@ export const sections: HubSection[] = [
       },
     ],
   },
+  {
+    slug: "client-questionnaires",
+    title: "Client Questionnaires",
+    marker: "07",
+    summary:
+      "Prepare, send and review the questionnaire a client fills in before onboarding.",
+    description:
+      "Everything above this point is documentation. This is the tool that implements it — it holds live client data, and the questionnaires it sends are real.",
+    entries: [
+      {
+        slug: "admin",
+        title: "Admin",
+        summary:
+          "Create, prepare, send and review client onboarding questionnaires.",
+        status: "published",
+        href: "/client-questionnaires/admin",
+      },
+    ],
+  },
 ];
 
 export function getSection(slug: string): HubSection | undefined {
@@ -334,6 +363,7 @@ export function getChild(
  * links past it to the first child rather than to a URL that only redirects.
  */
 export function entryHref(sectionSlug: string, entry: HubEntry): string {
+  if (entry.href) return entry.href;
   const base = `/${sectionSlug}/${entry.slug}`;
   const first = entry.children?.[0];
   return first ? `${base}/${first.slug}` : base;

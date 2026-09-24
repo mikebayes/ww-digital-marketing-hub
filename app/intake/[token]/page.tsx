@@ -71,7 +71,7 @@ export default async function ClientIntakePage({
         ) : null
       }
     >
-      <ClientIntro />
+      <ClientIntro introText={intake.introText} />
 
       <div className="mt-10">
         <Questionnaire

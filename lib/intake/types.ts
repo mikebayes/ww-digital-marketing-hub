@@ -77,12 +77,34 @@ export interface Intake {
   id: string;
   client_id: string;
   account_manager_name: string | null;
+  /** Explicit name. Null derives one from the client and services. */
+  title: string | null;
+  /** The paragraph above the first question. Null uses the standard wording. */
+  intro_text: string | null;
+  /** Set to hide from the admin list. Never deleted. */
+  archived_at: string | null;
   status: IntakeStatus;
   public_token: string;
   sent_at: string | null;
   submitted_at: string | null;
   reviewed_at: string | null;
   completed_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * An approved client contact.
+ *
+ * Record-keeping only today: the public questionnaire still authenticates with
+ * the token alone. The approved-email gate is separate work.
+ */
+export interface IntakeContact {
+  id: string;
+  intake_id: string;
+  name: string;
+  email: string;
+  is_primary: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -125,6 +147,11 @@ export interface PublicStep {
 
 export interface PublicIntake {
   clientName: string;
+  /**
+   * The paragraph above the first question, when this intake sets one.
+   * Authored by Web Wizards for this client; null uses the standard wording.
+   */
+  introText: string | null;
   status: IntakeStatus;
   submittedAt: string | null;
   steps: PublicStep[];

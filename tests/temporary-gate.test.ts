@@ -169,3 +169,47 @@ describe("comparison", () => {
     assert.equal(constantTimeEqual("", ""), true);
   });
 });
+
+describe("after the module moved to /client-questionnaires/admin", () => {
+  test("the new admin route and everything under it is held", () => {
+    for (const path of [
+      "/client-questionnaires/admin",
+      "/client-questionnaires/admin/new",
+      "/client-questionnaires/admin/8f1c-2b",
+      "/client-questionnaires/admin/8f1c-2b/questions",
+      "/client-questionnaires/admin/8f1c-2b/responses",
+      "/client-questionnaires/admin/8f1c-2b/client-access",
+      "/client-questionnaires/admin/8f1c-2b/settings",
+      "/client-questionnaires/admin/8f1c-2b/document",
+      "/client-questionnaires/admin/preview/8f1c-2b",
+    ]) {
+      assert.equal(isGatedPath(path), true, path);
+    }
+  });
+
+  test("the old routes stay held, because they redirect into the new ones", () => {
+    // An ungated redirect into a gated route is one missed case away from
+    // being an ungated route.
+    for (const path of ["/intakes", "/intakes/new", "/intakes/8f1c-2b/edit"]) {
+      assert.equal(isGatedPath(path), true, path);
+    }
+  });
+
+  test("the section index is documentation and stays open", () => {
+    assert.equal(isGatedPath("/client-questionnaires"), false);
+  });
+
+  test("a documentation page under the section is not swept in", () => {
+    // The failure this guards: prefix-matching "/client-questionnaires/admin"
+    // without a boundary would gate a page written to be read.
+    assert.equal(
+      isGatedPath("/client-questionnaires/administration-guide"),
+      false,
+    );
+    assert.equal(isGatedPath("/client-questionnaires/admin-overview"), false);
+  });
+
+  test("the client questionnaire is still not held", () => {
+    assert.equal(isGatedPath("/intake/abc123"), false);
+  });
+});

@@ -57,5 +57,12 @@ export const config = {
    * public for now and never reach this handler. The permanent matcher is
    * "/((?!_next/static|_next/image|favicon.ico).*)" — see microsoft-gate.ts.
    */
-  matcher: ["/intakes", "/intakes/:path*"],
+  matcher: [
+    "/client-questionnaires/admin",
+    "/client-questionnaires/admin/:path*",
+    // Still matched: these redirect into the admin, and a redirect that is not
+    // itself gated is a gap waiting to be found.
+    "/intakes",
+    "/intakes/:path*",
+  ],
 };

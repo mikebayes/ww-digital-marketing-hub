@@ -44,8 +44,18 @@ export function ClientShell({
   );
 }
 
-/** The introduction, in the words agreed for it. */
-export function ClientIntro() {
+/**
+ * The introduction, in the words agreed for it.
+ *
+ * `introText` replaces the opening paragraphs when a questionnaire sets one in
+ * Settings — some engagements need to say who we are or why we are asking. The
+ * two lines that follow it are not replaceable: "answer what you can" is the
+ * instruction that makes the whole thing work, and the line about credentials
+ * is a rule, not copy.
+ */
+export function ClientIntro({ introText }: { introText?: string | null }) {
+  const custom = introText?.trim();
+
   return (
     <div className="border-b border-rule pb-10">
       <h1 className="text-4xl leading-[1.05] font-semibold tracking-[-0.03em] text-balance text-charcoal">
@@ -55,11 +65,17 @@ export function ClientIntro() {
       <span aria-hidden className="mt-7 block h-px w-16 bg-teal" />
 
       <div className="mt-7 max-w-2xl space-y-4 text-[1.0625rem] leading-relaxed text-slate">
-        <p>
-          We&rsquo;ve already filled in anything we know from our previous
-          conversations and research. Please review what&rsquo;s here and fill in
-          anything that&rsquo;s missing.
-        </p>
+        {custom ? (
+          custom
+            .split(/\n\s*\n/)
+            .map((paragraph, index) => <p key={index}>{paragraph}</p>)
+        ) : (
+          <p>
+            We&rsquo;ve already filled in anything we know from our previous
+            conversations and research. Please review what&rsquo;s here and fill
+            in anything that&rsquo;s missing.
+          </p>
+        )}
         <p>
           Answer what you can. If you&rsquo;re unsure about something, leave it
           blank and we can discuss it during kickoff.

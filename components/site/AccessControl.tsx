@@ -25,7 +25,7 @@ import { lock } from "@/app/unlock/actions";
  */
 export function AccessControl({ className }: { className?: string }) {
   const pathname = usePathname();
-  const gated = pathname === "/intakes" || pathname.startsWith("/intakes/");
+  const gated = pathname.startsWith("/client-questionnaires/admin");
 
   if (!gated) return null;
 

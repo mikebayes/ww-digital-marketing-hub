@@ -55,15 +55,29 @@ export function isGateConfigured(): boolean {
 /**
  * Routes behind the key: the staff admin, and nothing else.
  *
- * The client questionnaire at /intake/<token> is deliberately absent. Its
- * token is its credential, and the people opening it are clients who have no
- * key and must never be asked for one. The trailing slash matters —
- * "/intakes" starts with "/intake", so matching the shorter prefix would gate
- * the questionnaire too.
+ * Two prefixes, because the module moved. /client-questionnaires/admin is
+ * where it lives; /intakes is where it was, and those URLs still redirect, so
+ * they stay gated — an ungated redirect into a gated route is only ever one
+ * missed edge case away from being an ungated route.
+ *
+ * Deliberately absent:
+ *
+ *   /client-questionnaires   the section index, which is documentation
+ *   /intake/<token>          the client questionnaire
+ *
+ * The trailing slashes matter twice over. "/intakes" starts with "/intake",
+ * so matching the shorter prefix would put a staff key in front of the
+ * client's questionnaire; and "/client-questionnaires/admin" without the
+ * boundary would be matched by a future "/client-questionnaires/administration
+ * -guide" documentation page, quietly gating a page meant to be read.
  */
 export function isGatedPath(pathname: string): boolean {
-  return pathname === "/intakes" || pathname.startsWith("/intakes/");
+  return GATED.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
 }
+
+const GATED = ["/client-questionnaires/admin", "/intakes"];
 
 /**
  * What goes in the cookie: a digest of the key, never the key itself.

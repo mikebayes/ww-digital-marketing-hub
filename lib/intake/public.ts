@@ -89,12 +89,14 @@ export function toPublicIntake(input: {
   clientName: string;
   status: IntakeStatus;
   submittedAt: string | null;
+  introText?: string | null;
   questions: IntakeQuestion[];
 }): PublicIntake {
   return {
     clientName: input.clientName,
     status: input.status,
     submittedAt: input.submittedAt,
+    introText: input.introText ?? null,
     steps: buildSteps(input.questions),
   };
 }

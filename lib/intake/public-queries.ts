@@ -53,6 +53,7 @@ const PUBLIC_QUESTION_COLUMNS = [
 interface TokenLookup {
   intakeId: string;
   clientName: string;
+  introText: string | null;
   status: PublicIntake["status"];
   submittedAt: string | null;
   questions: IntakeQuestion[];
@@ -77,7 +78,7 @@ async function lookup(token: string): Promise<TokenLookup | null> {
 
   const { data: intake, error } = await supabase
     .from("intakes")
-    .select("id, status, submitted_at, client:clients (name)")
+    .select("id, status, submitted_at, intro_text, client:clients (name)")
     .eq("public_token", token)
     .maybeSingle();
 
@@ -87,6 +88,7 @@ async function lookup(token: string): Promise<TokenLookup | null> {
     id: string;
     status: PublicIntake["status"];
     submitted_at: string | null;
+    intro_text: string | null;
     client: { name: string } | null;
   };
 
@@ -107,6 +109,7 @@ async function lookup(token: string): Promise<TokenLookup | null> {
   return {
     intakeId: row.id,
     clientName: row.client?.name ?? "",
+    introText: row.intro_text,
     status: row.status,
     submittedAt: row.submitted_at,
     questions: (questions ?? []) as unknown as IntakeQuestion[],
@@ -122,6 +125,7 @@ export async function getPublicIntake(token: string): Promise<PublicIntake | nul
     clientName: found.clientName,
     status: found.status,
     submittedAt: found.submittedAt,
+    introText: found.introText,
     questions: found.questions,
   });
 }

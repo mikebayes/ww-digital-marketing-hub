@@ -21,10 +21,18 @@ export const dynamicParams = false;
 
 export function generateStaticParams() {
   return sections.flatMap((section) =>
-    section.entries.map((entry) => ({
-      section: section.slug,
-      entry: entry.slug,
-    })),
+    section.entries
+      /*
+       * An entry with its own href is an operational module with a real route
+       * of its own. Generating a documentation page for the same URL would put
+       * two files in charge of it — the static one wins at request time, so the
+       * generated page would be dead weight that still had to be built.
+       */
+      .filter((entry) => !entry.href)
+      .map((entry) => ({
+        section: section.slug,
+        entry: entry.slug,
+      })),
   );
 }
 
